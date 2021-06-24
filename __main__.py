@@ -1,3 +1,4 @@
+from tkinter.constants import E
 import numpy
 import scipy.optimize as opt
 import pandas as pd
@@ -14,8 +15,9 @@ class ChiSquared():
         self.checker4set = 1
         self.slidervalset = 0
         self.rownumberset = ""
-        self.dset = "765000"
+        self.dset = "785000"
         self.sliderstringset = "log-log axes"
+        self.detailset = "  finer data  "
         self.starlist1 = ["-1.0","0.9","0.7","0.1","N/A","N/A","N/A","N/A"]
         self.starlist2 = ["-0.5",".8477","0.6","0.2","-1.5",".9477","0.8","0.1"]
         self.stardict1 = [["-2.1","-0.1"],[".66","1.01"],["0","1.4"],["0","2"],["N/A","N/A"],["N/A","N/A"],["N/A","N/A"],["N/A","N/A"]]
@@ -23,6 +25,7 @@ class ChiSquared():
         while True:
             self.intro_gui()
             self.extract_measured_flux()
+            self.extract_ul()
             self.convert_to_AB()
             self.convert_to_bandflux()
             self.prepare_for_interpolation()
@@ -136,8 +139,6 @@ class ChiSquared():
                                         self.ebvbound1lo = float(user_ebvbound1lo.get())
                                         self.ebvbound1hi = float(user_ebvbound1hi.get())
 
-                                        self.detail = user_detail.get()
-
                                         self.dispresults = checker1.get()
                                         self.fluxresults = checker2.get()
                                         self.chiparams = checker3.get()
@@ -152,6 +153,8 @@ class ChiSquared():
                                         self.slidervalset = currentsliderval.get()
                                         self.sliderstringset = sliderstring.get()
                                         
+                                        self.detail = user_detail.get()
+                                        self.detailset = user_detail.get()
                                         
                                         try:
                                             self.d = float(user_d.get())
@@ -230,11 +233,19 @@ class ChiSquared():
                                     else:
                                         mwin.destroy()
         
+        def openrows3():
+            from tkinter import messagebox
+            tk.messagebox.showinfo("Help", "One of the components of the model flux is an interpolation term that performs a 2-D interpolation inside a grid whose axes are Z and log(age)/10. The term accepts a coordinate (Z, log(age)/10) and returns a flux for every filter, subsequently to be used in calcuating the model flux. One property of the data grid of fluxes is left as a choice to the user: its resolution. The program actually contains two grids which the user can choose between. The finer grid is a 13 X 19 grid, and the coarser grid is a 10 X 16 grid, whose ranges in Z and log(age)/10 are roughly the same. The coarser grid was introduced to prevent the optimizer from getting stuck (as it tends to when performing 2-cluster fits). The lower resolution of the grid seems to help remove any local dips in the fluxes, and makes the 2-D landscape more monotonic.")
+
         user_detail = tk.StringVar()
-        user_detail.set("         ")
-        detailoptions = ["finer data","coarser data"]
+        user_detail.set(self.detailset)
+        detailoptions = ["  finer data  ","coarser data"]
+        detaillabel = tk.Label(mwin,text="Model data resolution",bg="alice blue")
+        detaillabel.place(x=38,y=270)
         detailmenu = tk.OptionMenu(mwin,user_detail,*detailoptions)
-        detailmenu.place(x=310,y=60)
+        detailmenu.place(x=32,y=300)
+        howbutton = tk.Button(mwin,text=" ? ",font=("TimesNewRoman 10"),command = openrows3,pady=1,padx=1)
+        howbutton.place(x=180,y=302)
         user_filename = tk.StringVar()
         user_filename.set(self.filenamevar)
         enterfileneame = tk.Entry(mwin,textvariable = user_filename,width=66)
@@ -242,11 +253,11 @@ class ChiSquared():
         user_rownumber = tk.StringVar()
         user_rownumber.set(self.rownumberset)
         enterrownumberpack = tk.Frame(mwin)
-        enterrownumberpack.place(x=37,y=160)
-        enterrownumber = tk.Entry(enterrownumberpack,textvariable=user_rownumber,width=15)
+        enterrownumberpack.place(x=37,y=125)
+        enterrownumber = tk.Entry(enterrownumberpack,textvariable=user_rownumber,width=12)
         enterrownumber.pack(ipady=3)
         labelwhich = tk.Label(mwin,text="Read rows", bg="alice blue")
-        labelwhich.place(x=39,y=130)
+        labelwhich.place(x=39,y=95)
         def openrows():
             from tkinter import messagebox
             tk.messagebox.showinfo("Help","  •  Use csv row labelling (which should start at row 2)\n\n  •  Specify multiple rows with commas: 2,5,6\n\n  •  Specify a selection of rows with a colon: 3:8")
@@ -254,21 +265,21 @@ class ChiSquared():
             from tkinter import messagebox
             tk.messagebox.showinfo("Help","The cluster distance d appears as a constant in the model flux formula:\n\nflux_mod = M*interp(age,Z)*(10[pc]/d[pc])^2*10^(-0.4*E(B-V)*(k(λ-V)+R(V)))\n\nNote that d must be in parsecs.")
         whichbutton = tk.Button(mwin,text="?",font=("TimesNewRoman 8"),command = openrows)
-        whichbutton.place(x=140,y=161)
+        whichbutton.place(x=117,y=126)
         enterdpack = tk.Frame(mwin,bg='alice blue')
-        enterdpack.place(x=37,y=265)
+        enterdpack.place(x=37,y=200)
         user_d = tk.StringVar()
         user_d.set(self.dset)
-        enterd = tk.Entry(enterdpack,textvariable=user_d,width=15)
+        enterd = tk.Entry(enterdpack,textvariable=user_d,width=12)
         enterd.pack(ipady=3)
         labelwhat = tk.Label(mwin,text="d",bg="alice blue")
-        labelwhat.place(x=38,y=235)
+        labelwhat.place(x=38,y=170)
         whatbutton = tk.Button(mwin,text="?"  ,font=("TimesNewRoman 8"),command = openrows2)
-        whatbutton.place(x=140,y=266)
+        whatbutton.place(x=117,y=201)
         labeltop = tk.Label(mwin,text="Input file: ", bg='white',border=2,relief=tk.RIDGE,padx=3,pady=1)
         labeltop.place(x=35,y=29)
-        labelbot = tk.Label(mwin,text="e.g. \"filter_magnitudes.csv\"",bg="alice blue")
-        labelbot.place(x=40,y=59)
+        #labelbot = tk.Label(mwin,text="e.g. \"filter_magnitudes.csv\"",bg="alice blue")
+        #labelbot.place(x=40,y=59)
         canvas2 = tk.Canvas(mwin,relief=tk.RIDGE,bd=2,width=330,height=320,bg='azure2')
         canvas2.place(x=310,y=110)
         canvasline = tk.Canvas(mwin,bd=3,relief=tk.GROOVE,width=680,height=1000,bg='mint cream')
@@ -613,11 +624,11 @@ class ChiSquared():
                 elif entrybZ1lo['state'] == tk.DISABLED:
                     enable2("all")
 
-        starlabel = tk.Label(mwin,text="Fitting method",bg="alice blue").place(x=38,y=340)
+        starlabel = tk.Label(mwin,text="Fitting method",bg="alice blue").place(x=38,y=360)
         starno_chosen.set(self.chosenstar)
         staroptions = ["     1-cluster fit     ","     2-cluster fit     "]
         starmenu = tk.OptionMenu(mwin,starno_chosen,*staroptions,command=stuffy)
-        starmenu.place(x=32,y=370)
+        starmenu.place(x=32,y=390)
         grent2()
         grent2()
         grent3()
@@ -638,7 +649,7 @@ class ChiSquared():
         import pandas as pd
         import numpy as np
         import tkinter as tk
-
+        
         raw_columns = ["F148W_AB","F148W_err","F169M_AB","F169M_err","F172M_AB","F172M_err","N219M_AB","N219M_err","N279N_AB","N279N_err","f275w_vega","f275w_err","f336w_vega","f336w_err","f475w_vega","f475w_err","f814w_vega","f814w_err","f110w_vega","f110w_err","f160w_vega","f160w_err"]
 
         self.raw_magnitudes_frame = pd.DataFrame()
@@ -677,6 +688,59 @@ class ChiSquared():
                 if colelement == -999:
                     self.raw_magnitudes_frame.iat[rowind,colind] = np.nan
 
+    def extract_ul(self):
+
+        import pandas as pd
+        import numpy as np
+        import tkinter as tk
+
+        raw_limits = ["F148W_ul","F169M_ul","F172M_ul","N219M_ul","N279N_ul","f275w_ul","f336w_ul","f475w_ul","f814w_ul","f110w_ul","f160w_ul"]
+        
+        self.ul_frame = pd.DataFrame()
+        for rawname in raw_limits:
+            self.ul_frame["{}".format(rawname)] = ""
+
+        saverowuls = []
+        savecoluls = []
+        badcoluls = []
+        first_time = True
+        for rowno in self.rows:
+            curr_rowdict = {}
+            for colname in raw_limits:
+                try:
+                    if self.measuredata.at[rowno,colname] == ">":
+                        curr_rowdict[colname] = 1
+                        savecoluls.append(colname)
+                        saverowuls.append(str(rowno+2))
+                    else:
+                        curr_rowdict[colname] = 0
+                except:
+                    curr_rowdict[colname] = np.nan
+                    badcoluls.append(colname)
+            self.ul_frame.loc[self.ul_frame.shape[0]] = curr_rowdict
+               
+            if first_time == True and len(badcoluls) > 0:
+                miniwin2 = tk.Tk()
+                miniwin2.geometry("10x10+800+500")
+                savebadcols2 = list(dict.fromkeys(badcoluls))
+                badstr2 = ""
+                for badcol2 in savebadcols2:
+                    badstr2 += "{} or ".format(badcol2)
+                badstr2 = badstr2[:-4]
+                response2 = tk.messagebox.askquestion('Warning',"No upper limit columns found for {}. Do you wish to proceed?".format(badstr2))
+                if response2 == "yes":
+                    miniwin2.destroy()
+                    first_time = False
+                if response2 == "no":
+                    assert response2 == "yes", "Program terminated"
+        
+        miniwin = tk.Tk()
+        miniwin.geometry("10x10+800+500")
+        response = tk.messagebox.askquestion('Info',"Upper limits detected in columns {} in rows {}, respectively. If this sounds correct, click yes to continue.".format(", ".join(savecoluls),", ".join(saverowuls)))
+        if response == "yes":
+            miniwin.destroy()
+        if response == "no":
+            assert response == "yes", "Program terminated"
 
     def convert_to_AB(self):
         self.ab_magnitudes_frame = self.raw_magnitudes_frame
@@ -717,7 +781,7 @@ class ChiSquared():
         import xarray as xr
         import numpy as np
 
-        if self.detail == "finer data":
+        if self.detail == "  finer data  ":
 
             fluxdata = pd.read_csv("fluxpersolarmass2.csv")
             
@@ -804,7 +868,7 @@ class ChiSquared():
         return bestmodels1,bestmodels2
 
 
-    def chisqfunc(self,tup,valid_filters_this_row,curr_row):
+    def chisqfunc(self,tup,valid_filters_this_row,ul_filters_this_row,curr_row):
         Z,age,M,E_bv, = tup
         print("Testing row {} with Z, log(age)/10, log(M)/10, E_bv: ".format(self.rows[curr_row]+2), Z,age,M,E_bv)
 
@@ -818,14 +882,20 @@ class ChiSquared():
 
         summands = []
         for i,valid_ind in enumerate(valid_filters_this_row):
-            summands.append(((self.bandfluxes.iat[curr_row,valid_ind] - models[i])/self.bandfluxerrors.iat[curr_row,valid_ind])**2)
+            if valid_ind in ul_filters_this_row:
+                if models[i] - self.bandfluxes.iat[curr_row,valid_ind] > 0:
+                    summands.append(((self.bandfluxes.iat[curr_row,valid_ind] - models[i])/self.bandfluxerrors.iat[curr_row,valid_ind])**2)
+                else:
+                    pass
+            else:
+                summands.append(((self.bandfluxes.iat[curr_row,valid_ind] - models[i])/self.bandfluxerrors.iat[curr_row,valid_ind])**2)
 
         chisq = sum(summands)
         print("chisq: ",chisq,"\n")
 
         return chisq
 
-    def chisqfunc2(self,tup,valid_filters_this_row,curr_row):
+    def chisqfunc2(self,tup,valid_filters_this_row,ul_filters_this_row,curr_row):
         Z1,age1,M1,E_bv1,Z2,age2,M2,E_bv2 = tup
         print("Testing row {} with Z1, log(age1)/10, log(M1)/10, E_bv1, Z2, log(age2)/10, log(M2)/10, E_bv2: ".format(self.rows[curr_row]+2), Z1, age1, M1, E_bv1, Z2, age2, M2, E_bv2)
 
@@ -845,7 +915,13 @@ class ChiSquared():
 
         summands = []
         for i,valid_ind in enumerate(valid_filters_this_row):
-            summands.append(((self.bandfluxes.iat[curr_row,valid_ind] - models1[i] - models2[i])/self.bandfluxerrors.iat[curr_row,valid_ind])**2)
+            if valid_ind in ul_filters_this_row:
+                if models1[i]+models2[i] - self.bandfluxes.iat[curr_row,valid_ind] > 0:
+                    summands.append(((self.bandfluxes.iat[curr_row,valid_ind] - models1[i]-models2[i])/self.bandfluxerrors.iat[curr_row,valid_ind])**2)
+                else:
+                    pass
+            else:
+                summands.append(((self.bandfluxes.iat[curr_row,valid_ind] - models1[i]-models2[i])/self.bandfluxerrors.iat[curr_row,valid_ind])**2)
 
         chisq = sum(summands)
         print("chisq: ",chisq,"\n")
@@ -855,16 +931,16 @@ class ChiSquared():
 
         if leadsign == 0:
             Z = lead
-            age,M,E_bv,valid_filters_this_row,curr_row = otherstup[0],otherstup[1],otherstup[2],otherstup[3],otherstup[4]
+            age,M,E_bv,valid_filters_this_row,ul_filters_this_row,curr_row = otherstup[0],otherstup[1],otherstup[2],otherstup[3],otherstup[4],otherstup[5]
         elif leadsign == 1:
             age = lead
-            Z,M,E_bv,valid_filters_this_row,curr_row = otherstup[0],otherstup[1],otherstup[2],otherstup[3],otherstup[4]
+            Z,M,E_bv,valid_filters_this_row,ul_filters_this_row,curr_row = otherstup[0],otherstup[1],otherstup[2],otherstup[3],otherstup[4],otherstup[5]
         elif leadsign == 2:
             M = lead
-            Z,age,E_bv,valid_filters_this_row,curr_row = otherstup[0],otherstup[1],otherstup[2],otherstup[3],otherstup[4]
+            Z,age,E_bv,valid_filters_this_row,ul_filters_this_row,curr_row = otherstup[0],otherstup[1],otherstup[2],otherstup[3],otherstup[4],otherstup[5]
         elif leadsign == 3:
             E_bv = lead
-            Z,age,M,valid_filters_this_row,curr_row = otherstup[0],otherstup[1],otherstup[2],otherstup[3],otherstup[4]
+            Z,age,M,valid_filters_this_row,ul_filters_this_row,curr_row = otherstup[0],otherstup[1],otherstup[2],otherstup[3],otherstup[4],otherstup[5]
 
         true_M = 10**(M*10)
 
@@ -876,7 +952,14 @@ class ChiSquared():
 
         summands = []
         for i,valid_ind in enumerate(valid_filters_this_row):
-            summands.append(((self.bandfluxes.iat[curr_row,valid_ind] - models[i])/self.bandfluxerrors.iat[curr_row,valid_ind])**2)
+            if valid_ind in ul_filters_this_row:
+                if models[i] - self.bandfluxes.iat[curr_row,valid_ind] > 0:
+                    summands.append(((self.bandfluxes.iat[curr_row,valid_ind] - models[i])/self.bandfluxerrors.iat[curr_row,valid_ind])**2)
+                else:
+                    pass
+            else:
+                summands.append(((self.bandfluxes.iat[curr_row,valid_ind] - models[i])/self.bandfluxerrors.iat[curr_row,valid_ind])**2)
+
 
         chisq = sum(summands) - self.results[curr_row].fun - 4.17
         return chisq
@@ -885,28 +968,28 @@ class ChiSquared():
 
         if leadsign == 0:
             Z1 = lead
-            age1,M1,E_bv1,Z2,age2,M2,E_bv2,valid_filters_this_row,curr_row = otherstup[0],otherstup[1],otherstup[2],otherstup[3],otherstup[4],otherstup[5],otherstup[6],otherstup[7],otherstup[8]
+            age1,M1,E_bv1,Z2,age2,M2,E_bv2,valid_filters_this_row,ul_filters_this_row,curr_row = otherstup[0],otherstup[1],otherstup[2],otherstup[3],otherstup[4],otherstup[5],otherstup[6],otherstup[7],otherstup[8],otherstup[9]
         elif leadsign == 1:
             age1 = lead
-            Z1,M1,E_bv1,Z2,age2,M2,E_bv2,valid_filters_this_row,curr_row = otherstup[0],otherstup[1],otherstup[2],otherstup[3],otherstup[4],otherstup[5],otherstup[6],otherstup[7],otherstup[8]
+            Z1,M1,E_bv1,Z2,age2,M2,E_bv2,valid_filters_this_row,ul_filters_this_row,curr_row = otherstup[0],otherstup[1],otherstup[2],otherstup[3],otherstup[4],otherstup[5],otherstup[6],otherstup[7],otherstup[8],otherstup[9]
         elif leadsign == 2:
             M1 = lead
-            Z1,age1,E_bv1,Z2,age2,M2,E_bv2,valid_filters_this_row,curr_row = otherstup[0],otherstup[1],otherstup[2],otherstup[3],otherstup[4],otherstup[5],otherstup[6],otherstup[7],otherstup[8]
+            Z1,age1,E_bv1,Z2,age2,M2,E_bv2,valid_filters_this_row,ul_filters_this_row,curr_row = otherstup[0],otherstup[1],otherstup[2],otherstup[3],otherstup[4],otherstup[5],otherstup[6],otherstup[7],otherstup[8],otherstup[9]
         elif leadsign == 3:
             E_bv1 = lead
-            Z1,age1,M1,Z2,age2,M2,E_bv2,valid_filters_this_row,curr_row = otherstup[0],otherstup[1],otherstup[2],otherstup[3],otherstup[4],otherstup[5],otherstup[6],otherstup[7],otherstup[8]
+            Z1,age1,M1,Z2,age2,M2,E_bv2,valid_filters_this_row,ul_filters_this_row,curr_row = otherstup[0],otherstup[1],otherstup[2],otherstup[3],otherstup[4],otherstup[5],otherstup[6],otherstup[7],otherstup[8],otherstup[9]
         elif leadsign == 4:
             Z2 = lead
-            Z1,age1,M1,E_bv1,age2,M2,E_bv2,valid_filters_this_row,curr_row = otherstup[0],otherstup[1],otherstup[2],otherstup[3],otherstup[4],otherstup[5],otherstup[6],otherstup[7],otherstup[8]
+            Z1,age1,M1,E_bv1,age2,M2,E_bv2,valid_filters_this_row,ul_filters_this_row,curr_row = otherstup[0],otherstup[1],otherstup[2],otherstup[3],otherstup[4],otherstup[5],otherstup[6],otherstup[7],otherstup[8],otherstup[9]
         elif leadsign == 5:
             age2 = lead
-            Z1,age1,M1,E_bv1,Z2,M2,E_bv2,valid_filters_this_row,curr_row = otherstup[0],otherstup[1],otherstup[2],otherstup[3],otherstup[4],otherstup[5],otherstup[6],otherstup[7],otherstup[8]
+            Z1,age1,M1,E_bv1,Z2,M2,E_bv2,valid_filters_this_row,ul_filters_this_row,curr_row = otherstup[0],otherstup[1],otherstup[2],otherstup[3],otherstup[4],otherstup[5],otherstup[6],otherstup[7],otherstup[8],otherstup[9]
         elif leadsign == 6:
             M2 = lead
-            Z1,age1,M1,E_bv1,Z2,age2,E_bv2,valid_filters_this_row,curr_row = otherstup[0],otherstup[1],otherstup[2],otherstup[3],otherstup[4],otherstup[5],otherstup[6],otherstup[7],otherstup[8]
+            Z1,age1,M1,E_bv1,Z2,age2,E_bv2,valid_filters_this_row,ul_filters_this_row,curr_row = otherstup[0],otherstup[1],otherstup[2],otherstup[3],otherstup[4],otherstup[5],otherstup[6],otherstup[7],otherstup[8],otherstup[9]
         elif leadsign == 7:
             E_bv2 = lead
-            Z1,age1,M1,E_bv1,Z2,age2,M2,valid_filters_this_row,curr_row = otherstup[0],otherstup[1],otherstup[2],otherstup[3],otherstup[4],otherstup[5],otherstup[6],otherstup[7],otherstup[8]
+            Z1,age1,M1,E_bv1,Z2,age2,M2,valid_filters_this_row,ul_filters_this_row,curr_row = otherstup[0],otherstup[1],otherstup[2],otherstup[3],otherstup[4],otherstup[5],otherstup[6],otherstup[7],otherstup[8],otherstup[9]
 
         true_M1 = 10**(M1*10)
         true_M2 = 10**(M2*10)
@@ -924,7 +1007,13 @@ class ChiSquared():
 
         summands = []
         for i,valid_ind in enumerate(valid_filters_this_row):
-            summands.append(((self.bandfluxes.iat[curr_row,valid_ind] - models1[i] - models2[i])/self.bandfluxerrors.iat[curr_row,valid_ind])**2)
+            if valid_ind in ul_filters_this_row:
+                if models1[i]+models2[i] - self.bandfluxes.iat[curr_row,valid_ind] > 0:
+                    summands.append(((self.bandfluxes.iat[curr_row,valid_ind] - models1[i]-models2[i])/self.bandfluxerrors.iat[curr_row,valid_ind])**2)
+                else:
+                    pass
+            else:
+                summands.append(((self.bandfluxes.iat[curr_row,valid_ind] - models1[i]-models2[i])/self.bandfluxerrors.iat[curr_row,valid_ind])**2)
 
         chisq = sum(summands) - self.results[curr_row].fun - 9.28
         return chisq
@@ -941,10 +1030,15 @@ class ChiSquared():
 
             for curr_row in range(self.bandfluxes.shape[0]): 
                 valid_filters_this_row = []
-                for valid_ind,bandflux in enumerate(self.bandfluxes.loc[curr_row,:]):
-                    if np.isnan(bandflux) == False:
+                ul_filters_this_row = []
+                for valid_ind,arraytup in enumerate(zip(self.bandfluxes.loc[curr_row,:],self.ul_frame.loc[curr_row,:])):
+                    if np.isnan(arraytup[0]) == False:
                         valid_filters_this_row.append(valid_ind)
-                self.results.append(opt.minimize(self.chisqfunc, x0, args=(valid_filters_this_row,curr_row,), bounds=bnds))
+                    if arraytup[1] == 1: 
+                        ul_filters_this_row.append(valid_ind)
+                print(valid_filters_this_row)
+                print(ul_filters_this_row)
+                self.results.append(opt.minimize(self.chisqfunc, x0, args=(valid_filters_this_row,ul_filters_this_row,curr_row,), bounds=bnds))
             print("results:\n",self.results)
         
         elif self.double_cluster == True:
@@ -957,10 +1051,13 @@ class ChiSquared():
 
             for curr_row in range(self.bandfluxes.shape[0]):  
                 valid_filters_this_row = []
-                for valid_ind,bandflux in enumerate(self.bandfluxes.loc[curr_row,:]):
-                    if np.isnan(bandflux) == False:
+                ul_filters_this_row = []
+                for valid_ind,arraytup in enumerate(zip(self.bandfluxes.loc[curr_row,:],self.ul_frame.loc[curr_row,:])):
+                    if np.isnan(arraytup[0]) == False:
                         valid_filters_this_row.append(valid_ind)
-                self.results.append(opt.minimize(self.chisqfunc2, x0, args=(valid_filters_this_row,curr_row,), bounds=bnds))       
+                    if arraytup[1] == 1:
+                        ul_filters_this_row.append(valid_ind)
+                self.results.append(opt.minimize(self.chisqfunc2, x0, args=(valid_filters_this_row,ul_filters_this_row,curr_row,), bounds=bnds))       
             print("results:\n",self.results)
 
 
@@ -970,162 +1067,305 @@ class ChiSquared():
         if self.single_cluster == True:
 
             self.errorsallrows = []
+            self.errornotes = []
             for curr_row in range(self.bandfluxes.shape[0]):  
                 valid_filters_this_row = []
-                for valid_ind,bandflux in enumerate(self.bandfluxes.loc[curr_row,:]):
-                    if np.isnan(bandflux) == False:
+                ul_filters_this_row = []
+                for valid_ind,arraytup in enumerate(zip(self.bandfluxes.loc[curr_row,:],self.ul_frame.loc[curr_row,:])):
+                    if np.isnan(arraytup[0]) == False:
                         valid_filters_this_row.append(valid_ind)
+                    if arraytup[1] == 1:
+                        ul_filters_this_row.append(valid_ind)
                 errorsthisrow = []
+                errornotesthisrow = []
                 Z,age,M,E_bv = self.results[curr_row].x[0],self.results[curr_row].x[1],self.results[curr_row].x[2],self.results[curr_row].x[3]
                 ###
-                otherstup = (age,M,E_bv,valid_filters_this_row,curr_row)
+                otherstup = (age,M,E_bv,valid_filters_this_row,ul_filters_this_row,curr_row)
                 try:
                     Zlowererror = Z - opt.root_scalar(self.chisqfuncerror, args=(0,otherstup,),method="brentq",bracket=[self.Zbound1lo,Z]).root
+                    Zlowernotes = "\n"
                 except:
                     Zlowererror = "N/A"
+                    if self.chisqfuncerror(Z,0,otherstup,) != self.chisqfuncerror(self.Zbound1lo,0,otherstup,) != self.chisqfuncerror(self.Zbound1hi,0,otherstup,):
+                        Zlowernotes = "cannot go low enough to\nchange chi^2 by 4.17"
+                    elif self.chisqfuncerror(Z,0,otherstup,) == self.chisqfuncerror(self.Zbound1lo,0,otherstup,):
+                        Zlowernotes = "sitting at lower bound\n"
                 try:
                     Zuppererror = opt.root_scalar(self.chisqfuncerror, args=(0,otherstup,),method="brentq",bracket=[Z,self.Zbound1hi]).root - Z
+                    Zuppernotes = "\n"
                 except:
                     Zuppererror = "N/A"
+                    if self.chisqfuncerror(Z,0,otherstup,) != self.chisqfuncerror(self.Zbound1lo,0,otherstup,) != self.chisqfuncerror(self.Zbound1hi,0,otherstup,):
+                        Zuppernotes = "cannot go high enough to\nchange chi^2 by 4.17"
+                    elif self.chisqfuncerror(Z,0,otherstup,) == self.chisqfuncerror(self.Zbound1hi,0,otherstup,):
+                        Zuppernotes = "sitting at upper bound\n"
                 errorsthisrow.append([Zlowererror,Zuppererror])
+                errornotesthisrow.append([Zlowernotes,Zuppernotes])
                 ###
-                otherstup = (Z,M,E_bv,valid_filters_this_row,curr_row)              
+                otherstup = (Z,M,E_bv,valid_filters_this_row,ul_filters_this_row,curr_row)              
                 try:
                     agelowererror = (age - opt.root_scalar(self.chisqfuncerror, args=(1,otherstup,),method="brentq",bracket=[self.agebound1lo,age]).root)
+                    agelowernotes = "\n"
                 except:
                     agelowererror = "N/A"
+                    if self.chisqfuncerror(age,1,otherstup,) != self.chisqfuncerror(self.agebound1lo,1,otherstup,) != self.chisqfuncerror(self.agebound1hi,1,otherstup,):
+                        agelowernotes = "cannot go low enough to\nchange chi^2 by 4.17"
+                    elif self.chisqfuncerror(age,1,otherstup,) == self.chisqfuncerror(self.agebound1lo,1,otherstup,):
+                        agelowernotes = "sitting at lower bound\n"
                 try:    
                     ageuppererror = (opt.root_scalar(self.chisqfuncerror, args=(1,otherstup,),method="brentq",bracket=[age,self.agebound1hi]).root - age)
+                    ageuppernotes = "\n"
                 except:
                     ageuppererror = "N/A"
+                    if self.chisqfuncerror(age,1,otherstup,) != self.chisqfuncerror(self.agebound1lo,1,otherstup,) != self.chisqfuncerror(self.agebound1hi,1,otherstup,):
+                        ageuppernotes = "cannot go high enough to\nchange chi^2 by 4.17"
+                    elif self.chisqfuncerror(age,1,otherstup,) == self.chisqfuncerror(self.agebound1hi,1,otherstup,):
+                        ageuppernotes = "sitting at upper bound\n"
                 errorsthisrow.append([agelowererror,ageuppererror])
+                errornotesthisrow.append([agelowernotes,ageuppernotes])
                 ###
-                otherstup = (Z,age,E_bv,valid_filters_this_row,curr_row)              
+                otherstup = (Z,age,E_bv,valid_filters_this_row,ul_filters_this_row,curr_row)     
                 try:
                     Mlowererror = M - opt.root_scalar(self.chisqfuncerror, args=(2,otherstup,),method="brentq",bracket=[self.Mbound1lo,M]).root
+                    Mlowernotes = "\n"
                 except:
                     Mlowererror = "N/A"
+                    if self.chisqfuncerror(M,2,otherstup,) != self.chisqfuncerror(self.Mbound1lo,2,otherstup,) != self.chisqfuncerror(self.Mbound1hi,2,otherstup,):
+                        Mlowernotes = "cannot go low enough to\nchange chi^2 by 4.17"
+                    elif self.chisqfuncerror(M,2,otherstup,) == self.chisqfuncerror(self.Mbound1lo,2,otherstup,):
+                        Mlowernotes = "sitting at lower bound\n"
                 try:
                     Muppererror = opt.root_scalar(self.chisqfuncerror, args=(2,otherstup,),method="brentq",bracket=[M,self.Mbound1hi]).root - M
+                    Muppernotes = "\n"
                 except:
                     Muppererror = "N/A"
+                    if self.chisqfuncerror(M,2,otherstup,) != self.chisqfuncerror(self.Mbound1lo,2,otherstup,) != self.chisqfuncerror(self.Mbound1hi,2,otherstup,):
+                        Muppernotes = "cannot go high enough to\nchange chi^2 by 4.17"
+                    elif self.chisqfuncerror(M,2,otherstup,) == self.chisqfuncerror(self.Mbound1hi,2,otherstup,):
+                        Muppernotes = "sitting at upper bound\n"
                 errorsthisrow.append([Mlowererror,Muppererror])
+                errornotesthisrow.append([Mlowernotes,Muppernotes])
                 ###
-                otherstup = (Z,age,M,valid_filters_this_row,curr_row)                           
+                otherstup = (Z,age,M,valid_filters_this_row,ul_filters_this_row,curr_row)                           
                 try:
                     E_bvlowererror = E_bv - opt.root_scalar(self.chisqfuncerror, args=(3,otherstup,),method="brentq",bracket=[self.ebvbound1lo,E_bv]).root
+                    ebvlowernotes = "\n"
                 except:
                     E_bvlowererror = "N/A"
+                    if self.chisqfuncerror(E_bv,3,otherstup,) != self.chisqfuncerror(self.ebvbound1lo,3,otherstup,) != self.chisqfuncerror(self.ebvbound1hi,3,otherstup,):
+                        ebvlowernotes = "cannot go low enough to\nchange chi^2 by 4.17"
+                    elif self.chisqfuncerror(E_bv,3,otherstup,) == self.chisqfuncerror(self.ebvbound1lo,3,otherstup,):
+                        ebvlowernotes = "sitting at lower bound\n"
                 try:
                     E_bvuppererror = opt.root_scalar(self.chisqfuncerror, args=(3,otherstup,),method="brentq",bracket=[E_bv,self.ebvbound1hi]).root - E_bv
+                    ebvuppernotes = "\n"
                 except:
                     E_bvuppererror = "N/A"
+                    if self.chisqfuncerror(E_bv,3,otherstup,) != self.chisqfuncerror(self.ebvbound1lo,3,otherstup,) != self.chisqfuncerror(self.ebvbound1hi,3,otherstup,):
+                        ebvuppernotes = "cannot go high enough to\nchange chi^2 by 4.17"
+                    elif self.chisqfuncerror(E_bv,3,otherstup,) == self.chisqfuncerror(self.ebvbound1lhi,3,otherstup,):
+                        ebvuppernotes = "sitting at upper bound\n"
                 errorsthisrow.append([E_bvlowererror,E_bvuppererror])
+                errornotesthisrow.append([ebvlowernotes,ebvuppernotes])
                 ###
                 self.errorsallrows.append(errorsthisrow)
+                self.errornotes.append(errornotesthisrow)
 
 
         elif self.double_cluster == True:
-
+            self.errornotes = []
             self.errorsallrows = []
             for curr_row in range(self.bandfluxes.shape[0]):  
                 valid_filters_this_row = []
-                for valid_ind,bandflux in enumerate(self.bandfluxes.loc[curr_row,:]):
-                    if np.isnan(bandflux) == False:
+                ul_filters_this_row = []
+                for valid_ind,arraytup in enumerate(zip(self.bandfluxes.loc[curr_row,:],self.ul_frame.loc[curr_row,:])):
+                    if np.isnan(arraytup[0]) == False:
                         valid_filters_this_row.append(valid_ind)
+                    if arraytup[1] == 1:
+                        ul_filters_this_row.append(valid_ind)
                 errorsthisrow = []
+                errornotesthisrow = []
                 Z1,age1,M1,E_bv1,Z2,age2,M2,E_bv2 = self.results[curr_row].x[0],self.results[curr_row].x[1],self.results[curr_row].x[2],self.results[curr_row].x[3],self.results[curr_row].x[4],self.results[curr_row].x[5],self.results[curr_row].x[6],self.results[curr_row].x[7]
                 ###
-                otherstup = (age1,M1,E_bv1,Z2,age2,M2,E_bv2,valid_filters_this_row,curr_row)
+                otherstup = (age1,M1,E_bv1,Z2,age2,M2,E_bv2,valid_filters_this_row,ul_filters_this_row,curr_row)
                 try:
-                    Z1lowererror = Z1 - opt.root_scalar(self.chisqfuncerror, args=(0,otherstup,),method="brentq",bracket=[self.Zbound1lo,Z1]).root
+                    Z1lowererror = Z1 - opt.root_scalar(self.chisqfunc2error, args=(0,otherstup,),method="brentq",bracket=[self.Zbound1lo,Z1]).root
+                    Z1lowernotes = "\n"
                 except:
                     Z1lowererror = "N/A"
+                    if self.chisqfuncerror(Z1,0,otherstup,) != self.chisqfuncerror(self.Zbound1lo,0,otherstup,) != self.chisqfuncerror(self.Zbound1hi,0,otherstup,):
+                        Z1lowernotes = "cannot go low enough to\nchange chi^2 by 9.28"
+                    elif self.chisqfuncerror(Z,0,otherstup,) == self.chisqfuncerror(self.Zbound1lo,0,otherstup,):
+                        Z1lowernotes = "sitting at lower bound\n"
                 try:
-                    Z1uppererror = opt.root_scalar(self.chisqfuncerror, args=(0,otherstup,),method="brentq",bracket=[Z1,self.Zbound1hi]).root - Z1
+                    Z1uppererror = opt.root_scalar(self.chisqfunc2error, args=(0,otherstup,),method="brentq",bracket=[Z1,self.Zbound1hi]).root - Z1
+                    Z1uppernotes = "\n"
                 except:
                     Z1uppererror = "N/A"
+                    if self.chisqfuncerror(Z1,0,otherstup,) != self.chisqfuncerror(self.Zbound1lo,0,otherstup,) != self.chisqfuncerror(self.Zbound1hi,0,otherstup,):
+                        Z1uppernotes = "cannot go high enough to\nchange chi^2 by 9.28"
+                    elif self.chisqfuncerror(Z1,0,otherstup,) == self.chisqfuncerror(self.Zbound1hi,0,otherstup,):
+                        Z1uppernotes = "sitting at upper bound\n"
                 errorsthisrow.append([Z1lowererror,Z1uppererror])
+                errornotesthisrow.append([Z1lowernotes,Z1uppernotes])
                 ###
-                otherstup = (Z1,M1,E_bv1,Z2,age2,M2,E_bv2,valid_filters_this_row,curr_row)              
+                otherstup = (Z1,M1,E_bv1,Z2,age2,M2,E_bv2,valid_filters_this_row,ul_filters_this_row,curr_row)              
                 try:
-                    age1lowererror = (age1 - opt.root_scalar(self.chisqfuncerror, args=(1,otherstup,),method="brentq",bracket=[self.agebound1lo,age1]).root)
+                    age1lowererror = (age1 - opt.root_scalar(self.chisqfuncerror2, args=(1,otherstup,),method="brentq",bracket=[self.agebound1lo,age1]).root)
+                    age1lowernotes = "\n"
                 except:
                     age1lowererror = "N/A"
+                    if self.chisqfuncerror(age1,1,otherstup,) != self.chisqfuncerror(self.agebound1lo,1,otherstup,) != self.chisqfuncerror(self.agebound1hi,1,otherstup,):
+                        age1lowernotes = "cannot go low enough to\nchange chi^2 by 9.28"
+                    elif self.chisqfuncerror(age1,1,otherstup,) == self.chisqfuncerror(self.agebound1lo,1,otherstup,):
+                        age1lowernotes = "sitting at lower bound\n"
                 try:    
-                    age1uppererror = (opt.root_scalar(self.chisqfuncerror, args=(1,otherstup,),method="brentq",bracket=[age1,self.agebound1hi]).root - age1)
+                    age1uppererror = (opt.root_scalar(self.chisqfuncerror2, args=(1,otherstup,),method="brentq",bracket=[age1,self.agebound1hi]).root - age1)
+                    age1uppernotes = "\n"
                 except:
                     age1uppererror = "N/A"
+                    if self.chisqfuncerror(age1,1,otherstup,) != self.chisqfuncerror(self.agebound1lo,1,otherstup,) != self.chisqfuncerror(self.agebound1hi,1,otherstup,):
+                        age1uppernotes = "cannot go high enough to\nchange chi^2 by 9.28"
+                    elif self.chisqfuncerror(age1,1,otherstup,) == self.chisqfuncerror(self.agebound1hi,1,otherstup,):
+                        age1uppernotes = "sitting at upper bound\n"
                 errorsthisrow.append([age1lowererror,age1uppererror])
+                errornotesthisrow.append([age1lowernotes,age1uppernotes])
                 ###
-                otherstup = (Z1,age1,E_bv1,Z2,age2,M2,E_bv2,valid_filters_this_row,curr_row)              
+                otherstup = (Z1,age1,E_bv1,Z2,age2,M2,E_bv2,valid_filters_this_row,ul_filters_this_row,curr_row)              
                 try:
-                    M1lowererror = M1 - opt.root_scalar(self.chisqfuncerror, args=(2,otherstup,),method="brentq",bracket=[self.Mbound1lo,M1]).root
+                    M1lowererror = M1 - opt.root_scalar(self.chisqfuncerror2, args=(2,otherstup,),method="brentq",bracket=[self.Mbound1lo,M1]).root
+                    Mlowernotes = "\n"
                 except:
                     M1lowererror = "N/A"
+                    if self.chisqfuncerror(M1,2,otherstup,) != self.chisqfuncerror(self.Mbound1lo,2,otherstup,) != self.chisqfuncerror(self.Mbound1hi,2,otherstup,):
+                        M1lowernotes = "cannot go low enough\nto change chi^2 by 9.28"
+                    elif self.chisqfuncerror(M1,2,otherstup,) == self.chisqfuncerror(self.Mbound1lo,2,otherstup,):
+                        M1lowernotes = "sitting at lower bound\n"
                 try:
-                    M1uppererror = opt.root_scalar(self.chisqfuncerror, args=(2,otherstup,),method="brentq",bracket=[M1,self.Mbound1hi]).root - M1
+                    M1uppererror = opt.root_scalar(self.chisqfuncerror2, args=(2,otherstup,),method="brentq",bracket=[M1,self.Mbound1hi]).root - M1
+                    M1uppernotes = "\n"
                 except:
                     M1uppererror = "N/A"
+                    if self.chisqfuncerror(M1,2,otherstup,) != self.chisqfuncerror(self.Mbound1lo,2,otherstup,) != self.chisqfuncerror(self.Mbound1hi,2,otherstup,):
+                        M1uppernotes = "cannot go high enough\nto change chi^2 by 9.28"
+                    elif self.chisqfuncerror(M1,2,otherstup,) == self.chisqfuncerror(self.Mbound1hi,2,otherstup,):
+                        M1uppernotes = "sitting at upper bound\n"
                 errorsthisrow.append([M1lowererror,M1uppererror])
+                errornotesthisrow.append([M1lowernotes,M1uppernotes])
                 ###
-                otherstup = (Z1,age1,M1,Z2,age2,M2,E_bv2,valid_filters_this_row,curr_row)                           
+                otherstup = (Z1,age1,M1,Z2,age2,M2,E_bv2,valid_filters_this_row,ul_filters_this_row,curr_row)                           
                 try:
-                    E_bv1lowererror = E_bv1 - opt.root_scalar(self.chisqfuncerror, args=(3,otherstup,),method="brentq",bracket=[self.ebvbound1lo,E_bv1]).root
+                    E_bv1lowererror = E_bv1 - opt.root_scalar(self.chisqfuncerror2, args=(3,otherstup,),method="brentq",bracket=[self.ebvbound1lo,E_bv1]).root
+                    ebv1lowernotes = "\n"
                 except:
                     E_bv1lowererror = "N/A"
+                    if self.chisqfuncerror(E_bv1,3,otherstup,) != self.chisqfuncerror(self.ebvbound1lo,3,otherstup,) != self.chisqfuncerror(self.ebvbound1hi,3,otherstup,):
+                        ebv1lowernotes = "cannot go low enough to\nchange chi^2 by 9.28"
+                    elif self.chisqfuncerror(E_bv1,3,otherstup,) == self.chisqfuncerror(self.ebvbound1lo,3,otherstup,):
+                        ebv1lowernotes = "sitting at lower bound\n"
                 try:
-                    E_bv1uppererror = opt.root_scalar(self.chisqfuncerror, args=(3,otherstup,),method="brentq",bracket=[E_bv1,self.ebvbound1hi]).root - E_bv1
+                    E_bv1uppererror = opt.root_scalar(self.chisqfuncerror2, args=(3,otherstup,),method="brentq",bracket=[E_bv1,self.ebvbound1hi]).root - E_bv1
+                    ebv1uppernotes = "\n"
                 except:
                     E_bv1uppererror = "N/A"
+                    if self.chisqfuncerror(E_bv1,3,otherstup,) != self.chisqfuncerror(self.ebvbound1lo,3,otherstup,) != self.chisqfuncerror(self.ebvbound1hi,3,otherstup,):
+                        ebv1uppernotes = "cannot go high enough to\nchange chi^2 by 9.28"
+                    elif self.chisqfuncerror(E_bv1,3,otherstup,) == self.chisqfuncerror(self.ebvbound1hi,3,otherstup,):
+                        ebv1uppernotes = "sitting at upper bound\n"
                 errorsthisrow.append([E_bv1lowererror,E_bv1uppererror])
+                errornotesthisrow.append([ebv1lowernotes,ebv1uppernotes])
                 ###
-                otherstup = (Z1,age1,M1,E_bv1,age2,M2,E_bv2,valid_filters_this_row,curr_row)
+                otherstup = (Z1,age1,M1,E_bv1,age2,M2,E_bv2,valid_filters_this_row,ul_filters_this_row,curr_row)
                 try:
-                    Z2lowererror = Z2 - opt.root_scalar(self.chisqfuncerror, args=(4,otherstup,),method="brentq",bracket=[self.Zbound2lo,Z2]).root
+                    Z2lowererror = Z2 - opt.root_scalar(self.chisqfuncerror2, args=(4,otherstup,),method="brentq",bracket=[self.Zbound2lo,Z2]).root
+                    Z2lowernotes = "\n"
                 except:
                     Z2lowererror = "N/A"
+                    if self.chisqfuncerror(Z2,4,otherstup,) != self.chisqfuncerror(self.Zbound2lo,4,otherstup,) != self.chisqfuncerror(self.Zbound2hi,4,otherstup,):
+                        Z2lowernotes = "cannot go low enough to\nchange chi^2 by 9.28"
+                    elif self.chisqfuncerror(Z2,4,otherstup,) == self.chisqfuncerror(self.Zbound2lo,4,otherstup,):
+                        Z2lowernotes = "sitting at lower bound\n"
                 try:
-                    Z2uppererror = opt.root_scalar(self.chisqfuncerror, args=(4,otherstup,),method="brentq",bracket=[Z2,self.Zbound2hi]).root - Z2
+                    Z2uppererror = opt.root_scalar(self.chisqfuncerror2, args=(4,otherstup,),method="brentq",bracket=[Z2,self.Zbound2hi]).root - Z2
+                    Z2uppernotes = "\n"
                 except:
                     Z2uppererror = "N/A"
+                    if self.chisqfuncerror(Z2,4,otherstup,) != self.chisqfuncerror(self.Zbound2lo,4,otherstup,) != self.chisqfuncerror(self.Zbound2hi,4,otherstup,):
+                        Z2uppernotes = "cannot go high enough to\nchange chi^2 by 9.28"
+                    elif self.chisqfuncerror(Z2,4,otherstup,) == self.chisqfuncerror(self.Zbound2hi,4,otherstup,):
+                        Z2uppernotes = "sitting at upper bound\n"
                 errorsthisrow.append([Z2lowererror,Z2uppererror])
+                errornotesthisrow.append([Z2lowernotes,Z2uppernotes])
                 ###
-                otherstup = (Z1,age1,M1,E_bv1,Z2,M2,E_bv2,valid_filters_this_row,curr_row)              
+                otherstup = (Z1,age1,M1,E_bv1,Z2,M2,E_bv2,valid_filters_this_row,ul_filters_this_row,curr_row)              
                 try:
-                    age2lowererror = (age2 - opt.root_scalar(self.chisqfuncerror, args=(5,otherstup,),method="brentq",bracket=[self.agebound2lo,age2]).root)
+                    age2lowererror = (age2 - opt.root_scalar(self.chisqfuncerror2, args=(5,otherstup,),method="brentq",bracket=[self.agebound2lo,age2]).root)
+                    age2lowernotes = "\n"
                 except:
                     age2lowererror = "N/A"
+                    if self.chisqfuncerror(age2,5,otherstup,) != self.chisqfuncerror(self.agebound2lo,5,otherstup,) != self.chisqfuncerror(self.agebound2hi,5,otherstup,):
+                        age2lowernotes = "cannot go low enough to\nchange chi^2 by 9.28"
+                    elif self.chisqfuncerror(age2,5,otherstup,) == self.chisqfuncerror(self.agebound2lo,5,otherstup,):
+                        age2lowernotes = "sitting at lower bound\n"
                 try:    
-                    age2uppererror = (opt.root_scalar(self.chisqfuncerror, args=(5,otherstup,),method="brentq",bracket=[age2,self.agebound2hi]).root - age2)
+                    age2uppererror = (opt.root_scalar(self.chisqfuncerror2, args=(5,otherstup,),method="brentq",bracket=[age2,self.agebound2hi]).root - age2)
+                    age2uppernotes = "\n"
                 except:
                     age2uppererror = "N/A"
+                    if self.chisqfuncerror(age2,5,otherstup,) != self.chisqfuncerror(self.agebound2lo,5,otherstup,) != self.chisqfuncerror(self.agebound2hi,5,otherstup,):
+                        age2uppernotes = "cannot go high enough to\nchange chi^2 by 9.28"
+                    elif self.chisqfuncerror(age2,5,otherstup,) == self.chisqfuncerror(self.agebound2hi,5,otherstup,):
+                        age2uppernotes = "sitting at upper bound\n"
                 errorsthisrow.append([age2lowererror,age2uppererror])
+                errornotesthisrow.append([age2lowernotes,age2uppernotes])
                 ###
-                otherstup = (Z1,age1,M1,E_bv1,Z2,age2,E_bv2,valid_filters_this_row,curr_row)              
+                otherstup = (Z1,age1,M1,E_bv1,Z2,age2,E_bv2,valid_filters_this_row,ul_filters_this_row,curr_row)              
                 try:
-                    M2lowererror = M2 - opt.root_scalar(self.chisqfuncerror, args=(6,otherstup,),method="brentq",bracket=[self.Mbound2lo,M2]).root
+                    M2lowererror = M2 - opt.root_scalar(self.chisqfuncerror2, args=(6,otherstup,),method="brentq",bracket=[self.Mbound2lo,M2]).root
+                    M2lowernotes = "\n"
                 except:
                     M2lowererror = "N/A"
+                    if self.chisqfuncerror(M2,6,otherstup,) != self.chisqfuncerror(self.Mbound2lo,6,otherstup,) != self.chisqfuncerror(self.Mbound2hi,6,otherstup,):
+                        M2lowernotes = "cannot go low enough to\nchange chi^2 by 9.28"
+                    elif self.chisqfuncerror(M2,6,otherstup,) == self.chisqfuncerror(self.Mbound2lo,6,otherstup,):
+                        M2lowernotes = "sitting at lower bound\n"
                 try:
-                    M2uppererror = opt.root_scalar(self.chisqfuncerror, args=(6,otherstup,),method="brentq",bracket=[M2,self.Mbound2hi]).root - M2
+                    M2uppererror = opt.root_scalar(self.chisqfuncerror2, args=(6,otherstup,),method="brentq",bracket=[M2,self.Mbound2hi]).root - M2
+                    M2uppernotes = "\n"
                 except:
                     M2uppererror = "N/A"
+                    if self.chisqfuncerror(M2,6,otherstup,) != self.chisqfuncerror(self.Mbound2lo,6,otherstup,) != self.chisqfuncerror(self.Mbound2hi,6,otherstup,):
+                        M2uppernotes = "cannot go high enough to\nchange chi^2 by 9.28"
+                    elif self.chisqfuncerror(M2,6,otherstup,) == self.chisqfuncerror(self.Mbound2hi,6,otherstup,):
+                        M2uppernotes = "sitting at upper bound\n"
                 errorsthisrow.append([M2lowererror,M2uppererror])
+                errornotesthisrow.append([M2lowernotes,M2uppernotes])
                 ###
-                otherstup = (Z1,age1,M1,E_bv1,Z2,age2,M2,valid_filters_this_row,curr_row)                           
+                otherstup = (Z1,age1,M1,E_bv1,Z2,age2,M2,valid_filters_this_row,ul_filters_this_row,curr_row)                           
                 try:
-                    E_bv2lowererror = E_bv2 - opt.root_scalar(self.chisqfuncerror, args=(7,otherstup,),method="brentq",bracket=[self.ebvbound2lo,E_bv2]).root
+                    E_bv2lowererror = E_bv2 - opt.root_scalar(self.chisqfuncerror2, args=(7,otherstup,),method="brentq",bracket=[self.ebvbound2lo,E_bv2]).root
+                    ebv2lowernotes = "\n"
                 except:
                     E_bv2lowererror = "N/A"
+                    if self.chisqfuncerror(E_bv2,7,otherstup,) != self.chisqfuncerror(self.ebvbound2lo,7,otherstup,) != self.chisqfuncerror(self.ebvbound2hi,7,otherstup,):
+                        ebv2lowernotes = "cannot go low enough to\nchange chi^2 by 9.28"
+                    elif self.chisqfuncerror(E_bv2,7,otherstup,) == self.chisqfuncerror(self.ebvbound2lo,7,otherstup,):
+                        ebv2lowernotes = "sitting at lower bound\n"
                 try:
-                    E_bv2uppererror = opt.root_scalar(self.chisqfuncerror, args=(7,otherstup,),method="brentq",bracket=[E_bv2,self.ebvbound2hi]).root - E_bv2
+                    E_bv2uppererror = opt.root_scalar(self.chisqfuncerror2, args=(7,otherstup,),method="brentq",bracket=[E_bv2,self.ebvbound2hi]).root - E_bv2
+                    ebv2lowernotes = "\n"
                 except:
                     E_bv2uppererror = "N/A"
+                    if self.chisqfuncerror(E_bv2,7,otherstup,) != self.chisqfuncerror(self.ebvbound2lo,7,otherstup,) != self.chisqfuncerror(self.ebvbound2hi,7,otherstup,):
+                        ebv2uppernotes = "cannot go high enough to\nchange chi^2 by 9.28"
+                    elif self.chisqfuncerror(E_bv2,7,otherstup,) == self.chisqfuncerror(self.ebvbound2hi,7,otherstup,):
+                        ebv2uppernotes = "sitting at upper bound\n"
                 errorsthisrow.append([E_bv2lowererror,E_bv2uppererror])
+                errornotesthisrow.append([ebv2lowernotes,ebv2uppernotes])
                 ###
 
                 self.errorsallrows.append(errorsthisrow)
+                self.errornotes.append(errornotesthisrow)
            
     def display_all_results(self):
         if self.dispresults == 1:
@@ -1150,12 +1390,15 @@ class ChiSquared():
                 models = self.bandfluxes.copy(deep=True)
                 for curr_row in range(self.bandfluxes.shape[0]):
                     valid_filters_this_row = []
-                    for valid_ind,bandflux in enumerate(self.bandfluxes.loc[curr_row,:]):
-                        if np.isnan(bandflux) == False:
+                    ul_filters_this_row = []
+                    for valid_ind,arraytup in enumerate(zip(self.bandfluxes.loc[curr_row,:],self.ul_frame.loc[curr_row,:])):
+                        if np.isnan(arraytup[0]) == False:
                             valid_filters_this_row.append(valid_ind)
+                        if arraytup[1] == 1:
+                            ul_filters_this_row.append(valid_ind)
 
                     best_tup = (self.results[curr_row].x[0],self.results[curr_row].x[1],self.results[curr_row].x[2],self.results[curr_row].x[3])
-                    model = self.minichisqfunc_single(best_tup,valid_filters_this_row)
+                    model = self.minichisqfunc_single(best_tup,ul_filters_this_row,valid_filters_this_row)
                     used = 0 
                     for colno,col in enumerate(models.loc[curr_row,:]):
                         if np.isnan(col) == False:
@@ -1183,12 +1426,15 @@ class ChiSquared():
                 coolmodels = self.bandfluxes.copy(deep=True)
                 for curr_row in range(self.bandfluxes.shape[0]):
                     valid_filters_this_row = []
-                    for valid_ind,bandflux in enumerate(self.bandfluxes.loc[curr_row,:]):
-                        if np.isnan(bandflux) == False:
+                    ul_filters_this_row = []
+                    for valid_ind,arraytup in enumerate(zip(self.bandfluxes.loc[curr_row,:],self.ul_frame.loc[curr_row,:])):
+                        if np.isnan(arraytup[0]) == False:
                             valid_filters_this_row.append(valid_ind)
+                        if arraytup[1] == 1:
+                            ul_filters_this_row.append(valid_ind)
 
                     best_tup = (self.results[curr_row].x[0],self.results[curr_row].x[1],self.results[curr_row].x[2],self.results[curr_row].x[3],self.results[curr_row].x[4],self.results[curr_row].x[5],self.results[curr_row].x[6],self.results[curr_row].x[7])
-                    hot,cool = self.minichisqfunc_double(best_tup,valid_filters_this_row)
+                    hot,cool = self.minichisqfunc_double(best_tup,ul_filters_this_row,valid_filters_this_row)
                     usedhot = 0
                     usedcool = 0
                     for colno,col in enumerate(hotmodels.loc[curr_row,:]):
@@ -1294,15 +1540,15 @@ class ChiSquared():
         abc.errorbar(valid_avgwv_this_row,valid_fluxes_this_row,yerr=valid_errors_this_row,fmt="o",color="orange")
         abc.plot(valid_avgwv_this_row,self.minichisqfunc_single(best_tup,valid_filters_this_row),color="blue")
 
-        if self.saveplots == 1:
-            saveimgname = self.imgfilename.replace("X","{}".format(self.rows[curr_row]+2))
-            fig.savefig('{}'.format(saveimgname), bbox_inches='tight', dpi=150)
-
         if self.plotscale == 0:
             abc.set_xscale('log')
             abc.set_yscale('log')
             abc.set_xticks([150,171,199,276,337,476,833,1097,1522])
             abc.get_xaxis().set_major_formatter(matplotlib.ticker.ScalarFormatter())
+
+        if self.saveplots == 1:
+            saveimgname = self.imgfilename.replace("X","{}".format(self.rows[curr_row]+2))
+            fig.savefig('{}'.format(saveimgname), bbox_inches='tight', dpi=150)
 
         canvas = FigureCanvasTkAgg(fig, master=topw)
         canvas.get_tk_widget().pack(anchor=tk.E)
@@ -1338,12 +1584,7 @@ class ChiSquared():
         label5.place(x=425,y=665)
         label5a = tk.Label(topw,text="{}".format(format(self.results[curr_row].fun,'.6e')),font=("Arial",12))
         label5a.place(x=437,y=715)
-        ridge = tk.Canvas(topw,width=600,height=300,bd=4,relief=tk.GROOVE)
-        ridge.place(x=875,y=630)
-        #label6 = tk.Label(topw,text="Best fit parameters",pady=15)
-        #label6.place(x=865,y=725)
-        labelheader = tk.Label(topw,text="Parameter                        Best fit value            Error_lower             Error_upper",bd=4,relief=tk.GROOVE,padx=40,bg="azure")
-        labelheader.place(x=878,y=603) 
+        
         import math
         Z_sticker1 = format(self.results[curr_row].x[0],'.6e')
         try:
@@ -1354,8 +1595,8 @@ class ChiSquared():
             Z_sticker3 = format(self.errorsallrows[curr_row][0][1],'.6e')
         except:
             Z_sticker3 = "       N/A       "
-        label7 = tk.Label(topw,text="Z                  =             {}        ({})        ({})".format(Z_sticker1,Z_sticker2,Z_sticker3))
-        label7.place(x=910,y=648)
+        Z_sticker4 = self.errornotes[curr_row][0][0]
+        Z_sticker5 = self.errornotes[curr_row][0][1]
 
         age_sticker1 = format(self.results[curr_row].x[1],'.6e')
         try:
@@ -1365,9 +1606,9 @@ class ChiSquared():
         try:
             age_sticker3 = format(self.errorsallrows[curr_row][1][1],'.6e')
         except:
-            age_sticker3 = "       N/A       "    
-        label8= tk.Label(topw,text = "age      =             {}        ({})        ({})".format(age_sticker1,age_sticker2,age_sticker3))
-        label8.place(x=910,y=683)
+            age_sticker3 = "       N/A       "
+        age_sticker4 = self.errornotes[curr_row][1][0]
+        age_sticker5 = self.errornotes[curr_row][1][1]    
 
         M_sticker1 = format(self.results[curr_row].x[2],'.6e')
         try:
@@ -1378,8 +1619,8 @@ class ChiSquared():
             M_sticker3 = format(self.errorsallrows[curr_row][2][1],'.6e')
         except:
             M_sticker3 = "       N/A       "
-        label9 = tk.Label(topw, text = "M         =              {}        ({})        ({})".format(M_sticker1,M_sticker2,M_sticker3))
-        label9.place(x=910,y=718)
+        M_sticker4 = self.errornotes[curr_row][2][0]
+        M_sticker5 = self.errornotes[curr_row][2][1]
 
         ebv_sticker1 = format(self.results[curr_row].x[3],'.6e')
         try:
@@ -1390,8 +1631,51 @@ class ChiSquared():
             ebv_sticker3 = format(self.errorsallrows[curr_row][3][1],'.6e')
         except:
             ebv_sticker3 = "       N/A       "
-        label10 = tk.Label(topw,text="E(b-v)                 =              {}        ({})        ({})".format(ebv_sticker1,ebv_sticker2,ebv_sticker3))
-        label10.place(x=910,y=753)
+        ebv_sticker4 = self.errornotes[curr_row][3][0]
+        ebv_sticker5 = self.errornotes[curr_row][3][1]
+
+        colpack1 = tk.Frame(topw)
+        colpack1.place(x=650,y=600)
+        colpack2 = tk.Frame(topw)
+        colpack2.place(x=770,y=600)
+        colpack3 = tk.Frame(topw)
+        colpack3.place(x=910,y=600)
+        colpack4 = tk.Frame(topw)
+        colpack4.place(x=1020,y=600)
+        colpack5 = tk.Frame(topw)
+        colpack5.place(x=1180,y=600)
+        colpack6 = tk.Frame(topw)
+        colpack6.place(x=1290,y=600)
+        parameterhead = tk.Label(colpack1,text="Parameter",bg="azure").pack(pady=10)
+        parameter1 = tk.Label(colpack1,text="Z").pack(pady=10)
+        parameter2 = tk.Label(colpack1,text="log(age)/10").pack(pady=10)
+        parameter3 = tk.Label(colpack1,text="log(M)/10").pack(pady=10)
+        parameter4 = tk.Label(colpack1,text="E(B-V)").pack(pady=10)
+        besthead = tk.Label(colpack2,text="Best fit value",bg="azure").pack(pady=10)
+        best1 = tk.Label(colpack2,text="{}".format(Z_sticker1)).pack(pady=10)
+        best2 = tk.Label(colpack2,text="{}".format(age_sticker1)).pack(pady=10)
+        best3 = tk.Label(colpack2,text="{}".format(M_sticker1)).pack(pady=10)
+        best4 = tk.Label(colpack2,text="{}".format(ebv_sticker1)).pack(pady=10)
+        errlohead = tk.Label(colpack3,text="Lower error",bg="azure").pack(pady=10)
+        errlo1 = tk.Label(colpack3,text="{}".format(Z_sticker2)).pack(pady=10)
+        errlo2 = tk.Label(colpack3,text="{}".format(age_sticker2)).pack(pady=10)
+        errlo3 = tk.Label(colpack3,text="{}".format(M_sticker2)).pack(pady=10)
+        errlo4 = tk.Label(colpack3,text="{}".format(ebv_sticker2)).pack(pady=10)
+        noteslohead = tk.Label(colpack4,text="Lower error notes",bg="azure").pack(pady=10)
+        noteslo1 = tk.Label(colpack4,text="{}".format(Z_sticker4),font="Arial, 7").pack(pady=5)
+        noteslo2 = tk.Label(colpack4,text="{}".format(age_sticker4),font="Arial, 7").pack(pady=5)
+        noteslo3 = tk.Label(colpack4,text="{}".format(M_sticker4),font="Arial, 7").pack(pady=5)
+        noteslo4 = tk.Label(colpack4,text="{}".format(ebv_sticker4),font="Arial, 7").pack(pady=5)
+        errhihead = tk.Label(colpack5,text="Upper error",bg="azure").pack(pady=10)
+        errhi1 = tk.Label(colpack5,text="{}".format(Z_sticker3)).pack(pady=10)
+        errhi2 = tk.Label(colpack5,text="{}".format(age_sticker3)).pack(pady=10)
+        errhi3 = tk.Label(colpack5,text="{}".format(M_sticker3)).pack(pady=10)
+        errhi4 = tk.Label(colpack5,text="{}".format(ebv_sticker3)).pack(pady=10)
+        noteshihead = tk.Label(colpack6,text="Upper error notes",bg="azure").pack(pady=10)
+        noteshi1 = tk.Label(colpack6,text="{}".format(Z_sticker5),font="Arial, 7").pack(pady=5)
+        noteshi2 = tk.Label(colpack6,text="{}".format(age_sticker5),font="Arial, 7").pack(pady=5)
+        noteshi3 = tk.Label(colpack6,text="{}".format(M_sticker5),font="Arial, 7").pack(pady=5)
+        noteshi4 = tk.Label(colpack6,text="{}".format(ebv_sticker5),font="Arial, 7").pack(pady=5)
 
         def closethesource():
             topw.destroy()
@@ -1449,16 +1733,16 @@ class ChiSquared():
         abc.plot(valid_avgwv_this_row,coolmod,color="blue")
         sumofmodels = [hotmod[i] + coolmod[i] for i in range(len(hotmod))]
         abc.plot(valid_avgwv_this_row,sumofmodels,color="limegreen")
-
-        if self.saveplots == 1:
-            saveimgname = self.imgfilename.replace("X","{}".format(self.rows[curr_row]+2))
-            fig.savefig('{}'.format(saveimgname), bbox_inches='tight', dpi=150)
-
+        
         if self.plotscale == 0:
             abc.set_xscale('log')
             abc.set_yscale('log')
             abc.set_xticks([150,171,199,276,337,476,833,1097,1522])
             abc.get_xaxis().set_major_formatter(matplotlib.ticker.ScalarFormatter())
+
+        if self.saveplots == 1:
+            saveimgname = self.imgfilename.replace("X","{}".format(self.rows[curr_row]+2))
+            fig.savefig('{}'.format(saveimgname), bbox_inches='tight', dpi=150)
 
         canvas = FigureCanvasTkAgg(fig, master=topw)
         canvas.get_tk_widget().pack(anchor=tk.E)
@@ -1500,12 +1784,7 @@ class ChiSquared():
         label5.place(x=425,y=665)
         label5a = tk.Label(topw,text="{}".format(format(self.results[curr_row].fun,'.6e')),font=("Arial",12))
         label5a.place(x=437,y=715)
-        ridge = tk.Canvas(topw,width=600,height=300,bd=4,relief=tk.GROOVE)
-        ridge.place(x=875,y=630)
-        #label6 = tk.Label(topw,text="Best fit parameters",pady=15)
-        #label6.place(x=865,y=725)
-        labelheader = tk.Label(topw,text="Parameter                        Best fit value            Error_lower             Error_upper",bd=4,relief=tk.GROOVE,padx=40,bg="azure")
-        labelheader.place(x=878,y=603) 
+
         import math
         Z_hot_sticker1 = format(self.results[curr_row].x[0],'.6e')
         try:
@@ -1516,8 +1795,8 @@ class ChiSquared():
             Z_hot_sticker3 = format(self.errorsallrows[curr_row][0][1],'.6e')
         except:
             Z_hot_sticker3 = "       N/A       "
-        label7 = tk.Label(topw,text="Z_hot                  =     {}        ({})        ({})".format(Z_hot_sticker1,Z_hot_sticker2,Z_hot_sticker3))
-        label7.place(x=910,y=648)
+        Z_hot_sticker4 = self.errornotes[curr_row][0][0]
+        Z_hot_sticker5 = self.errornotes[curr_row][0][1]
 
         age_hot_sticker1 = format(self.results[curr_row].x[1],'.6e')
         try:
@@ -1527,9 +1806,9 @@ class ChiSquared():
         try:
             age_hot_sticker3 = format(self.errorsallrows[curr_row][1][1],'.6e')
         except:
-            age_hot_sticker3 = "       N/A       "    
-        label8= tk.Label(topw,text = "age_hot       =     {}        ({})        ({})".format(age_hot_sticker1,age_hot_sticker2,age_hot_sticker3))
-        label8.place(x=910,y=678)
+            age_hot_sticker3 = "       N/A       "
+        age_hot_sticker4 = self.errornotes[curr_row][1][0]
+        age_hot_sticker5 = self.errornotes[curr_row][1][1]  
 
         M_hot_sticker1 = format(self.results[curr_row].x[2],'.6e')
         try:
@@ -1540,8 +1819,8 @@ class ChiSquared():
             M_hot_sticker3 = format(self.errorsallrows[curr_row][2][1],'.6e')
         except:
             M_hot_sticker3 = "       N/A       "
-        label9 = tk.Label(topw, text = "M_hot         =      {}        ({})        ({})".format(M_hot_sticker1,M_hot_sticker2,M_hot_sticker3))
-        label9.place(x=910,y=708)
+        M_hot_sticker4 = self.errornotes[curr_row][2][0]
+        M_hot_sticker5 = self.errornotes[curr_row][2][1]
 
         ebv_hot_sticker1 = format(self.results[curr_row].x[3],'.6e')
         try:
@@ -1552,8 +1831,8 @@ class ChiSquared():
             ebv_hot_sticker3 = format(self.errorsallrows[curr_row][3][1],'.6e')
         except:
             ebv_hot_sticker3 = "       N/A     "
-        label10 = tk.Label(topw,text="E(B-V)_hot                =      {}        ({})        ({})".format(ebv_hot_sticker1,ebv_hot_sticker2,ebv_hot_sticker3))
-        label10.place(x=910,y=738)
+        ebv_hot_sticker4 = self.errornotes[curr_row][3][0]
+        ebv_hot_sticker5 = self.errornotes[curr_row][3][1]
 
         Z_cool_sticker1 = format(self.results[curr_row].x[4],'.6e')
         try:
@@ -1564,8 +1843,8 @@ class ChiSquared():
             Z_cool_sticker3 = format(self.errorsallrows[curr_row][4][1],'.6e')
         except:
             Z_cool_sticker3 = "       N/A       "
-        label11 = tk.Label(topw,text="Z_cool                  =     {}        ({})        ({})".format(Z_cool_sticker1,Z_cool_sticker2,Z_cool_sticker3))
-        label11.place(x=910,y=768)
+        Z_cool_sticker4 = self.errornotes[curr_row][4][0]
+        Z_cool_sticker5 = self.errornotes[curr_row][4][1]
 
         age_cool_sticker1 = format(self.results[curr_row].x[5],'.6e')
         try:
@@ -1576,8 +1855,8 @@ class ChiSquared():
             age_cool_sticker3 = format(self.errorsallrows[curr_row][5][1],'.6e')
         except:
             age_cool_sticker3 = "       N/A       "
-        label12 = tk.Label(topw,text="age_cool     =      {}        ({})        ({})".format(age_cool_sticker1,age_cool_sticker2,age_cool_sticker3))
-        label12.place(x=910,y=798)
+        age_cool_sticker4 = self.errornotes[curr_row][5][0]
+        age_cool_sticker5 = self.errornotes[curr_row][5][1]
 
         M_cool_sticker1 = format(self.results[curr_row].x[6],'.6e')
         try:
@@ -1588,8 +1867,8 @@ class ChiSquared():
             M_cool_sticker3 = format(self.errorsallrows[curr_row][6][1],'.6e')
         except:
             M_cool_sticker3 = "       N/A       "
-        label13 = tk.Label(topw,text="M_cool              =      {}        ({})        ({})".format(M_cool_sticker1,M_cool_sticker2,M_cool_sticker3))
-        label13.place(x=910,y=828)
+        M_cool_sticker4 = self.errornotes[curr_row][6][0]
+        M_cool_sticker5 = self.errornotes[curr_row][6][1]
 
         ebv_cool_sticker1 = format(self.results[curr_row].x[7],'.6e')
         try:
@@ -1600,8 +1879,72 @@ class ChiSquared():
             ebv_cool_sticker3 = format(self.errorsallrows[curr_row][7][1],'.6e')
         except:
             ebv_cool_sticker3 = "       N/A       "
-        label14 = tk.Label(topw,text="E(b-v)_cool               =      {}        ({})        ({})".format(ebv_cool_sticker1,ebv_cool_sticker2,ebv_cool_sticker3))
-        label14.place(x=910,y=858)
+        ebv_cool_sticker4 = self.errornotes[curr_row][7][0]
+        ebv_cool_sticker5 = self.errornotes[curr_row][7][1]
+
+        colpack1 = tk.Frame(topw)
+        colpack1.place(x=650,y=600)
+        colpack2 = tk.Frame(topw)
+        colpack2.place(x=770,y=600)
+        colpack3 = tk.Frame(topw)
+        colpack3.place(x=910,y=600)
+        colpack4 = tk.Frame(topw)
+        colpack4.place(x=1020,y=600)
+        colpack5 = tk.Frame(topw)
+        colpack5.place(x=1180,y=600)
+        colpack6 = tk.Frame(topw)
+        colpack6.place(x=1290,y=600)
+        parameterhead = tk.Label(colpack1,text="Parameter",bg="azure").pack(pady=10)
+        parameter1 = tk.Label(colpack1,text="Z").pack(pady=10)
+        parameter2 = tk.Label(colpack1,text="log(age)/10").pack(pady=10)
+        parameter3 = tk.Label(colpack1,text="log(M)/10").pack(pady=10)
+        parameter4 = tk.Label(colpack1,text="E(B-V)").pack(pady=10)
+        besthead = tk.Label(colpack2,text="Best fit value",bg="azure").pack(pady=5)
+        best1 = tk.Label(colpack2,text="{}".format(Z_hot_sticker1)).pack(pady=5)
+        best2 = tk.Label(colpack2,text="{}".format(age_hot_sticker1)).pack(pady=5)
+        best3 = tk.Label(colpack2,text="{}".format(M_hot_sticker1)).pack(pady=5)
+        best4 = tk.Label(colpack2,text="{}".format(ebv_hot_sticker1)).pack(pady=5)
+        best5 = tk.Label(colpack2,text="{}".format(Z_cool_sticker1)).pack(pady=5)
+        best6 = tk.Label(colpack2,text="{}".format(age_cool_sticker1)).pack(pady=5)
+        best7 = tk.Label(colpack2,text="{}".format(M_cool_sticker1)).pack(pady=5)
+        best8 = tk.Label(colpack2,text="{}".format(ebv_cool_sticker1)).pack(pady=5)
+        errlohead = tk.Label(colpack3,text="Lower error",bg="azure").pack(pady=5)
+        errlo1 = tk.Label(colpack3,text="{}".format(Z_hot_sticker2)).pack(pady=5)
+        errlo2 = tk.Label(colpack3,text="{}".format(age_hot_sticker2)).pack(pady=5)
+        errlo3 = tk.Label(colpack3,text="{}".format(M_hot_sticker2)).pack(pady=5)
+        errlo4 = tk.Label(colpack3,text="{}".format(ebv_hot_sticker2)).pack(pady=5)
+        errlo5 = tk.Label(colpack3,text="{}".format(Z_cool_sticker2)).pack(pady=5)
+        errlo6 = tk.Label(colpack3,text="{}".format(age_cool_sticker2)).pack(pady=5)
+        errlo7 = tk.Label(colpack3,text="{}".format(M_cool_sticker2)).pack(pady=5)
+        errlo8 = tk.Label(colpack3,text="{}".format(ebv_cool_sticker2)).pack(pady=5)
+        noteslohead = tk.Label(colpack4,text="Lower error notes",bg="azure").pack(pady=5)
+        noteslo1 = tk.Label(colpack4,text="{}".format(Z_hot_sticker4),font="Arial, 7").pack()
+        noteslo2 = tk.Label(colpack4,text="{}".format(age_hot_sticker4),font="Arial, 7").pack()
+        noteslo3 = tk.Label(colpack4,text="{}".format(M_hot_sticker4),font="Arial, 7").pack()
+        noteslo4 = tk.Label(colpack4,text="{}".format(ebv_hot_sticker4),font="Arial, 7").pack()
+        noteslo5 = tk.Label(colpack4,text="{}".format(Z_cool_sticker4),font="Arial, 7").pack()
+        noteslo6 = tk.Label(colpack4,text="{}".format(age_cool_sticker4),font="Arial, 7").pack()
+        noteslo7 = tk.Label(colpack4,text="{}".format(M_cool_sticker4),font="Arial, 7").pack()
+        noteslo8 = tk.Label(colpack4,text="{}".format(ebv_cool_sticker4),font="Arial, 7").pack()
+        errhihead = tk.Label(colpack5,text="Upper error",bg="azure").pack(pady=5)
+        errhi1 = tk.Label(colpack5,text="{}".format(Z_hot_sticker3)).pack(pady=5)
+        errhi2 = tk.Label(colpack5,text="{}".format(age_hot_sticker3)).pack(pady=5)
+        errhi3 = tk.Label(colpack5,text="{}".format(M_hot_sticker3)).pack(pady=5)
+        errhi4 = tk.Label(colpack5,text="{}".format(ebv_hot_sticker3)).pack(pady=5)
+        errhi5 = tk.Label(colpack5,text="{}".format(Z_cool_sticker3)).pack(pady=5)
+        errhi6 = tk.Label(colpack5,text="{}".format(age_cool_sticker3)).pack(pady=5)
+        errhi7 = tk.Label(colpack5,text="{}".format(M_cool_sticker3)).pack(pady=5)
+        errhi8 = tk.Label(colpack5,text="{}".format(ebv_cool_sticker3)).pack(pady=5)
+        noteshihead = tk.Label(colpack6,text="Upper error notes",bg="azure").pack(pady=5)
+        noteshi1 = tk.Label(colpack6,text="{}".format(Z_hot_sticker5),font="Arial, 7").pack()
+        noteshi2 = tk.Label(colpack6,text="{}".format(age_hot_sticker5),font="Arial, 7").pack()
+        noteshi3 = tk.Label(colpack6,text="{}".format(M_hot_sticker5),font="Arial, 7").pack()
+        noteshi4 = tk.Label(colpack6,text="{}".format(ebv_hot_sticker5),font="Arial, 7").pack()
+        noteshi5 = tk.Label(colpack6,text="{}".format(Z_cool_sticker5),font="Arial, 7").pack()
+        noteshi6 = tk.Label(colpack6,text="{}".format(age_cool_sticker5),font="Arial, 7").pack()
+        noteshi7 = tk.Label(colpack6,text="{}".format(M_cool_sticker5),font="Arial, 7").pack()
+        noteshi8 = tk.Label(colpack6,text="{}".format(ebv_cool_sticker5),font="Arial, 7").pack()
+
 
         def closethesource():
             topw.destroy()
