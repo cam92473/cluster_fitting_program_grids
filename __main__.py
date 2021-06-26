@@ -18,9 +18,9 @@ class ChiSquared():
         self.dset = "785000"
         self.sliderstringset = "log-log axes"
         self.detailset = "  finer data  "
-        self.starlist1 = ["-1.0","0.9","0.7","0.1","N/A","N/A","N/A","N/A"]
+        self.starlist1 = ["0","0.75","0.3","0.1","N/A","N/A","N/A","N/A"]
         self.starlist2 = ["-0.5",".8477","0.6","0.2","-1.5",".9477","0.8","0.1"]
-        self.stardict1 = [["-2.1","-0.1"],[".66","1.01"],["0","1.4"],["0","2"],["N/A","N/A"],["N/A","N/A"],["N/A","N/A"],["N/A","N/A"]]
+        self.stardict1 = [["-2.5","0.3"],[".66",".90"],["0",".75"],["0","1"],["N/A","N/A"],["N/A","N/A"],["N/A","N/A"],["N/A","N/A"]]
         self.stardict2 = [["-2.1","-0.1"],[".66","1.01"],["0","1.4"],["0","2"],["-2.1","-0.1"],[".66","1.01"],["0","1.4"],["0","2"]]
         while True:
             self.intro_gui()
@@ -1397,7 +1397,7 @@ class ChiSquared():
                             ul_filters_this_row.append(valid_ind)
 
                     best_tup = (self.results[curr_row].x[0],self.results[curr_row].x[1],self.results[curr_row].x[2],self.results[curr_row].x[3])
-                    model = self.minichisqfunc_single(best_tup,ul_filters_this_row,valid_filters_this_row)
+                    model = self.minichisqfunc_single(best_tup,valid_filters_this_row)
                     used = 0 
                     for colno,col in enumerate(models.loc[curr_row,:]):
                         if np.isnan(col) == False:
@@ -1433,7 +1433,7 @@ class ChiSquared():
                             ul_filters_this_row.append(valid_ind)
 
                     best_tup = (self.results[curr_row].x[0],self.results[curr_row].x[1],self.results[curr_row].x[2],self.results[curr_row].x[3],self.results[curr_row].x[4],self.results[curr_row].x[5],self.results[curr_row].x[6],self.results[curr_row].x[7])
-                    hot,cool = self.minichisqfunc_double(best_tup,ul_filters_this_row,valid_filters_this_row)
+                    hot,cool = self.minichisqfunc_double(best_tup,valid_filters_this_row)
                     usedhot = 0
                     usedcool = 0
                     for colno,col in enumerate(hotmodels.loc[curr_row,:]):
