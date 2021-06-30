@@ -1015,8 +1015,10 @@ class ChiSquared():
             self.filternames = ["F148W","F169M","F172M","N219M","N279N","f275w","f336w","f475w","f814w","f110w","f160w"]
             self.bandfluxes = pd.DataFrame()
             self.bandfluxerrors = pd.DataFrame()
-            self.avgwvlist = [150.2491,161.4697,170.856,199.1508,276.0,267.884375,336.8484,476.0,833.0,1096.7245,1522.1981]
-            self.allextinct = [5.52548923, 5.17258596, 5.0540947, 5.83766858, 3.49917568, 3.25288368, 1.95999799, 0.62151591, -1.44589933, -2.10914243, -2.51310314]
+            self.avgwvlist = [148.1,160.8,171.7,219.6,279.2,270.4,335.5,477.3,802.4,1153.4,1536.9]
+            #self.avgwvlist = [150.2491,161.4697,170.856,199.1508,276.0,267.884375,336.8484,476.0,833.0,1096.7245,1522.1981]
+            #self.allextinct = [5.52548923, 5.17258596, 5.0540947, 5.83766858, 3.49917568, 3.25288368, 1.95999799, 0.62151591, -1.44589933, -2.10914243, -2.51310314]
+            self.allextinct = [ 5.62427152,  5.18640888,  5.04926289,  6.99406125,  3.15901211,  3.42340971, 1.97787612,  0.61008783, -1.33280758, -2.18810981, -2.52165626]
 
             for colind,col in enumerate(self.ab_magnitudes_frame):
                 if colind%2 == 0:
@@ -1888,7 +1890,11 @@ class ChiSquared():
             if self.xticker == 1:
                 abc.set_xticks([int(i) for i in np.arange(200,max(valid_avgwv_this_row),200)])
             elif self.xticker == 0:
-                abc.set_xticks(valid_avgwv_this_row)
+                better_avgwv_this_row = []
+                for ind, wv in enumerate(valid_avgwv_this_row[0:len(valid_avgwv_this_row)-1]):
+                    if valid_avgwv_this_row[ind + 1] - valid_avgwv_this_row[ind] > 80:
+                        better_avgwv_this_row.append(wv)
+                abc.set_xticks(better_avgwv_this_row)
 
         if self.plotscale == 0:
             abc.set_xscale('log')
@@ -1896,7 +1902,11 @@ class ChiSquared():
             if self.xticker == 1:
                 abc.set_xticks([int(i) for i in np.arange(200,max(valid_avgwv_this_row),200)])
             elif self.xticker == 0:
-                abc.set_xticks(valid_avgwv_this_row)
+                better_avgwv_this_row = []
+                for ind, wv in enumerate(valid_avgwv_this_row[0:len(valid_avgwv_this_row)-1]):
+                    if valid_avgwv_this_row[ind + 1] - valid_avgwv_this_row[ind] > 20:
+                        better_avgwv_this_row.append(wv)
+                abc.set_xticks(better_avgwv_this_row)
             abc.get_xaxis().set_major_formatter(matplotlib.ticker.ScalarFormatter())
 
         if self.saveplots == 1:
@@ -2122,7 +2132,11 @@ class ChiSquared():
             if self.xticker == 1:
                 abc.set_xticks([int(i) for i in np.arange(200,max(valid_avgwv_this_row),200)])
             elif self.xticker == 0:
-                abc.set_xticks(valid_avgwv_this_row)
+                better_avgwv_this_row = []
+                for ind, wv in enumerate(valid_avgwv_this_row[0:len(valid_avgwv_this_row)-1]):
+                    if valid_avgwv_this_row[ind + 1] - valid_avgwv_this_row[ind] > 80:
+                        better_avgwv_this_row.append(wv)
+                abc.set_xticks(better_avgwv_this_row)
 
         if self.plotscale == 0:
             abc.set_xscale('log')
@@ -2130,7 +2144,11 @@ class ChiSquared():
             if self.xticker == 1:
                 abc.set_xticks([int(i) for i in np.arange(200,max(valid_avgwv_this_row),200)])
             elif self.xticker == 0:
-                abc.set_xticks(valid_avgwv_this_row)
+                better_avgwv_this_row = []
+                for ind, wv in enumerate(valid_avgwv_this_row[0:len(valid_avgwv_this_row)-1]):
+                    if valid_avgwv_this_row[ind + 1] - valid_avgwv_this_row[ind] > 20:
+                        better_avgwv_this_row.append(wv)
+                abc.set_xticks(better_avgwv_this_row)
             abc.get_xaxis().set_major_formatter(matplotlib.ticker.ScalarFormatter())
 
         if self.saveplots == 1:
