@@ -1512,13 +1512,14 @@ class ChiSquared():
                 otherstup = (Z1,age1,E_bv1,Z2,age2,M2,E_bv2,valid_filters_this_row,ul_filters_this_row,curr_row)              
                 try:
                     M1lowererror = M1 - opt.root_scalar(self.chisqfunc2error, args=(2,otherstup,),method="brentq",bracket=[self.Mbound1lo,M1]).root
-                    Mlowernotes = "\n"
+                    M1lowernotes = "\n"
                 except:
                     M1lowererror = "N/A"
                     if self.chisqfunc2error(M1,2,otherstup,) != self.chisqfunc2error(self.Mbound1lo,2,otherstup,) != self.chisqfunc2error(self.Mbound1hi,2,otherstup,):
                         M1lowernotes = "cannot go low enough\nto change chi^2 by 9.28"
                     elif self.chisqfunc2error(M1,2,otherstup,) == self.chisqfunc2error(self.Mbound1lo,2,otherstup,):
                         M1lowernotes = "sitting at lower bound\n"
+                        print("INHERE2")
                 try:
                     M1uppererror = opt.root_scalar(self.chisqfunc2error, args=(2,otherstup,),method="brentq",bracket=[M1,self.Mbound1hi]).root - M1
                     M1uppernotes = "\n"
@@ -1631,7 +1632,7 @@ class ChiSquared():
                         ebv2lowernotes = "sitting at lower bound\n"
                 try:
                     E_bv2uppererror = opt.root_scalar(self.chisqfunc2error, args=(7,otherstup,),method="brentq",bracket=[E_bv2,self.ebvbound2hi]).root - E_bv2
-                    ebv2lowernotes = "\n"
+                    ebv2uppernotes = "\n"
                 except:
                     E_bv2uppererror = "N/A"
                     if self.chisqfunc2error(E_bv2,7,otherstup,) != self.chisqfunc2error(self.ebvbound2lo,7,otherstup,) != self.chisqfunc2error(self.ebvbound2hi,7,otherstup,):
