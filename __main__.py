@@ -1088,7 +1088,6 @@ class ChiSquared():
             filtercoordlist = [0,1,2,3,4,5,6,7,8,9,10,11]
 
             self.da = xr.DataArray(filleddata,coords=[("Z",zcoordlist),("Age",agecoordlist),("Filter",filtercoordlist)])
-            print(self.da)
 
     def interpolate(self,Z,age,valid_filters_this_row):
         interpolist = []
@@ -1471,7 +1470,7 @@ class ChiSquared():
                     Z1lowernotes = "\n"
                 except:
                     Z1lowererror = "N/A"
-                    if self.chisqfunc2error(Z1,0,otherstup,) != self.chisqfunc2error(self.Zbound1lo,0,otherstup,) != self.chisqfunc2error(self.Zbound1hi,0,otherstup,):
+                    if self.chisqfunc2error(Z1,0,otherstup,) != self.chisqfunc2error(self.Zbound1lo,0,otherstup,):
                         Z1lowernotes = "cannot go low enough to\nchange chi^2 by 9.28"
                     elif self.chisqfunc2error(Z1,0,otherstup,) == self.chisqfunc2error(self.Zbound1lo,0,otherstup,):
                         Z1lowernotes = "sitting at lower bound\n"
@@ -1480,7 +1479,7 @@ class ChiSquared():
                     Z1uppernotes = "\n"
                 except:
                     Z1uppererror = "N/A"
-                    if self.chisqfunc2error(Z1,0,otherstup,) != self.chisqfunc2error(self.Zbound1lo,0,otherstup,) != self.chisqfunc2error(self.Zbound1hi,0,otherstup,):
+                    if self.chisqfunc2error(Z1,0,otherstup,) != self.chisqfunc2error(self.Zbound1hi,0,otherstup,):
                         Z1uppernotes = "cannot go high enough to\nchange chi^2 by 9.28"
                     elif self.chisqfunc2error(Z1,0,otherstup,) == self.chisqfunc2error(self.Zbound1hi,0,otherstup,):
                         Z1uppernotes = "sitting at upper bound\n"
@@ -1493,7 +1492,7 @@ class ChiSquared():
                     age1lowernotes = "\n"
                 except:
                     age1lowererror = "N/A"
-                    if self.chisqfunc2error(age1,1,otherstup,) != self.chisqfunc2error(self.agebound1lo,1,otherstup,) != self.chisqfunc2error(self.agebound1hi,1,otherstup,):
+                    if self.chisqfunc2error(age1,1,otherstup,) != self.chisqfunc2error(self.agebound1lo,1,otherstup,):
                         age1lowernotes = "cannot go low enough to\nchange chi^2 by 9.28"
                     elif self.chisqfunc2error(age1,1,otherstup,) == self.chisqfunc2error(self.agebound1lo,1,otherstup,):
                         age1lowernotes = "sitting at lower bound\n"
@@ -1502,7 +1501,7 @@ class ChiSquared():
                     age1uppernotes = "\n"
                 except:
                     age1uppererror = "N/A"
-                    if self.chisqfunc2error(age1,1,otherstup,) != self.chisqfunc2error(self.agebound1lo,1,otherstup,) != self.chisqfunc2error(self.agebound1hi,1,otherstup,):
+                    if self.chisqfunc2error(age1,1,otherstup,) != self.chisqfunc2error(self.agebound1hi,1,otherstup,):
                         age1uppernotes = "cannot go high enough to\nchange chi^2 by 9.28"
                     elif self.chisqfunc2error(age1,1,otherstup,) == self.chisqfunc2error(self.agebound1hi,1,otherstup,):
                         age1uppernotes = "sitting at upper bound\n"
@@ -1515,17 +1514,16 @@ class ChiSquared():
                     M1lowernotes = "\n"
                 except:
                     M1lowererror = "N/A"
-                    if self.chisqfunc2error(M1,2,otherstup,) != self.chisqfunc2error(self.Mbound1lo,2,otherstup,) != self.chisqfunc2error(self.Mbound1hi,2,otherstup,):
+                    if self.chisqfunc2error(M1,2,otherstup,) != self.chisqfunc2error(self.Mbound1lo,2,otherstup,):
                         M1lowernotes = "cannot go low enough\nto change chi^2 by 9.28"
                     elif self.chisqfunc2error(M1,2,otherstup,) == self.chisqfunc2error(self.Mbound1lo,2,otherstup,):
                         M1lowernotes = "sitting at lower bound\n"
-                        print("INHERE2")
                 try:
                     M1uppererror = opt.root_scalar(self.chisqfunc2error, args=(2,otherstup,),method="brentq",bracket=[M1,self.Mbound1hi]).root - M1
                     M1uppernotes = "\n"
                 except:
                     M1uppererror = "N/A"
-                    if self.chisqfunc2error(M1,2,otherstup,) != self.chisqfunc2error(self.Mbound1lo,2,otherstup,) != self.chisqfunc2error(self.Mbound1hi,2,otherstup,):
+                    if self.chisqfunc2error(M1,2,otherstup,) != self.chisqfunc2error(self.Mbound1hi,2,otherstup,):
                         M1uppernotes = "cannot go high enough\nto change chi^2 by 9.28"
                     elif self.chisqfunc2error(M1,2,otherstup,) == self.chisqfunc2error(self.Mbound1hi,2,otherstup,):
                         M1uppernotes = "sitting at upper bound\n"
@@ -1538,7 +1536,7 @@ class ChiSquared():
                     ebv1lowernotes = "\n"
                 except:
                     E_bv1lowererror = "N/A"
-                    if self.chisqfunc2error(E_bv1,3,otherstup,) != self.chisqfunc2error(self.ebvbound1lo,3,otherstup,) != self.chisqfunc2error(self.ebvbound1hi,3,otherstup,):
+                    if self.chisqfunc2error(E_bv1,3,otherstup,) != self.chisqfunc2error(self.ebvbound1lo,3,otherstup,):
                         ebv1lowernotes = "cannot go low enough to\nchange chi^2 by 9.28"
                     elif self.chisqfunc2error(E_bv1,3,otherstup,) == self.chisqfunc2error(self.ebvbound1lo,3,otherstup,):
                         ebv1lowernotes = "sitting at lower bound\n"
@@ -1547,7 +1545,7 @@ class ChiSquared():
                     ebv1uppernotes = "\n"
                 except:
                     E_bv1uppererror = "N/A"
-                    if self.chisqfunc2error(E_bv1,3,otherstup,) != self.chisqfunc2error(self.ebvbound1lo,3,otherstup,) != self.chisqfunc2error(self.ebvbound1hi,3,otherstup,):
+                    if self.chisqfunc2error(E_bv1,3,otherstup,) != self.chisqfunc2error(self.ebvbound1hi,3,otherstup,):
                         ebv1uppernotes = "cannot go high enough to\nchange chi^2 by 9.28"
                     elif self.chisqfunc2error(E_bv1,3,otherstup,) == self.chisqfunc2error(self.ebvbound1hi,3,otherstup,):
                         ebv1uppernotes = "sitting at upper bound\n"
@@ -1560,7 +1558,7 @@ class ChiSquared():
                     Z2lowernotes = "\n"
                 except:
                     Z2lowererror = "N/A"
-                    if self.chisqfunc2error(Z2,4,otherstup,) != self.chisqfunc2error(self.Zbound2lo,4,otherstup,) != self.chisqfunc2error(self.Zbound2hi,4,otherstup,):
+                    if self.chisqfunc2error(Z2,4,otherstup,) != self.chisqfunc2error(self.Zbound2lo,4,otherstup,):
                         Z2lowernotes = "cannot go low enough to\nchange chi^2 by 9.28"
                     elif self.chisqfunc2error(Z2,4,otherstup,) == self.chisqfunc2error(self.Zbound2lo,4,otherstup,):
                         Z2lowernotes = "sitting at lower bound\n"
@@ -1569,7 +1567,7 @@ class ChiSquared():
                     Z2uppernotes = "\n"
                 except:
                     Z2uppererror = "N/A"
-                    if self.chisqfunc2error(Z2,4,otherstup,) != self.chisqfunc2error(self.Zbound2lo,4,otherstup,) != self.chisqfunc2error(self.Zbound2hi,4,otherstup,):
+                    if self.chisqfunc2error(Z2,4,otherstup,) != self.chisqfunc2error(self.Zbound2hi,4,otherstup,):
                         Z2uppernotes = "cannot go high enough to\nchange chi^2 by 9.28"
                     elif self.chisqfunc2error(Z2,4,otherstup,) == self.chisqfunc2error(self.Zbound2hi,4,otherstup,):
                         Z2uppernotes = "sitting at upper bound\n"
@@ -1582,7 +1580,7 @@ class ChiSquared():
                     age2lowernotes = "\n"
                 except:
                     age2lowererror = "N/A"
-                    if self.chisqfunc2error(age2,5,otherstup,) != self.chisqfunc2error(self.agebound2lo,5,otherstup,) != self.chisqfunc2error(self.agebound2hi,5,otherstup,):
+                    if self.chisqfunc2error(age2,5,otherstup,) != self.chisqfunc2error(self.agebound2lo,5,otherstup,):
                         age2lowernotes = "cannot go low enough to\nchange chi^2 by 9.28"
                     elif self.chisqfunc2error(age2,5,otherstup,) == self.chisqfunc2error(self.agebound2lo,5,otherstup,):
                         age2lowernotes = "sitting at lower bound\n"
@@ -1591,7 +1589,7 @@ class ChiSquared():
                     age2uppernotes = "\n"
                 except:
                     age2uppererror = "N/A"
-                    if self.chisqfunc2error(age2,5,otherstup,) != self.chisqfunc2error(self.agebound2lo,5,otherstup,) != self.chisqfunc2error(self.agebound2hi,5,otherstup,):
+                    if self.chisqfunc2error(age2,5,otherstup,) != self.chisqfunc2error(self.agebound2hi,5,otherstup,):
                         age2uppernotes = "cannot go high enough to\nchange chi^2 by 9.28"
                     elif self.chisqfunc2error(age2,5,otherstup,) == self.chisqfunc2error(self.agebound2hi,5,otherstup,):
                         age2uppernotes = "sitting at upper bound\n"
@@ -1604,7 +1602,7 @@ class ChiSquared():
                     M2lowernotes = "\n"
                 except:
                     M2lowererror = "N/A"
-                    if self.chisqfunc2error(M2,6,otherstup,) != self.chisqfunc2error(self.Mbound2lo,6,otherstup,) != self.chisqfunc2error(self.Mbound2hi,6,otherstup,):
+                    if self.chisqfunc2error(M2,6,otherstup,) != self.chisqfunc2error(self.Mbound2lo,6,otherstup,):
                         M2lowernotes = "cannot go low enough to\nchange chi^2 by 9.28"
                     elif self.chisqfunc2error(M2,6,otherstup,) == self.chisqfunc2error(self.Mbound2lo,6,otherstup,):
                         M2lowernotes = "sitting at lower bound\n"
@@ -1613,7 +1611,7 @@ class ChiSquared():
                     M2uppernotes = "\n"
                 except:
                     M2uppererror = "N/A"
-                    if self.chisqfunc2error(M2,6,otherstup,) != self.chisqfunc2error(self.Mbound2lo,6,otherstup,) != self.chisqfunc2error(self.Mbound2hi,6,otherstup,):
+                    if self.chisqfunc2error(M2,6,otherstup,) != self.chisqfunc2error(self.Mbound2hi,6,otherstup,):
                         M2uppernotes = "cannot go high enough to\nchange chi^2 by 9.28"
                     elif self.chisqfunc2error(M2,6,otherstup,) == self.chisqfunc2error(self.Mbound2hi,6,otherstup,):
                         M2uppernotes = "sitting at upper bound\n"
@@ -1626,7 +1624,7 @@ class ChiSquared():
                     ebv2lowernotes = "\n"
                 except:
                     E_bv2lowererror = "N/A"
-                    if self.chisqfunc2error(E_bv2,7,otherstup,) != self.chisqfunc2error(self.ebvbound2lo,7,otherstup,) != self.chisqfunc2error(self.ebvbound2hi,7,otherstup,):
+                    if self.chisqfunc2error(E_bv2,7,otherstup,) != self.chisqfunc2error(self.ebvbound2lo,7,otherstup,):
                         ebv2lowernotes = "cannot go low enough to\nchange chi^2 by 9.28"
                     elif self.chisqfunc2error(E_bv2,7,otherstup,) == self.chisqfunc2error(self.ebvbound2lo,7,otherstup,):
                         ebv2lowernotes = "sitting at lower bound\n"
@@ -1635,7 +1633,7 @@ class ChiSquared():
                     ebv2uppernotes = "\n"
                 except:
                     E_bv2uppererror = "N/A"
-                    if self.chisqfunc2error(E_bv2,7,otherstup,) != self.chisqfunc2error(self.ebvbound2lo,7,otherstup,) != self.chisqfunc2error(self.ebvbound2hi,7,otherstup,):
+                    if self.chisqfunc2error(E_bv2,7,otherstup,) != self.chisqfunc2error(self.ebvbound2hi,7,otherstup,):
                         ebv2uppernotes = "cannot go high enough to\nchange chi^2 by 9.28"
                     elif self.chisqfunc2error(E_bv2,7,otherstup,) == self.chisqfunc2error(self.ebvbound2hi,7,otherstup,):
                         ebv2uppernotes = "sitting at upper bound\n"
