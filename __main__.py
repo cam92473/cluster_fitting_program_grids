@@ -145,11 +145,13 @@ class ChiSquared():
                                     self.switch = True
                                     if checked3.get() == 0:
                                         self.rows = [i-2 for i in introwlist]
+                                        print("NORMAL ROWS \n",self.rows)
                                         self.rownumberset = user_rownumber.get()
                                     elif checked3.get() == 1:
                                         guesssids = self.inputguesses['Source_ID'].to_list()
-                                        self.measuredata = self.measuredata[self.measuredata['Source_ID'].isin(guesssids)]
-                                        self.rows = list(self.measuredata.head().index)
+                                        guesssidsstr = [str(i) for i in guesssids]
+                                        self.measuredata = self.measuredata[self.measuredata['Source_ID'].isin(guesssidsstr)]
+                                        self.rows = self.measuredata.index.to_list()
 
                                     self.dispresults = checker1.get()
                                     self.fluxresults = checker2.get()
