@@ -1442,7 +1442,7 @@ class ChiSquared():
                     E_bvuppererror = "N/A"
                     if self.chisqfuncerror(E_bv,3,otherstup,) != self.chisqfuncerror(self.ebvbound1hi,3,otherstup,):
                         ebvuppernotes = "cannot go high enough to\nchange chi^2 by 4.17"
-                    elif self.chisqfuncerror(E_bv,3,otherstup,) == self.chisqfuncerror(self.ebvbound1lhi,3,otherstup,):
+                    elif self.chisqfuncerror(E_bv,3,otherstup,) == self.chisqfuncerror(self.ebvbound1hi,3,otherstup,):
                         ebvuppernotes = "sitting at upper bound\n"
                 errorsthisrow.append([E_bvlowererror,E_bvuppererror])
                 errornotesthisrow.append([ebvlowernotes,ebvuppernotes])
