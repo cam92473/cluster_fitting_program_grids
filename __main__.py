@@ -1,3 +1,4 @@
+from operator import mod
 import numpy
 import scipy.optimize as opt
 import pandas as pd
@@ -23,12 +24,16 @@ class ChiSquared():
         self.sliderstring2set = "average filter wavelength"
         self.ulmethset = "Standard"
         self.model_chosen_set = "UVIT_HST"
-        self.starlist1 = ["0","0.75","0.3","0.1","N/A","N/A","N/A","N/A"]
-        self.starlist2 = ["-0.5",".8477","0.6","0.2","-1.5",".9477","0.8","0.1"]
-        self.stardict1 = [["-2.5","0.3"],[".66",".90"],["0",".75"],["0","1"],["N/A","N/A"],["N/A","N/A"],["N/A","N/A"],["N/A","N/A"]]
-        self.stardict2 = [["-2.1","-0.1"],[".66","1.01"],["0","1.4"],["0","2"],["-2.1","-0.1"],[".66","1.01"],["0","1.4"],["0","2"]]
-        self.stardict3 = [["-2.1","-0.1"],[".66",".90"],["0",".75"],["0","1"],["N/A","N/A"],["N/A","N/A"],["N/A","N/A"],["N/A","N/A"]]
-        self.stardict4 = [["-2.1","-0.1"],[".66","1.01"],["0","1.4"],["0","2"],["-2.1","-0.1"],[".66","1.01"],["0","1.4"],["0","2"]]
+        self.starlist1 = ["0","0.75","0.3","0.1","N/A","N/A","N/A","N/A","N/A","N/A","N/A"]
+        self.starlist2 = ["-0.5",".8477","0.6","0.2","-1.5",".9477","0.8","0.1","N/A","N/A","N/A"]
+        self.starlist3 = ["-1",".8477","0.6","0.1","-1","1.0","0.6","0.1","-1",".72","0.3"]
+        self.stardict1 = [["-2.5","0.3"],[".66",".90"],["0",".75"],["0","1"],["N/A","N/A"],["N/A","N/A"],["N/A","N/A"],["N/A","N/A"],["N/A","N/A"],["N/A","N/A"],["N/A","N/A"]]
+        self.stardict2 = [["-2.1","-0.1"],[".66","1.01"],["0","1.4"],["0","2"],["-2.1","-0.1"],[".66","1.01"],["0","1.4"],["0","2"],["N/A","N/A"],["N/A","N/A"],["N/A","N/A"]]
+        self.stardict3 = [["-2.1","-0.1"],[".8",".9"],["0","1"],["0","1"],["-2.1","-0.1"],[".9","1.13"],["0","1"],["0","1"],["-2.1","0.3"],[".66",".8"],["0",".7"]]
+        self.stardict4 = [["-2.1","-0.1"],[".66",".90"],["0",".75"],["0","1"],["N/A","N/A"],["N/A","N/A"],["N/A","N/A"],["N/A","N/A"],["N/A","N/A"],["N/A","N/A"],["N/A","N/A"]]
+        self.stardict5 = [["-2.1","-0.1"],[".66","1.01"],["0","1.4"],["0","2"],["-2.1","-0.1"],[".66","1.01"],["0","1.4"],["0","2"],["N/A","N/A"],["N/A","N/A"],["N/A","N/A"]]
+        self.stardict6 = [["-2.1","-0.1"],[".8",".9"],["0","1"],["0","1"],["-2.1","-0.1"],[".9","1.13"],["0","1"],["0","1"],["-2.1","0.3"],[".66",".8"],["0",".7"]]
+
         while True:
             self.intro_gui()
             self.extract_measured_flux()
@@ -50,7 +55,7 @@ class ChiSquared():
         ctypes.windll.shcore.SetProcessDpiAwareness(1)
         import tkinter as tk
         mwin = tk.Tk()
-        mwin.geometry("1030x800+520+100")
+        mwin.geometry("1030x900+520+50")
         mwin.title("Cluster Fitting")
         mwin.config(bg='alice blue')
         mwin.resizable(0,0)
@@ -145,7 +150,6 @@ class ChiSquared():
                                     self.switch = True
                                     if checked3.get() == 0:
                                         self.rows = [i-2 for i in introwlist]
-                                        print("NORMAL ROWS \n",self.rows)
                                         self.rownumberset = user_rownumber.get()
                                     elif checked3.get() == 1:
                                         guesssids = self.inputguesses['Source_ID'].to_list()
@@ -192,14 +196,15 @@ class ChiSquared():
                                     
                                     self.single_cluster = False
                                     self.double_cluster = False
+                                    self.triple_cluster = False
                                     self.chosenstar = starno_chosen.get()
-                                    if user_Zbound2lo.get() == user_agebound2lo.get() == user_Mbound2lo.get() == user_ebvbound2lo.get() == "N/A":
+                                    if self.chosenstar == "     1-cluster fit     ":
                                         self.single_cluster = True
                                         if checked3.get() == 0:
-                                            self.Zguess1 = [user_Zguess1.get() for i in range(len(self.rows))]
-                                            self.ageguess1 = [user_ageguess1.get() for i in range(len(self.rows))]
-                                            self.Mguess1 = [user_Mguess1.get() for i in range(len(self.rows))]
-                                            self.ebvguess1 = [user_ebvguess1.get() for i in range(len(self.rows))]
+                                            self.Zguess1 = [float(user_Zguess1.get()) for i in range(len(self.rows))]
+                                            self.ageguess1 = [float(user_ageguess1.get()) for i in range(len(self.rows))]
+                                            self.Mguess1 = [float(user_Mguess1.get()) for i in range(len(self.rows))]
+                                            self.ebvguess1 = [float(user_ebvguess1.get()) for i in range(len(self.rows))]
                                             self.starlist1[0]=user_Zguess1.get()
                                             self.starlist1[1]=user_ageguess1.get()
                                             self.starlist1[2]=user_Mguess1.get()
@@ -218,6 +223,7 @@ class ChiSquared():
                                         self.Mbound1hi = float(user_Mbound1hi.get())
                                         self.ebvbound1lo = float(user_ebvbound1lo.get())
                                         self.ebvbound1hi = float(user_ebvbound1hi.get())
+                                        
                                         if self.model_chosen == "UVIT_HST":
                                             self.stardict1[0][0] = user_Zbound1lo.get()
                                             self.stardict1[0][1] = user_Zbound1hi.get()
@@ -228,21 +234,22 @@ class ChiSquared():
                                             self.stardict1[3][0] = user_ebvbound1lo.get()
                                             self.stardict1[3][1] = user_ebvbound1hi.get()
                                         elif self.model_chosen == "UVIT_SDSS_Spitzer":
-                                            self.stardict3[0][0] = user_Zbound1lo.get()
-                                            self.stardict3[0][1] = user_Zbound1hi.get()
-                                            self.stardict3[1][0] = user_agebound1lo.get()
-                                            self.stardict3[1][1] = user_agebound1hi.get()
-                                            self.stardict3[2][0] = user_Mbound1lo.get()
-                                            self.stardict3[2][1] = user_Mbound1hi.get()
-                                            self.stardict3[3][0] = user_ebvbound1lo.get()
-                                            self.stardict3[3][1] = user_ebvbound1hi.get()
+                                            self.stardict4[0][0] = user_Zbound1lo.get()
+                                            self.stardict4[0][1] = user_Zbound1hi.get()
+                                            self.stardict4[1][0] = user_agebound1lo.get()
+                                            self.stardict4[1][1] = user_agebound1hi.get()
+                                            self.stardict4[2][0] = user_Mbound1lo.get()
+                                            self.stardict4[2][1] = user_Mbound1hi.get()
+                                            self.stardict4[3][0] = user_ebvbound1lo.get()
+                                            self.stardict4[3][1] = user_ebvbound1hi.get()
 
-                                    else:
+                                    elif self.chosenstar == "     2-cluster fit     ":
+                                        self.double_cluster = True
                                         if checked3.get() == 0:
-                                            self.Zguess1 = [user_Zguess1.get() for i in range(len(self.rows))]
-                                            self.ageguess1 = [user_ageguess1.get() for i in range(len(self.rows))]
-                                            self.Mguess1 = [user_Mguess1.get() for i in range(len(self.rows))]
-                                            self.ebvguess1 = [user_ebvguess1.get() for i in range(len(self.rows))]
+                                            self.Zguess1 = [float(user_Zguess1.get()) for i in range(len(self.rows))]
+                                            self.ageguess1 = [float(user_ageguess1.get()) for i in range(len(self.rows))]
+                                            self.Mguess1 = [float(user_Mguess1.get()) for i in range(len(self.rows))]
+                                            self.ebvguess1 = [float(user_ebvguess1.get()) for i in range(len(self.rows))]
                                             self.Zguess2 = [float(user_Zguess2.get()) for i in range(len(self.rows))]
                                             self.ageguess2 = [float(user_ageguess2.get()) for i in range(len(self.rows))]
                                             self.Mguess2 = [float(user_Mguess2.get()) for i in range(len(self.rows))]
@@ -265,7 +272,6 @@ class ChiSquared():
                                             self.Mguess2 = self.inputguesses['log(M_cool)/10']
                                             self.ebvguess2 = self.inputguesses['E(B-V)_cool']
 
-                                        self.double_cluster = True
                                         self.Zbound1lo = float(user_Zbound1lo.get())
                                         self.Zbound1hi = float(user_Zbound1hi.get())
                                         self.agebound1lo = float(user_agebound1lo.get())
@@ -300,22 +306,127 @@ class ChiSquared():
                                             self.stardict2[7][0] = user_ebvbound2lo.get()
                                             self.stardict2[7][1] = user_ebvbound2hi.get()
                                         elif self.model_chosen == "UVIT_SDSS_Spitzer":
-                                            self.stardict4[0][0] = user_Zbound1lo.get()
-                                            self.stardict4[0][1] = user_Zbound1hi.get()
-                                            self.stardict4[1][0] = user_agebound1lo.get()
-                                            self.stardict4[1][1] = user_agebound1hi.get()
-                                            self.stardict4[2][0] = user_Mbound1lo.get()
-                                            self.stardict4[2][1] = user_Mbound1hi.get()
-                                            self.stardict4[3][0] = user_ebvbound1lo.get()
-                                            self.stardict4[3][1] = user_ebvbound1hi.get()
-                                            self.stardict4[4][0] = user_Zbound2lo.get()
-                                            self.stardict4[4][1] = user_Zbound2hi.get()
-                                            self.stardict4[5][0] = user_agebound2lo.get()
-                                            self.stardict4[5][1] = user_agebound2hi.get()
-                                            self.stardict4[6][0] = user_Mbound2lo.get()
-                                            self.stardict4[6][1] = user_Mbound2hi.get()
-                                            self.stardict4[7][0] = user_ebvbound2lo.get()
-                                            self.stardict4[7][1] = user_ebvbound2hi.get()
+                                            self.stardict5[0][0] = user_Zbound1lo.get()
+                                            self.stardict5[0][1] = user_Zbound1hi.get()
+                                            self.stardict5[1][0] = user_agebound1lo.get()
+                                            self.stardict5[1][1] = user_agebound1hi.get()
+                                            self.stardict5[2][0] = user_Mbound1lo.get()
+                                            self.stardict5[2][1] = user_Mbound1hi.get()
+                                            self.stardict5[3][0] = user_ebvbound1lo.get()
+                                            self.stardict5[3][1] = user_ebvbound1hi.get()
+                                            self.stardict5[4][0] = user_Zbound2lo.get()
+                                            self.stardict5[4][1] = user_Zbound2hi.get()
+                                            self.stardict5[5][0] = user_agebound2lo.get()
+                                            self.stardict5[5][1] = user_agebound2hi.get()
+                                            self.stardict5[6][0] = user_Mbound2lo.get()
+                                            self.stardict5[6][1] = user_Mbound2hi.get()
+                                            self.stardict5[7][0] = user_ebvbound2lo.get()
+                                            self.stardict5[7][1] = user_ebvbound2hi.get()
+                                        
+                                    elif self.chosenstar == "     3-cluster fit     ":
+                                        self.triple_cluster = True
+                                        if checked3.get() == 0:
+                                            self.Zguess1 = [float(user_Zguess1.get()) for i in range(len(self.rows))]
+                                            self.ageguess1 = [float(user_ageguess1.get()) for i in range(len(self.rows))]
+                                            self.Mguess1 = [float(user_Mguess1.get()) for i in range(len(self.rows))]
+                                            self.ebvguess1 = [float(user_ebvguess1.get()) for i in range(len(self.rows))]
+                                            self.Zguess2 = [float(user_Zguess2.get()) for i in range(len(self.rows))]
+                                            self.ageguess2 = [float(user_ageguess2.get()) for i in range(len(self.rows))]
+                                            self.Mguess2 = [float(user_Mguess2.get()) for i in range(len(self.rows))]
+                                            self.ebvguess2 = [float(user_ebvguess2.get()) for i in range(len(self.rows))]
+                                            self.Zguess3 = [float(user_Zguess3.get()) for i in range(len(self.rows))]
+                                            self.ageguess3 = [float(user_ageguess3.get()) for i in range(len(self.rows))]
+                                            self.Mguess3 = [float(user_Mguess3.get()) for i in range(len(self.rows))]
+                                            self.starlist3[0]=user_Zguess1.get()
+                                            self.starlist3[1]=user_ageguess1.get()
+                                            self.starlist3[2]=user_Mguess1.get()
+                                            self.starlist3[3]=user_ebvguess1.get()
+                                            self.starlist3[4]=user_Zguess2.get()
+                                            self.starlist3[5]=user_ageguess2.get()
+                                            self.starlist3[6]=user_Mguess2.get()
+                                            self.starlist3[7]=user_ebvguess2.get()
+                                        elif checked3.get() == 1:
+                                            self.Zguess1 = self.inputguesses['log(Z_old_1)']
+                                            self.ageguess1 = self.inputguesses['log(age_old_1)/10']
+                                            self.Mguess1 = self.inputguesses['log(M_old_1)/10']
+                                            self.ebvguess1 = self.inputguesses['E(B-V)_1']
+                                            self.Zguess2 = self.inputguesses['log(Z_old_2)']
+                                            self.ageguess2 = self.inputguesses['log(age_old_2)/10']
+                                            self.Mguess2 = self.inputguesses['log(M_old_2)/10']
+                                            self.ebvguess2 = self.inputguesses['E(B-V)_new']
+                                            self.Zguess3 = self.inputguesses['log(Z_new)']
+                                            self.ageguess3 = self.inputguesses['log(age_new)/10']
+                                            self.Mguess3 = self.inputguesses['log(M_new)/10']
+
+                                        self.Zbound1lo = float(user_Zbound1lo.get())
+                                        self.Zbound1hi = float(user_Zbound1hi.get())
+                                        self.agebound1lo = float(user_agebound1lo.get())
+                                        self.agebound1hi = float(user_agebound1hi.get())
+                                        self.Mbound1lo = float(user_Mbound1lo.get())
+                                        self.Mbound1hi = float(user_Mbound1hi.get())
+                                        self.ebvbound1lo = float(user_ebvbound1lo.get())
+                                        self.ebvbound1hi = float(user_ebvbound1hi.get())
+                                        self.Zbound2lo = float(user_Zbound2lo.get())
+                                        self.Zbound2hi = float(user_Zbound2hi.get())
+                                        self.agebound2lo = float(user_agebound2lo.get())
+                                        self.agebound2hi = float(user_agebound2hi.get())
+                                        self.Mbound2lo = float(user_Mbound2lo.get())
+                                        self.Mbound2hi = float(user_Mbound2hi.get())
+                                        self.ebvbound2lo = float(user_ebvbound2lo.get())
+                                        self.ebvbound2hi = float(user_ebvbound2hi.get())
+                                        self.Zbound3lo = float(user_Zbound3lo.get())
+                                        self.Zbound3hi = float(user_Zbound3hi.get())
+                                        self.agebound3lo = float(user_agebound3lo.get())
+                                        self.agebound3hi = float(user_agebound3hi.get())
+                                        self.Mbound3lo = float(user_Mbound3lo.get())
+                                        self.Mbound3hi = float(user_Mbound3hi.get())
+                                        if self.model_chosen == "UVIT_HST":
+                                            self.stardict3[0][0] = user_Zbound1lo.get()
+                                            self.stardict3[0][1] = user_Zbound1hi.get()
+                                            self.stardict3[1][0] = user_agebound1lo.get()
+                                            self.stardict3[1][1] = user_agebound1hi.get()
+                                            self.stardict3[2][0] = user_Mbound1lo.get()
+                                            self.stardict3[2][1] = user_Mbound1hi.get()
+                                            self.stardict3[3][0] = user_ebvbound1lo.get()
+                                            self.stardict3[3][1] = user_ebvbound1hi.get()
+                                            self.stardict3[4][0] = user_Zbound2lo.get()
+                                            self.stardict3[4][1] = user_Zbound2hi.get()
+                                            self.stardict3[5][0] = user_agebound2lo.get()
+                                            self.stardict3[5][1] = user_agebound2hi.get()
+                                            self.stardict3[6][0] = user_Mbound2lo.get()
+                                            self.stardict3[6][1] = user_Mbound2hi.get()
+                                            self.stardict3[7][0] = user_ebvbound2lo.get()
+                                            self.stardict3[7][1] = user_ebvbound2hi.get()
+                                            self.stardict3[8][0] = user_Zbound3lo.get()
+                                            self.stardict3[8][1] = user_Zbound3hi.get()
+                                            self.stardict3[9][0] = user_agebound3lo.get()
+                                            self.stardict3[9][1] = user_agebound3hi.get()
+                                            self.stardict3[10][0] = user_Mbound3lo.get()
+                                            self.stardict3[10][1] = user_Mbound3hi.get()
+                                        elif self.model_chosen == "UVIT_SDSS_Spitzer":
+                                            self.stardict6[0][0] = user_Zbound1lo.get()
+                                            self.stardict6[0][1] = user_Zbound1hi.get()
+                                            self.stardict6[1][0] = user_agebound1lo.get()
+                                            self.stardict6[1][1] = user_agebound1hi.get()
+                                            self.stardict6[2][0] = user_Mbound1lo.get()
+                                            self.stardict6[2][1] = user_Mbound1hi.get()
+                                            self.stardict6[3][0] = user_ebvbound1lo.get()
+                                            self.stardict6[3][1] = user_ebvbound1hi.get()
+                                            self.stardict6[4][0] = user_Zbound2lo.get()
+                                            self.stardict6[4][1] = user_Zbound2hi.get()
+                                            self.stardict6[5][0] = user_agebound2lo.get()
+                                            self.stardict6[5][1] = user_agebound2hi.get()
+                                            self.stardict6[6][0] = user_Mbound2lo.get()
+                                            self.stardict6[6][1] = user_Mbound2hi.get()
+                                            self.stardict6[7][0] = user_ebvbound2lo.get()
+                                            self.stardict6[7][1] = user_ebvbound2hi.get()
+                                            self.stardict6[8][0] = user_Zbound3lo.get()
+                                            self.stardict6[8][1] = user_Zbound3hi.get()
+                                            self.stardict6[9][0] = user_agebound3lo.get()
+                                            self.stardict6[9][1] = user_agebound3hi.get()
+                                            self.stardict6[10][0] = user_Mbound3lo.get()
+                                            self.stardict6[10][1] = user_Mbound3hi.get()
+
                                 except:
                                         tk.messagebox.showinfo('Error', "One or more parameters seem to have been entered incorrectly. Please reenter the values and try again.")
                                         return None
@@ -361,45 +472,70 @@ class ChiSquared():
         canvasline.place(x=-20,y=550)
         canvasline2 = canvasline = tk.Canvas(mwin,bd=3,relief=tk.GROOVE,width=680,height=1060,bg='lavender')
         canvasline2.place(x=660,y=150)
-        user_Zguess1 = tk.DoubleVar()
-        user_ageguess1 = tk.DoubleVar()
-        user_Mguess1 = tk.DoubleVar()
-        user_ebvguess1 = tk.DoubleVar()
-        ystar1labels = 630
-        ystar1entries = 660
-        ycheckbutton = 580
-        labelZ1 = tk.Label(mwin,text="log(Z_hot)",bg="mint cream").place(x=50,y=ystar1labels)
-        entryZ1 = tk.Entry(mwin,textvariable=user_Zguess1,width=10)
-        entryZ1.place(x=50,y=ystar1entries)
-        labelage1 = tk.Label(mwin,text="log(age_hot)/10",bg="mint cream").place(x=155,y=ystar1labels)
-        entryage1 = tk.Entry(mwin,textvariable=user_ageguess1,width=10)
-        entryage1.place(x=170,y=ystar1entries)
-        labelM1 = tk.Label(mwin,text="log(M_hot)/10",bg="mint cream").place(x=285,y=ystar1labels)
-        entryM1 = tk.Entry(mwin,textvariable=user_Mguess1,width=10)
-        entryM1.place(x=290,y=ystar1entries)
-        labelebv1 = tk.Label(mwin,text="E(B-V)_hot",bg="mint cream").place(x=410,y=ystar1labels)
-        entryebv1 = tk.Entry(mwin,textvariable=user_ebvguess1,width=10)
-        entryebv1.place(x=410,y=ystar1entries)
 
-
-        ystar2labels = 710
-        ystar2entries = 740
+        user_Zguess1 = tk.StringVar()
+        user_ageguess1 = tk.StringVar()
+        user_Mguess1 = tk.StringVar()
+        user_ebvguess1 = tk.StringVar()
         user_Zguess2 = tk.StringVar()
         user_ageguess2 = tk.StringVar()
         user_Mguess2 = tk.StringVar()
         user_ebvguess2 = tk.StringVar()
-        labelZ2 = tk.Label(mwin,text="log(Z_cool)",bg="mint cream").place(x=50,y=ystar2labels)
+        user_Zguess3 = tk.StringVar()
+        user_ageguess3 = tk.StringVar()
+        user_Mguess3 = tk.StringVar()
+        ystar1labels = 630
+        ystar1entries = 660
+        ystar2labels = 710
+        ystar2entries = 740
+        ystar3labels = 790
+        ystar3entries = 820
+        ycheckbutton = 580
+
+        labelZ1 = tk.Label(mwin,text="log(Z_hot)",bg="mint cream")
+        labelZ1.place(x=50,y=ystar1labels)
+        entryZ1 = tk.Entry(mwin,textvariable=user_Zguess1,width=10)
+        entryZ1.place(x=50,y=ystar1entries)
+        labelage1 = tk.Label(mwin,text="log(age_hot)/10",bg="mint cream")
+        labelage1.place(x=155,y=ystar1labels)
+        entryage1 = tk.Entry(mwin,textvariable=user_ageguess1,width=10)
+        entryage1.place(x=170,y=ystar1entries)
+        labelM1 = tk.Label(mwin,text="log(M_hot)/10",bg="mint cream")
+        labelM1.place(x=285,y=ystar1labels)
+        entryM1 = tk.Entry(mwin,textvariable=user_Mguess1,width=10)
+        entryM1.place(x=290,y=ystar1entries)
+        labelebv1 = tk.Label(mwin,text="E(B-V)_hot",bg="mint cream")
+        labelebv1.place(x=410,y=ystar1labels)
+        entryebv1 = tk.Entry(mwin,textvariable=user_ebvguess1,width=10)
+        entryebv1.place(x=410,y=ystar1entries)
+        labelZ2 = tk.Label(mwin,text="log(Z_cool)",bg="mint cream")
+        labelZ2.place(x=50,y=ystar2labels)
         entryZ2 = tk.Entry(mwin,textvariable=user_Zguess2,width=10)
         entryZ2.place(x=50,y=ystar2entries)
-        labelage2 = tk.Label(mwin,text="log(age_cool)/10",bg="mint cream").place(x=155,y=ystar2labels)
+        labelage2 = tk.Label(mwin,text="log(age_cool)/10",bg="mint cream")
+        labelage2.place(x=155,y=ystar2labels)
         entryage2 = tk.Entry(mwin,textvariable=user_ageguess2,width=10)
         entryage2.place(x=170,y=ystar2entries)
-        labelM2 = tk.Label(mwin,text="log(M_cool)/10",bg="mint cream").place(x=285,y=ystar2labels)
+        labelM2 = tk.Label(mwin,text="log(M_cool)/10",bg="mint cream")
+        labelM2.place(x=285,y=ystar2labels)
         entryM2 = tk.Entry(mwin,textvariable=user_Mguess2,width=10)
         entryM2.place(x=290,y=ystar2entries)
-        labelebv2 = tk.Label(mwin,text="E(B-V)_cool",bg="mint cream").place(x=410,y=ystar2labels)
+        labelebv2 = tk.Label(mwin,text="E(B-V)_cool",bg="mint cream")
+        labelebv2.place(x=410,y=ystar2labels)
         entryebv2 = tk.Entry(mwin,textvariable=user_ebvguess2,width=10)
         entryebv2.place(x=410,y=ystar2entries)
+        labelZ3 = tk.Label(mwin,text="log(Z_cool)",bg="mint cream")
+        labelZ3.place(x=50,y=ystar3labels)
+        entryZ3 = tk.Entry(mwin,textvariable=user_Zguess3,width=10)
+        entryZ3.place(x=50,y=ystar3entries)
+        labelage3 = tk.Label(mwin,text="log(age_cool)/10",bg="mint cream")
+        labelage3.place(x=155,y=ystar3labels)
+        entryage3 = tk.Entry(mwin,textvariable=user_ageguess3,width=10)
+        entryage3.place(x=170,y=ystar3entries)
+        labelM3 = tk.Label(mwin,text="log(M_cool)/10",bg="mint cream")
+        labelM3.place(x=285,y=ystar3labels)
+        entryM3 = tk.Entry(mwin,textvariable=user_Mguess3,width=10)
+        entryM3.place(x=290,y=ystar3entries)
         
         starno_chosen = tk.StringVar()
         checked=tk.IntVar()
@@ -410,42 +546,73 @@ class ChiSquared():
             entryage1['state'] = tk.NORMAL
             entryM1['state'] = tk.NORMAL
             entryebv1['state'] = tk.NORMAL
-            if howmany == "all":
+            if howmany == "2":
                 entryZ2['state'] = tk.NORMAL
                 entryage2['state'] = tk.NORMAL
                 entryM2['state'] = tk.NORMAL
                 entryebv2['state'] = tk.NORMAL
+            if howmany == "3":
+                entryZ2['state'] = tk.NORMAL
+                entryage2['state'] = tk.NORMAL
+                entryM2['state'] = tk.NORMAL
+                entryebv2['state'] = tk.NORMAL
+                entryZ3['state'] = tk.NORMAL
+                entryage3['state'] = tk.NORMAL
+                entryM3['state'] = tk.NORMAL
 
         def disable(howmany):
             entryZ1['state'] = tk.DISABLED
             entryage1['state'] = tk.DISABLED
             entryM1['state'] = tk.DISABLED
             entryebv1['state'] = tk.DISABLED
-            if howmany == "all":
+            if howmany == "2":
                 entryZ2['state'] = tk.DISABLED
                 entryage2['state'] = tk.DISABLED
                 entryM2['state'] = tk.DISABLED
                 entryebv2['state'] = tk.DISABLED
+            if howmany == "3":
+                entryZ2['state'] = tk.DISABLED
+                entryage2['state'] = tk.DISABLED
+                entryM2['state'] = tk.DISABLED
+                entryebv2['state'] = tk.DISABLED
+                entryZ3['state'] = tk.DISABLED
+                entryage3['state'] = tk.DISABLED
+                entryM3['state'] = tk.DISABLED
 
 
         def stuff_vals():
-            entrylist = [entryZ1,entryage1,entryM1,entryebv1,entryZ2,entryage2,entryM2,entryebv2]
+            entrylist = [entryZ1,entryage1,entryM1,entryebv1,entryZ2,entryage2,entryM2,entryebv2,entryZ3,entryage3,entryM3]
+            labellistlist = [[labelZ1,"log(Z)","log(Z_hot)","log(Z_old_1)"],[labelage1,"log(age)/10","log(age_hot)/10","log(age_old_1)/10"],[labelM1,"log(M)/10","log(M_hot)/10","log(M_old_1)/10"],[labelebv1,"E(B-V)","E(B-V)_hot","E(B-V)_old"],[labelZ2,"","log(Z_cool)","log(Z_old_2)"],[labelage2,"","log(age_cool)/10","log(age_old_2)/10"],[labelM2,"","log(M_cool)/10","log(M_old_2)/10"],[labelebv2,"","E(B-V)_cool","E(B-V)_new"],[labelZ3,"","","log(Z_new)"],[labelage3,"","","log(age_new)/10"],[labelM3,"","","log(M_new)/10"]]
             if starno_chosen.get() == "     1-cluster fit     ":
-                enable("all")
+                enable("3")
+                for labelquad in labellistlist:
+                    labelquad[0].config(text="{}".format(labelquad[1]))
                 for i,entry in enumerate(entrylist):
                     entry.delete(0,20)
                     entry.insert(0,"{}".format(self.starlist1[i]))
-                disable("all")
+                disable("3")
                 if checked.get() == 1:
-                    enable("some")
+                    enable("1")
             elif starno_chosen.get() == "     2-cluster fit     ":
-                enable("all")
+                enable("3")
+                for labelquad in labellistlist:
+                    labelquad[0].config(text="{}".format(labelquad[2]))
                 for i,entry in enumerate(entrylist):
                     entry.delete(0,20)
                     entry.insert(0,"{}".format(self.starlist2[i]))
-                disable("all")
+                disable("3")
                 if checked.get() == 1:
-                    enable("all")
+                    enable("2")
+            elif starno_chosen.get() == "     3-cluster fit     ":
+                enable("3")
+                for labelquad in labellistlist:
+                    labelquad[0].config(text="{}".format(labelquad[3]))
+                for i,entry in enumerate(entrylist):
+                    entry.delete(0,20)
+                    entry.insert(0,"{}".format(self.starlist3[i]))
+                disable("3")
+                if checked.get() == 1:
+                    enable("3")
         
         def openinfo():
             #info = tk.Toplevel()
@@ -581,31 +748,6 @@ class ChiSquared():
         user_Mbound1hi = tk.StringVar()
         user_ebvbound1lo = tk.StringVar()
         user_ebvbound1hi = tk.StringVar()
-        xstarbentrieslo = 685
-        xstarbentrieshi = 915
-        lwbound = tk.Label(mwin,text="Lower bound",font="Arial 10 underline",bg="lavender").place(x=xstarbentrieslo-7,y=280)
-        upbound = tk.Label(mwin,text="Upper bound",font = "Arial 10 underline",bg="lavender").place(x=xstarbentrieshi-7,y=280)
-        labelbZ1 = tk.Label(mwin,text="log(Z_hot)",bg="lavender").place(x=xstarbentrieslo+117,y=330)
-        entrybZ1lo = tk.Entry(mwin,textvariable=user_Zbound1lo,width=10)
-        entrybZ1lo.place(x=xstarbentrieslo,y=330)
-        entrybZ1hi = tk.Entry(mwin,textvariable=user_Zbound1hi,width=10)
-        entrybZ1hi.place(x=xstarbentrieshi,y=330)
-        labelbage1lo = tk.Label(mwin,text="log(age_hot)/10",bg="lavender").place(x=xstarbentrieslo+102,y=390)
-        entrybage1lo = tk.Entry(mwin,textvariable=user_agebound1lo,width=10)
-        entrybage1lo.place(x=xstarbentrieslo,y=390)
-        entrybage1hi = tk.Entry(mwin,textvariable=user_agebound1hi,width=10)
-        entrybage1hi.place(x=xstarbentrieshi,y=390)
-        labelbMlo = tk.Label(mwin,text="log(M_hot)/10",bg="lavender").place(x=xstarbentrieslo+108,y=450)
-        entrybM1lo = tk.Entry(mwin,textvariable=user_Mbound1lo,width=10)
-        entrybM1lo.place(x=xstarbentrieslo,y=450)
-        entrybM1hi = tk.Entry(mwin,textvariable=user_Mbound1hi,width=10)
-        entrybM1hi.place(x=xstarbentrieshi,y=450)
-        labelbebv1lo = tk.Label(mwin,text="E(B-V)_hot",bg="lavender").place(x=xstarbentrieslo+115,y=510)
-        entrybebv1lo = tk.Entry(mwin,textvariable=user_ebvbound1lo,width=10)
-        entrybebv1lo.place(x=xstarbentrieslo,y=510)
-        entrybebv1hi = tk.Entry(mwin,textvariable=user_ebvbound1hi,width=10)
-        entrybebv1hi.place(x=xstarbentrieshi,y=510)
-
         user_Zbound2lo = tk.StringVar()
         user_Zbound2hi = tk.StringVar()
         user_agebound2lo = tk.StringVar()
@@ -614,26 +756,82 @@ class ChiSquared():
         user_Mbound2hi = tk.StringVar()
         user_ebvbound2lo = tk.StringVar()
         user_ebvbound2hi = tk.StringVar()
-        labelbZ2lo = tk.Label(mwin,text="log(Z_cool)",bg="lavender").place(x=xstarbentrieslo+115,y=570)
+        user_Zbound3lo = tk.StringVar()
+        user_Zbound3hi = tk.StringVar()
+        user_agebound3lo = tk.StringVar()
+        user_agebound3hi = tk.StringVar()
+        user_Mbound3lo = tk.StringVar()
+        user_Mbound3hi = tk.StringVar()
+        xstarbentrieslo = 685
+        xstarbentrieshi = 915
+        lwbound = tk.Label(mwin,text="Lower bound",font="Arial 10 underline",bg="lavender").place(x=xstarbentrieslo-7,y=200)
+        upbound = tk.Label(mwin,text="Upper bound",font = "Arial 10 underline",bg="lavender").place(x=xstarbentrieshi-7,y=200)
+        labelbZ1 = tk.Label(mwin,text="",bg="lavender")
+        labelbZ1.place(x=xstarbentrieslo+100,y=250)
+        entrybZ1lo = tk.Entry(mwin,textvariable=user_Zbound1lo,width=10)
+        entrybZ1lo.place(x=xstarbentrieslo,y=250)
+        entrybZ1hi = tk.Entry(mwin,textvariable=user_Zbound1hi,width=10)
+        entrybZ1hi.place(x=xstarbentrieshi,y=250)
+        labelbage1 = tk.Label(mwin,text="",bg="lavender")
+        labelbage1.place(x=xstarbentrieslo+100,y=310)
+        entrybage1lo = tk.Entry(mwin,textvariable=user_agebound1lo,width=10)
+        entrybage1lo.place(x=xstarbentrieslo,y=310)
+        entrybage1hi = tk.Entry(mwin,textvariable=user_agebound1hi,width=10)
+        entrybage1hi.place(x=xstarbentrieshi,y=310)
+        labelbM1 = tk.Label(mwin,text="",bg="lavender")
+        labelbM1.place(x=xstarbentrieslo+100,y=370)
+        entrybM1lo = tk.Entry(mwin,textvariable=user_Mbound1lo,width=10)
+        entrybM1lo.place(x=xstarbentrieslo,y=370)
+        entrybM1hi = tk.Entry(mwin,textvariable=user_Mbound1hi,width=10)
+        entrybM1hi.place(x=xstarbentrieshi,y=370)
+        labelbebv1 = tk.Label(mwin,text="",bg="lavender")
+        labelbebv1.place(x=xstarbentrieslo+100,y=430)
+        entrybebv1lo = tk.Entry(mwin,textvariable=user_ebvbound1lo,width=10)
+        entrybebv1lo.place(x=xstarbentrieslo,y=430)
+        entrybebv1hi = tk.Entry(mwin,textvariable=user_ebvbound1hi,width=10)
+        entrybebv1hi.place(x=xstarbentrieshi,y=430)
+        labelbZ2 = tk.Label(mwin,text="",bg="lavender")
+        labelbZ2.place(x=xstarbentrieslo+100,y=490)
         entrybZ2lo = tk.Entry(mwin,textvariable=user_Zbound2lo,width=10)
-        entrybZ2lo.place(x=xstarbentrieslo,y=570)
+        entrybZ2lo.place(x=xstarbentrieslo,y=490)
         entrybZ2hi = tk.Entry(mwin,textvariable=user_Zbound2hi,width=10)
-        entrybZ2hi.place(x=xstarbentrieshi,y=570)
-        labelbage2lo = tk.Label(mwin,text="log(age_cool)/10",bg="lavender").place(x=xstarbentrieslo+100,y=630)
+        entrybZ2hi.place(x=xstarbentrieshi,y=490)
+        labelbage2 = tk.Label(mwin,text="",bg="lavender")
+        labelbage2.place(x=xstarbentrieslo+100,y=550)
         entrybage2lo = tk.Entry(mwin,textvariable=user_agebound2lo,width=10)
-        entrybage2lo.place(x=xstarbentrieslo,y=630)
+        entrybage2lo.place(x=xstarbentrieslo,y=550)
         entrybage2hi = tk.Entry(mwin,textvariable=user_agebound2hi,width=10)
-        entrybage2hi.place(x=xstarbentrieshi,y=630)
-        labelbM2lo = tk.Label(mwin,text="log(M_cool)/10",bg="lavender").place(x=xstarbentrieslo+105,y=690)
+        entrybage2hi.place(x=xstarbentrieshi,y=550)
+        labelbM2 = tk.Label(mwin,text="",bg="lavender")
+        labelbM2.place(x=xstarbentrieslo+100,y=610)
         entrybM2lo = tk.Entry(mwin,textvariable=user_Mbound2lo,width=10)
-        entrybM2lo.place(x=xstarbentrieslo,y=690)
+        entrybM2lo.place(x=xstarbentrieslo,y=610)
         entrybM2hi = tk.Entry(mwin,textvariable=user_Mbound2hi,width=10)
-        entrybM2hi.place(x=xstarbentrieshi,y=690)
-        labelbebv2lo = tk.Label(mwin,text="E(B-V)_cool",bg="lavender").place(x=xstarbentrieslo+112,y=750)
+        entrybM2hi.place(x=xstarbentrieshi,y=610)
+        labelbebv2 = tk.Label(mwin,text="",bg="lavender")
+        labelbebv2.place(x=xstarbentrieslo+100,y=670)
         entrybebv2lo = tk.Entry(mwin,textvariable=user_ebvbound2lo,width=10)
-        entrybebv2lo.place(x=xstarbentrieslo,y=750)
+        entrybebv2lo.place(x=xstarbentrieslo,y=670)
         entrybebv2hi = tk.Entry(mwin,textvariable=user_ebvbound2hi,width=10)
-        entrybebv2hi.place(x=xstarbentrieshi,y=750)
+        entrybebv2hi.place(x=xstarbentrieshi,y=670)
+        labelbZ3 = tk.Label(mwin,text="",bg="lavender")
+        labelbZ3.place(x=xstarbentrieslo+100,y=730)
+        entrybZ3lo = tk.Entry(mwin,textvariable=user_Zbound3lo,width=10)
+        entrybZ3lo.place(x=xstarbentrieslo,y=730)
+        entrybZ3hi = tk.Entry(mwin,textvariable=user_Zbound3hi,width=10)
+        entrybZ3hi.place(x=xstarbentrieshi,y=730)
+        labelbage3 = tk.Label(mwin,text="",bg="lavender")
+        labelbage3.place(x=xstarbentrieslo+100,y=790)
+        entrybage3lo = tk.Entry(mwin,textvariable=user_agebound3lo,width=10)
+        entrybage3lo.place(x=xstarbentrieslo,y=790)
+        entrybage3hi = tk.Entry(mwin,textvariable=user_agebound3hi,width=10)
+        entrybage3hi.place(x=xstarbentrieshi,y=790)
+        labelbM3 = tk.Label(mwin,text="",bg="lavender")
+        labelbM3.place(x=xstarbentrieslo+100,y=850)
+        entrybM3lo = tk.Entry(mwin,textvariable=user_Mbound3lo,width=10)
+        entrybM3lo.place(x=xstarbentrieslo,y=850)
+        entrybM3hi = tk.Entry(mwin,textvariable=user_Mbound3hi,width=10)
+        entrybM3hi.place(x=xstarbentrieshi,y=850)
         
         checked2=tk.IntVar()
         checked2.set(self.checked2set)
@@ -647,7 +845,7 @@ class ChiSquared():
             entrybM1hi['state'] = tk.NORMAL
             entrybebv1lo['state'] = tk.NORMAL
             entrybebv1hi['state'] = tk.NORMAL
-            if howmany == "all":
+            if howmany == "2":
                 entrybZ2lo['state'] = tk.NORMAL
                 entrybZ2hi['state'] = tk.NORMAL
                 entrybage2lo['state'] = tk.NORMAL
@@ -656,6 +854,21 @@ class ChiSquared():
                 entrybM2hi['state'] = tk.NORMAL
                 entrybebv2lo['state'] = tk.NORMAL
                 entrybebv2hi['state'] = tk.NORMAL
+            if howmany == "3":
+                entrybZ2lo['state'] = tk.NORMAL
+                entrybZ2hi['state'] = tk.NORMAL
+                entrybage2lo['state'] = tk.NORMAL
+                entrybage2hi['state'] = tk.NORMAL
+                entrybM2lo['state'] = tk.NORMAL
+                entrybM2hi['state'] = tk.NORMAL
+                entrybebv2lo['state'] = tk.NORMAL
+                entrybebv2hi['state'] = tk.NORMAL
+                entrybZ3lo['state'] = tk.NORMAL
+                entrybZ3hi['state'] = tk.NORMAL
+                entrybage3lo['state'] = tk.NORMAL
+                entrybage3hi['state'] = tk.NORMAL
+                entrybM3lo['state'] = tk.NORMAL
+                entrybM3hi['state'] = tk.NORMAL
 
         def disable2(howmany):
             entrybZ1lo['state'] = tk.DISABLED
@@ -666,7 +879,7 @@ class ChiSquared():
             entrybM1hi['state'] = tk.DISABLED
             entrybebv1lo['state'] = tk.DISABLED
             entrybebv1hi['state'] = tk.DISABLED
-            if howmany == "all":
+            if howmany == "2":
                 entrybZ2lo['state'] = tk.DISABLED
                 entrybZ2hi['state'] = tk.DISABLED
                 entrybage2lo['state'] = tk.DISABLED
@@ -675,52 +888,100 @@ class ChiSquared():
                 entrybM2hi['state'] = tk.DISABLED
                 entrybebv2lo['state'] = tk.DISABLED
                 entrybebv2hi['state'] = tk.DISABLED
-
+            if howmany == "3":
+                entrybZ2lo['state'] = tk.DISABLED
+                entrybZ2hi['state'] = tk.DISABLED
+                entrybage2lo['state'] = tk.DISABLED
+                entrybage2hi['state'] = tk.DISABLED
+                entrybM2lo['state'] = tk.DISABLED
+                entrybM2hi['state'] = tk.DISABLED
+                entrybebv2lo['state'] = tk.DISABLED
+                entrybebv2hi['state'] = tk.DISABLED
+                entrybZ3lo['state'] = tk.DISABLED
+                entrybZ3hi['state'] = tk.DISABLED
+                entrybage3lo['state'] = tk.DISABLED
+                entrybage3hi['state'] = tk.DISABLED
+                entrybM3lo['state'] = tk.DISABLED
+                entrybM3hi['state'] = tk.DISABLED
 
         def stuff_vals2():
-            entrybdict = {entrybZ1lo:entrybZ1hi,entrybage1lo:entrybage1hi,entrybM1lo:entrybM1hi,entrybebv1lo:entrybebv1hi,entrybZ2lo:entrybZ2hi,entrybage2lo:entrybage2hi,entrybM2lo:entrybM2hi,entrybebv2lo:entrybebv2hi}
+            entrybdict = {entrybZ1lo:entrybZ1hi,entrybage1lo:entrybage1hi,entrybM1lo:entrybM1hi,entrybebv1lo:entrybebv1hi,entrybZ2lo:entrybZ2hi,entrybage2lo:entrybage2hi,entrybM2lo:entrybM2hi,entrybebv2lo:entrybebv2hi,entrybZ3lo:entrybZ3hi,entrybage3lo:entrybage3hi,entrybM3lo:entrybM3hi}
+            labelblistlist = [[labelbZ1,"log(Z)","log(Z_hot)","log(Z_old_1)"],[labelbage1,"log(age)/10","log(age_hot)/10","log(age_old_1)/10"],[labelbM1,"log(M)/10","log(M_hot)/10","log(M_old_1)/10"],[labelbebv1,"E(B-V)","E(B-V)_hot","E(B-V)_old"],[labelbZ2,"","log(Z_cool)","log(Z_old_2)"],[labelbage2,"","log(age_cool)/10","log(age_old_2)/10"],[labelbM2,"","log(M_cool)/10","log(M_old_2)/10"],[labelbebv2,"","E(B-V)_cool","E(B-V)_new"],[labelbZ3,"","","log(Z_new)"],[labelbage3,"","","log(age_new)/10"],[labelbM3,"","","log(M_new)/10"]]
             if user_model_cho.get() == "UVIT_HST":
                 if starno_chosen.get() == "     1-cluster fit     ":
-                    enable2("all")
+                    enable2("3")
+                    for labelquad in labelblistlist:
+                        labelquad[0].config(text="{}".format(labelquad[1]))
                     for (entryleft,entryright),(key,val) in zip(entrybdict.items(),self.stardict1):
                         entryleft.delete(0,20)
                         entryleft.insert(0,"{}".format(key))
                         entryright.delete(0,20)
                         entryright.insert(0,"{}".format(val))
-                    disable2("all")
+                    disable2("3")
                     if checked2.get() == 1:
-                        enable2("some")
+                        enable2("1")
                 elif starno_chosen.get() == "     2-cluster fit     ":
-                    enable2("all")
+                    enable2("3")
+                    for labelquad in labelblistlist:
+                        labelquad[0].config(text="{}".format(labelquad[2]))
                     for (entryleft,entryright),(key,val) in zip(entrybdict.items(),self.stardict2):
                         entryleft.delete(0,20)
                         entryleft.insert(0,"{}".format(key))
                         entryright.delete(0,20)
                         entryright.insert(0,"{}".format(val))
-                    disable2("all")
+                    disable2("3")
                     if checked2.get() == 1:
-                        enable2("all")
-            if user_model_cho.get() == "UVIT_SDSS_Spitzer":
-                if starno_chosen.get() == "     1-cluster fit     ":
-                    enable2("all")
+                        enable2("2")
+                elif starno_chosen.get() == "     3-cluster fit     ":
+                    enable2("3")
+                    for labelquad in labelblistlist:
+                        labelquad[0].config(text="{}".format(labelquad[3]))
                     for (entryleft,entryright),(key,val) in zip(entrybdict.items(),self.stardict3):
                         entryleft.delete(0,20)
                         entryleft.insert(0,"{}".format(key))
                         entryright.delete(0,20)
                         entryright.insert(0,"{}".format(val))
-                    disable2("all")
+                    disable2("3")
                     if checked2.get() == 1:
-                        enable2("some")
-                elif starno_chosen.get() == "     2-cluster fit     ":
-                    enable2("all")
+                        enable2("3")
+
+            if user_model_cho.get() == "UVIT_SDSS_Spitzer":
+                if starno_chosen.get() == "     1-cluster fit     ":
+                    enable2("3")
+                    for labelquad in labelblistlist:
+                        labelquad[0].config(text="{}".format(labelquad[1]))
                     for (entryleft,entryright),(key,val) in zip(entrybdict.items(),self.stardict4):
                         entryleft.delete(0,20)
                         entryleft.insert(0,"{}".format(key))
                         entryright.delete(0,20)
                         entryright.insert(0,"{}".format(val))
-                    disable2("all")
+                    disable2("3")
                     if checked2.get() == 1:
-                        enable2("all")
+                        enable2("1")
+                elif starno_chosen.get() == "     2-cluster fit     ":
+                    enable2("3")
+                    for labelquad in labelblistlist:
+                        labelquad[0].config(text="{}".format(labelquad[2]))
+                    for (entryleft,entryright),(key,val) in zip(entrybdict.items(),self.stardict5):
+                        entryleft.delete(0,20)
+                        entryleft.insert(0,"{}".format(key))
+                        entryright.delete(0,20)
+                        entryright.insert(0,"{}".format(val))
+                    disable2("3")
+                    if checked2.get() == 1:
+                        enable2("2")
+                elif starno_chosen.get() == "     3-cluster fit     ":
+                    enable2("3")
+                    for labelquad in labelblistlist:
+                        labelquad[0].config(text="{}".format(labelquad[3]))
+                    for (entryleft,entryright),(key,val) in zip(entrybdict.items(),self.stardict6):
+                        entryleft.delete(0,20)
+                        entryleft.insert(0,"{}".format(key))
+                        entryright.delete(0,20)
+                        entryright.insert(0,"{}".format(val))
+                    disable2("3")
+                    if checked2.get() == 1:
+                        enable2("3")
 
         def stuffy(useless):
             stuff_vals()
@@ -733,26 +994,36 @@ class ChiSquared():
         def gray():
             if starno_chosen.get() == "     1-cluster fit     ":
                 if entryZ1['state'] == tk.NORMAL:
-                    disable("some")
+                    disable("1")
                 elif entryZ1['state'] == tk.DISABLED:
-                    enable("some")
+                    enable("1")
             elif starno_chosen.get() == "     2-cluster fit     ":
                 if entryZ1['state'] == tk.NORMAL:
-                    disable("all")
+                    disable("2")
                 elif entryZ1['state'] == tk.DISABLED:
-                    enable("all")
+                    enable("2")
+            elif starno_chosen.get() == "     3-cluster fit     ":
+                if entryZ1['state'] == tk.NORMAL:
+                    disable("3")
+                elif entryZ1['state'] == tk.DISABLED:
+                    enable("3")
         
         def gray2():
             if starno_chosen.get() == "     1-cluster fit     ":
                 if entrybZ1lo['state'] == tk.NORMAL:
-                    disable2("some")
+                    disable2("1")
                 elif entrybZ1lo['state'] == tk.DISABLED:
-                    enable2("some")
+                    enable2("1")
             elif starno_chosen.get() == "     2-cluster fit     ":
                 if entrybZ1lo['state'] == tk.NORMAL:
-                    disable2("all")
+                    disable2("2")
                 elif entrybZ1lo['state'] == tk.DISABLED:
-                    enable2("all")
+                    enable2("2")
+            elif starno_chosen.get() == "     3-cluster fit     ":
+                if entrybZ1lo['state'] == tk.NORMAL:
+                    disable2("3")
+                elif entrybZ1lo['state'] == tk.DISABLED:
+                    enable2("3")
 
         user_ulmeth = tk.StringVar()
         user_ulmeth.set(self.ulmethset)
@@ -770,7 +1041,7 @@ class ChiSquared():
         modelchomenu.place(x=32,y=400)
         starlabel = tk.Label(mwin,text="Fitting method",bg="alice blue").place(x=38,y=460)
         starno_chosen.set(self.chosenstar)
-        staroptions = ["     1-cluster fit     ","     2-cluster fit     "]
+        staroptions = ["     1-cluster fit     ","     2-cluster fit     ","     3-cluster fit     "]
         starmenu = tk.OptionMenu(mwin,starno_chosen,*staroptions,command=stuffy)
         starmenu.place(x=32,y=490)
         checkbutton = tk.Checkbutton(mwin,text="Edit default guess (parameter vector)",variable=checked,command=gray,bg="mint cream")
@@ -779,7 +1050,7 @@ class ChiSquared():
         checkbutton2.place(x=680,y=160)
         def disableguesses():
             if checkbutton['state'] == tk.NORMAL:
-                disable('all')
+                disable('3')
                 enterrownumber['state'] = tk.DISABLED
                 checked.set(0)
                 checkbutton['state'] = tk.DISABLED
@@ -787,9 +1058,11 @@ class ChiSquared():
             else:
                 if checked == 1:
                     if starno_chosen.get() == "     1-cluster fit     ":
-                        enable('some')
+                        enable('1')
                     elif starno_chosen.get() == "     2-cluster fit     ":
-                        enable('all')
+                        enable('2')
+                    elif starno_chosen.get() == "     3-cluster fit     ":
+                        enable('3')
                 checkbutton['state'] = tk.NORMAL
                 enterrownumber['state'] = tk.NORMAL
                 enterguessername['state'] = tk.DISABLED
@@ -814,8 +1087,8 @@ class ChiSquared():
         grent3()
         grent4()
         grent4()
-        disable("all")
-        disable2("all")
+        disable("3")
+        disable2("3")
         enterguessername['state'] = tk.DISABLED
         stuffy(3)
         mwin.mainloop()
@@ -1136,6 +1409,31 @@ class ChiSquared():
         
         return bestmodels1,bestmodels2
 
+    def minichisqfunc_triple(self,tup,valid_filters_this_row):
+        Z_old_1,age_old_1,M_old_1,E_bv_old,Z_old_2,age_old_2,M_old_2,E_bv_new,Z_new,age_new,M_new = tup
+
+        true_M_old_1 = 10**(M_old_1*10)
+        true_M_old_2 = 10**(M_old_2*10)
+        true_M_new = 10**(M_new*10)
+
+        bestmodels1 = []
+        interpolist1 = self.interpolate(Z_old_1,age_old_1,valid_filters_this_row)
+        extinctolist1 =self.extinction(valid_filters_this_row)
+        for i in range(len(valid_filters_this_row)):
+            bestmodels1.append(true_M_old_1*interpolist1[i]*(10/self.d)**2*10**(-0.4*(E_bv_old*(extinctolist1[i]+3.001))))
+        bestmodels2 = []
+        interpolist2 = self.interpolate(Z_old_2,age_old_2,valid_filters_this_row)
+        extinctolist2 = self.extinction(valid_filters_this_row)
+        for i in range(len(valid_filters_this_row)):
+            bestmodels2.append(true_M_old_2*interpolist2[i]*(10/self.d)**2*10**(-0.4*(E_bv_old*(extinctolist2[i]+3.001))))
+        bestmodels3 = []
+        interpolist3 = self.interpolate(Z_new,age_new,valid_filters_this_row)
+        extinctolist3 = self.extinction(valid_filters_this_row)
+        for i in range(len(valid_filters_this_row)):
+            bestmodels3.append(true_M_new*interpolist3[i]*(10/self.d)**2*10**(-0.4*(E_bv_new*(extinctolist3[i]+3.001))))
+
+        return bestmodels1,bestmodels2,bestmodels3
+
 
     def chisqfunc(self,tup,valid_filters_this_row,ul_filters_this_row,curr_row):
         Z,age,M,E_bv, = tup
@@ -1202,6 +1500,47 @@ class ChiSquared():
         print("chisq: ",chisq,"\n")
         return chisq
 
+    def chisqfunc3(self,tup,valid_filters_this_row,ul_filters_this_row,curr_row):
+        Z_old_1,age_old_1,M_old_1,E_bv_old,Z_old_2,age_old_2,M_old_2,E_bv_new,Z_new,age_new,M_new = tup
+        print("Testing row {} with log(Z_old_1), log(age_old_1)/10, log(M_old_1)/10, E(B-V)_old, log(Z_old_2), log(age_old_2)/10, log(M_old_2)/10, E(B-V)_new, log(Z_new), log(age_new)/10, log(M_new)/10: ".format(self.rows[curr_row]+2),Z_old_1,age_old_1,M_old_1,E_bv_old,Z_old_2,age_old_2,M_old_2,E_bv_new,Z_new,age_new,M_new)
+
+        true_M_old_1 = 10**(M_old_1*10)
+        true_M_old_2 = 10**(M_old_2*10)
+        true_M_new = 10**(M_new*10)
+
+        models1 = []
+        interpolist1 = self.interpolate(Z_old_1,age_old_1,valid_filters_this_row)
+        extinctolist1 =self.extinction(valid_filters_this_row)
+        for i in range(len(valid_filters_this_row)):
+            models1.append(true_M_old_1*interpolist1[i]*(10/self.d)**2*10**(-0.4*(E_bv_old*(extinctolist1[i]+3.001))))
+        models2 = []
+        interpolist2 = self.interpolate(Z_old_2,age_old_2,valid_filters_this_row)
+        extinctolist2 = self.extinction(valid_filters_this_row)
+        for i in range(len(valid_filters_this_row)):
+            models2.append(true_M_old_2*interpolist2[i]*(10/self.d)**2*10**(-0.4*(E_bv_old*(extinctolist2[i]+3.001))))
+        models3 = []
+        interpolist3 = self.interpolate(Z_new,age_new,valid_filters_this_row)
+        extinctolist3 = self.extinction(valid_filters_this_row)
+        for i in range(len(valid_filters_this_row)):
+            models3.append(true_M_new*interpolist3[i]*(10/self.d)**2*10**(-0.4*(E_bv_new*(extinctolist3[i]+3.001))))
+
+        summands = []
+        for i,valid_ind in enumerate(valid_filters_this_row):
+            if valid_ind in ul_filters_this_row:
+                if self.ulmeth == "Limit":
+                    if models1[i]+models2[i]+models3[i] - self.bandfluxes.iat[curr_row,valid_ind] > 0:
+                        summands.append(((self.bandfluxes.iat[curr_row,valid_ind] - models1[i]-models2[i]-models3[i])/self.bandfluxerrors.iat[curr_row,valid_ind])**2)
+                    else:
+                        pass
+                elif self.ulmeth == "Standard":
+                    summands.append(((self.bandfluxes.iat[curr_row,valid_ind]/3 -models1[i]-models2[i]-models3[i])/(self.bandfluxes.iat[curr_row,valid_ind]/3))**2)
+            else:
+                summands.append(((self.bandfluxes.iat[curr_row,valid_ind] - models1[i]-models2[i]-models3[i])/self.bandfluxerrors.iat[curr_row,valid_ind])**2)
+
+        chisq = sum(summands)
+        print("chisq: ",chisq,"\n")
+        return chisq
+
     def chisqfuncerror(self,lead,leadsign,otherstup):
 
         if leadsign == 0:
@@ -1239,7 +1578,7 @@ class ChiSquared():
                 summands.append(((self.bandfluxes.iat[curr_row,valid_ind] - models[i])/self.bandfluxerrors.iat[curr_row,valid_ind])**2)
 
 
-        chisq = sum(summands) - self.results[curr_row].fun - 4.17
+        chisq = sum(summands) - self.results[curr_row].fun - 4.28
         return chisq
 
     def chisqfunc2error(self,lead,leadsign,otherstup):
@@ -1296,15 +1635,85 @@ class ChiSquared():
             else:
                 summands.append(((self.bandfluxes.iat[curr_row,valid_ind] - models1[i]-models2[i])/self.bandfluxerrors.iat[curr_row,valid_ind])**2)
 
-        chisq = sum(summands) - self.results[curr_row].fun - 9.28
+        chisq = sum(summands) - self.results[curr_row].fun - 9.32
+        return chisq
+
+    def chisqfunc3error(self,lead,leadsign,otherstup):
+
+        if leadsign == 0:
+            Z_old_1 = lead
+            age_old_1,M_old_1,E_bv_old,Z_old_2,age_old_2,M_old_2,E_bv_new,Z_new,age_new,M_new,valid_filters_this_row,ul_filters_this_row,curr_row = otherstup[0],otherstup[1],otherstup[2],otherstup[3],otherstup[4],otherstup[5],otherstup[6],otherstup[7],otherstup[8],otherstup[9],otherstup[10],otherstup[11],otherstup[12]
+        elif leadsign == 1:
+            age_old_1 = lead
+            Z_old_1,M_old_1,E_bv_old,Z_old_2,age_old_2,M_old_2,E_bv_new,Z_new,age_new,M_new,valid_filters_this_row,ul_filters_this_row,curr_row = otherstup[0],otherstup[1],otherstup[2],otherstup[3],otherstup[4],otherstup[5],otherstup[6],otherstup[7],otherstup[8],otherstup[9],otherstup[10],otherstup[11],otherstup[12]
+        elif leadsign == 2:
+            M_old_1 = lead
+            Z_old_1,age_old_1,E_bv_old,Z_old_2,age_old_2,M_old_2,E_bv_new,Z_new,age_new,M_new,valid_filters_this_row,ul_filters_this_row,curr_row = otherstup[0],otherstup[1],otherstup[2],otherstup[3],otherstup[4],otherstup[5],otherstup[6],otherstup[7],otherstup[8],otherstup[9],otherstup[10],otherstup[11],otherstup[12]
+        elif leadsign == 3:
+            E_bv_old = lead
+            Z_old_1,age_old_1,M_old_1,Z_old_2,age_old_2,M_old_2,E_bv_new,Z_new,age_new,M_new,valid_filters_this_row,ul_filters_this_row,curr_row = otherstup[0],otherstup[1],otherstup[2],otherstup[3],otherstup[4],otherstup[5],otherstup[6],otherstup[7],otherstup[8],otherstup[9],otherstup[10],otherstup[11],otherstup[12]
+        elif leadsign == 4:
+            Z_old_2 = lead
+            Z_old_1,age_old_1,M_old_1,E_bv_old,age_old_2,M_old_2,E_bv_new,Z_new,age_new,M_new,valid_filters_this_row,ul_filters_this_row,curr_row = otherstup[0],otherstup[1],otherstup[2],otherstup[3],otherstup[4],otherstup[5],otherstup[6],otherstup[7],otherstup[8],otherstup[9],otherstup[10],otherstup[11],otherstup[12]
+        elif leadsign == 5:
+            age_old_2 = lead
+            Z_old_1,age_old_1,M_old_1,E_bv_old,Z_old_2,M_old_2,E_bv_new,Z_new,age_new,M_new,valid_filters_this_row,ul_filters_this_row,curr_row = otherstup[0],otherstup[1],otherstup[2],otherstup[3],otherstup[4],otherstup[5],otherstup[6],otherstup[7],otherstup[8],otherstup[9],otherstup[10],otherstup[11],otherstup[12]
+        elif leadsign == 6:
+            M_old_2 = lead
+            Z_old_1,age_old_1,M_old_1,E_bv_old,Z_old_2,age_old_2,E_bv_new,Z_new,age_new,M_new,valid_filters_this_row,ul_filters_this_row,curr_row = otherstup[0],otherstup[1],otherstup[2],otherstup[3],otherstup[4],otherstup[5],otherstup[6],otherstup[7],otherstup[8],otherstup[9],otherstup[10],otherstup[11],otherstup[12]
+        elif leadsign == 7:
+            E_bv_new = lead
+            Z_old_1,age_old_1,M_old_1,E_bv_old,Z_old_2,age_old_2,M_old_2,Z_new,age_new,M_new,valid_filters_this_row,ul_filters_this_row,curr_row = otherstup[0],otherstup[1],otherstup[2],otherstup[3],otherstup[4],otherstup[5],otherstup[6],otherstup[7],otherstup[8],otherstup[9],otherstup[10],otherstup[11],otherstup[12]
+        elif leadsign == 8:
+            Z_new = lead
+            Z_old_1,age_old_1,M_old_1,E_bv_old,Z_old_2,age_old_2,M_old_2,E_bv_new,age_new,M_new,valid_filters_this_row,ul_filters_this_row,curr_row = otherstup[0],otherstup[1],otherstup[2],otherstup[3],otherstup[4],otherstup[5],otherstup[6],otherstup[7],otherstup[8],otherstup[9],otherstup[10],otherstup[11],otherstup[12]
+        elif leadsign == 9:
+            age_new = lead
+            Z_old_1,age_old_1,M_old_1,E_bv_old,Z_old_2,age_old_2,M_old_2,E_bv_new,Z_new,M_new,valid_filters_this_row,ul_filters_this_row,curr_row = otherstup[0],otherstup[1],otherstup[2],otherstup[3],otherstup[4],otherstup[5],otherstup[6],otherstup[7],otherstup[8],otherstup[9],otherstup[10],otherstup[11],otherstup[12]
+        elif leadsign == 10:
+            M_new = lead
+            Z_old_1,age_old_1,M_old_1,E_bv_old,Z_old_2,age_old_2,M_old_2,E_bv_new,Z_new,age_new,valid_filters_this_row,ul_filters_this_row,curr_row = otherstup[0],otherstup[1],otherstup[2],otherstup[3],otherstup[4],otherstup[5],otherstup[6],otherstup[7],otherstup[8],otherstup[9],otherstup[10],otherstup[11],otherstup[12]
+
+        true_M_old_1 = 10**(M_old_1*10)
+        true_M_old_2 = 10**(M_old_2*10)
+        true_M_new = 10**(M_new*10)
+
+        models1 = []
+        interpolist1 = self.interpolate(Z_old_1,age_old_1,valid_filters_this_row)
+        extinctolist1 =self.extinction(valid_filters_this_row)
+        for i in range(len(valid_filters_this_row)):
+            models1.append(true_M_old_1*interpolist1[i]*(10/self.d)**2*10**(-0.4*(E_bv_old*(extinctolist1[i]+3.001))))
+        models2 = []
+        interpolist2 = self.interpolate(Z_old_2,age_old_2,valid_filters_this_row)
+        extinctolist2 = self.extinction(valid_filters_this_row)
+        for i in range(len(valid_filters_this_row)):
+            models2.append(true_M_old_2*interpolist2[i]*(10/self.d)**2*10**(-0.4*(E_bv_old*(extinctolist2[i]+3.001))))
+        models3 = []
+        interpolist3 = self.interpolate(Z_new,age_new,valid_filters_this_row)
+        extinctolist3 = self.extinction(valid_filters_this_row)
+        for i in range(len(valid_filters_this_row)):
+            models3.append(true_M_new*interpolist3[i]*(10/self.d)**2*10**(-0.4*(E_bv_new*(extinctolist3[i]+3.001))))
+
+        summands = []
+        for i,valid_ind in enumerate(valid_filters_this_row):
+            if valid_ind in ul_filters_this_row:
+                if self.ulmeth == "Limit":
+                    if models1[i]+models2[i]+models3[i] - self.bandfluxes.iat[curr_row,valid_ind] > 0:
+                        summands.append(((self.bandfluxes.iat[curr_row,valid_ind] - models1[i]-models2[i]-models3[i])/self.bandfluxerrors.iat[curr_row,valid_ind])**2)
+                    else:
+                        pass
+                elif self.ulmeth == "Standard":
+                    summands.append(((self.bandfluxes.iat[curr_row,valid_ind]/3 -models1[i]-models2[i]-models3[i])/(self.bandfluxes.iat[curr_row,valid_ind]/3))**2)
+            else:
+                summands.append(((self.bandfluxes.iat[curr_row,valid_ind] - models1[i]-models2[i]-models3[i])/self.bandfluxerrors.iat[curr_row,valid_ind])**2)
+
+        chisq = sum(summands) - self.results[curr_row].fun - 12.77
         return chisq
 
     def minimize_chisq(self):
         import numpy as np
         
         if self.single_cluster == True:
-            #default guess: -1.0,0.9, 0.7, 0.1
-            #bnds = ((-2.6,0.3),(.66,1.02),(0,1.4),(0,2))
             bnds = ((self.Zbound1lo,self.Zbound1hi),(self.agebound1lo,self.agebound1hi),(self.Mbound1lo,self.Mbound1hi),(self.ebvbound1lo,self.ebvbound1hi))
             self.results = []
 
@@ -1321,9 +1730,6 @@ class ChiSquared():
             print("results:\n",self.results)
         
         elif self.double_cluster == True:
-
-            #default guess: -0.5, .8477, .6, .2, -1.5, .9477, .8, 0.1 
-            #bnds = ((-2.6,0.3),(.66,1.02),(0,1.4),(0,2),(-2.6,0.3),(.66,1.02),(0,1.4),(0,2))
             bnds = ((self.Zbound1lo,self.Zbound1hi),(self.agebound1lo,self.agebound1hi),(self.Mbound1lo,self.Mbound1hi),(self.ebvbound1lo,self.ebvbound1hi),(self.Zbound2lo,self.Zbound2hi),(self.agebound2lo,self.agebound2hi),(self.Mbound2lo,self.Mbound2hi),(self.ebvbound2lo,self.ebvbound2hi))
             self.results = []
 
@@ -1339,6 +1745,21 @@ class ChiSquared():
                 self.results.append(opt.minimize(self.chisqfunc2, x0, args=(valid_filters_this_row,ul_filters_this_row,curr_row,), bounds=bnds))       
             print("results:\n",self.results)
 
+        elif self.triple_cluster == True:
+            bnds = ((self.Zbound1lo,self.Zbound1hi),(self.agebound1lo,self.agebound1hi),(self.Mbound1lo,self.Mbound1hi),(self.ebvbound1lo,self.ebvbound1hi),(self.Zbound2lo,self.Zbound2hi),(self.agebound2lo,self.agebound2hi),(self.Mbound2lo,self.Mbound2hi),(self.ebvbound2lo,self.ebvbound2hi),(self.Zbound3lo,self.Zbound3hi),(self.agebound3lo,self.agebound3hi),(self.Mbound3lo,self.Mbound3hi))
+            self.results = []
+
+            for curr_row in range(self.bandfluxes.shape[0]):  
+                valid_filters_this_row = []
+                ul_filters_this_row = []
+                for valid_ind,arraytup in enumerate(zip(self.bandfluxes.loc[curr_row,:],self.ul_frame.loc[curr_row,:])):
+                    if np.isnan(arraytup[0]) == False:
+                        valid_filters_this_row.append(valid_ind)
+                    if arraytup[1] == 1:
+                        ul_filters_this_row.append(valid_ind)
+                x0 = np.array([self.Zguess1[curr_row],self.ageguess1[curr_row],self.Mguess1[curr_row],self.ebvguess1[curr_row],self.Zguess2[curr_row],self.ageguess2[curr_row],self.Mguess2[curr_row],self.ebvguess2[curr_row],self.Zguess3[curr_row],self.ageguess3[curr_row],self.Mguess3[curr_row]])
+                self.results.append(opt.minimize(self.chisqfunc3, x0, args=(valid_filters_this_row,ul_filters_this_row,curr_row,), bounds=bnds))       
+            print("results:\n",self.results)
 
     def find_param_errors(self):
         import numpy as np
@@ -1642,7 +2063,266 @@ class ChiSquared():
                 errorsthisrow.append([E_bv2lowererror,E_bv2uppererror])
                 errornotesthisrow.append([ebv2lowernotes,ebv2uppernotes])
                 ###
-
+                self.errorsallrows.append(errorsthisrow)
+                self.errornotes.append(errornotesthisrow)
+        
+        elif self.triple_cluster == True:
+            self.errornotes = []
+            self.errorsallrows = []
+            for curr_row in range(self.bandfluxes.shape[0]):  
+                valid_filters_this_row = []
+                ul_filters_this_row = []
+                for valid_ind,arraytup in enumerate(zip(self.bandfluxes.loc[curr_row,:],self.ul_frame.loc[curr_row,:])):
+                    if np.isnan(arraytup[0]) == False:
+                        valid_filters_this_row.append(valid_ind)
+                    if arraytup[1] == 1:
+                        ul_filters_this_row.append(valid_ind)
+                errorsthisrow = []
+                errornotesthisrow = []
+                Z_old_1,age_old_1,M_old_1,E_bv_old,Z_old_2,age_old_2,M_old_2,E_bv_new,Z_new,age_new,M_new = self.results[curr_row].x[0],self.results[curr_row].x[1],self.results[curr_row].x[2],self.results[curr_row].x[3],self.results[curr_row].x[4],self.results[curr_row].x[5],self.results[curr_row].x[6],self.results[curr_row].x[7],self.results[curr_row].x[8],self.results[curr_row].x[9],self.results[curr_row].x[10]
+                ###
+                otherstup = (age_old_1,M_old_1,E_bv_old,Z_old_2,age_old_2,M_old_2,E_bv_new,Z_new,age_new,M_new,valid_filters_this_row,ul_filters_this_row,curr_row)
+                try:
+                    Z_old_1lowererror = Z_old_1 - opt.root_scalar(self.chisqfunc3error, args=(0,otherstup,),method="brentq",bracket=[self.Zbound1lo,Z_old_1]).root
+                    Z_old_1lowernotes = "\n"
+                except:
+                    Z_old_1lowererror = "N/A"
+                    if self.chisqfunc3error(Z_old_1,0,otherstup,) != self.chisqfunc3error(self.Zbound1lo,0,otherstup,):
+                        Z_old_1lowernotes = "cannot go low enough to\nchange chi^2 by 12.77"
+                    elif self.chisqfunc3error(Z_old_1,0,otherstup,) == self.chisqfunc3error(self.Zbound1lo,0,otherstup,):
+                        Z_old_1lowernotes = "sitting at lower bound\n"
+                try:
+                    Z_old_1uppererror = opt.root_scalar(self.chisqfunc3error, args=(0,otherstup,),method="brentq",bracket=[Z_old_1,self.Zbound1hi]).root - Z_old_1
+                    Z_old_1uppernotes = "\n"
+                except:
+                    Z_old_1uppererror = "N/A"
+                    if self.chisqfunc3error(Z_old_1,0,otherstup,) != self.chisqfunc3error(self.Zbound1hi,0,otherstup,):
+                        Z_old_1uppernotes = "cannot go high enough to\nchange chi^2 by 12.77"
+                    elif self.chisqfunc3error(Z_old_1,0,otherstup,) == self.chisqfunc3error(self.Zbound1hi,0,otherstup,):
+                        Z_old_1uppernotes = "sitting at upper bound\n"
+                errorsthisrow.append([Z_old_1lowererror,Z_old_1uppererror])
+                errornotesthisrow.append([Z_old_1lowernotes,Z_old_1uppernotes])
+                ###
+                otherstup = (Z_old_1,M_old_1,E_bv_old,Z_old_2,age_old_2,M_old_2,E_bv_new,Z_new,age_new,M_new,valid_filters_this_row,ul_filters_this_row,curr_row)            
+                try:
+                    age_old_1lowererror = (age_old_1 - opt.root_scalar(self.chisqfunc3error, args=(1,otherstup,),method="brentq",bracket=[self.agebound1lo,age_old_1]).root)
+                    age_old_1lowernotes = "\n"
+                except:
+                    age_old_1lowererror = "N/A"
+                    if self.chisqfunc3error(age_old_1,1,otherstup,) != self.chisqfunc3error(self.agebound1lo,1,otherstup,):
+                        age_old_1lowernotes = "cannot go low enough to\nchange chi^2 by 12.77"
+                    elif self.chisqfunc3error(age_old_1,1,otherstup,) == self.chisqfunc3error(self.agebound1lo,1,otherstup,):
+                        age_old_1lowernotes = "sitting at lower bound\n"
+                try:    
+                    age_old_1uppererror = (opt.root_scalar(self.chisqfunc3error, args=(1,otherstup,),method="brentq",bracket=[age_old_1,self.agebound1hi]).root - age_old_1)
+                    age_old_1uppernotes = "\n"
+                except:
+                    age_old_1uppererror = "N/A"
+                    if self.chisqfunc3error(age_old_1,1,otherstup,) != self.chisqfunc3error(self.agebound1hi,1,otherstup,):
+                        age_old_1uppernotes = "cannot go high enough to\nchange chi^2 by 12.77"
+                    elif self.chisqfunc3error(age_old_1,1,otherstup,) == self.chisqfunc3error(self.agebound1hi,1,otherstup,):
+                        age_old_1uppernotes = "sitting at upper bound\n"
+                errorsthisrow.append([age_old_1lowererror,age_old_1uppererror])
+                errornotesthisrow.append([age_old_1lowernotes,age_old_1uppernotes])
+                ###
+                otherstup = (Z_old_1,age_old_1,E_bv_old,Z_old_2,age_old_2,M_old_2,E_bv_new,Z_new,age_new,M_new,valid_filters_this_row,ul_filters_this_row,curr_row)              
+                try:
+                    M_old_1lowererror = M_old_1 - opt.root_scalar(self.chisqfunc3error, args=(2,otherstup,),method="brentq",bracket=[self.Mbound1lo,M_old_1]).root
+                    M_old_1lowernotes = "\n"
+                except:
+                    M_old_1lowererror = "N/A"
+                    if self.chisqfunc3error(M_old_1,2,otherstup,) != self.chisqfunc3error(self.Mbound1lo,2,otherstup,):
+                        M_old_1lowernotes = "cannot go low enough\nto change chi^2 by 12.77"
+                    elif self.chisqfunc3error(M_old_1,2,otherstup,) == self.chisqfunc3error(self.Mbound1lo,2,otherstup,):
+                        M_old_1lowernotes = "sitting at lower bound\n"
+                try:
+                    M_old_1uppererror = opt.root_scalar(self.chisqfunc3error, args=(2,otherstup,),method="brentq",bracket=[M_old_1,self.Mbound1hi]).root - M_old_1
+                    M_old_1uppernotes = "\n"
+                except:
+                    M_old_1uppererror = "N/A"
+                    if self.chisqfunc3error(M_old_1,2,otherstup,) != self.chisqfunc3error(self.Mbound1hi,2,otherstup,):
+                        M_old_1uppernotes = "cannot go high enough\nto change chi^2 by 12.77"
+                    elif self.chisqfunc3error(M_old_1,2,otherstup,) == self.chisqfunc3error(self.Mbound1hi,2,otherstup,):
+                        M_old_1uppernotes = "sitting at upper bound\n"
+                errorsthisrow.append([M_old_1lowererror,M_old_1uppererror])
+                errornotesthisrow.append([M_old_1lowernotes,M_old_1uppernotes])
+                ###
+                otherstup = (Z_old_1,age_old_1,M_old_1,Z_old_2,age_old_2,M_old_2,E_bv_new,Z_new,age_new,M_new,valid_filters_this_row,ul_filters_this_row,curr_row)                           
+                try:
+                    E_bv_oldlowererror = E_bv_old - opt.root_scalar(self.chisqfunc3error, args=(3,otherstup,),method="brentq",bracket=[self.ebvbound1lo,E_bv_old]).root
+                    ebv1lowernotes = "\n"
+                except:
+                    E_bv_oldlowererror = "N/A"
+                    if self.chisqfunc3error(E_bv_old,3,otherstup,) != self.chisqfunc3error(self.ebvbound1lo,3,otherstup,):
+                        ebv1lowernotes = "cannot go low enough to\nchange chi^2 by 12.77"
+                    elif self.chisqfunc3error(E_bv_old,3,otherstup,) == self.chisqfunc3error(self.ebvbound1lo,3,otherstup,):
+                        ebv1lowernotes = "sitting at lower bound\n"
+                try:
+                    E_bv_olduppererror = opt.root_scalar(self.chisqfunc3error, args=(3,otherstup,),method="brentq",bracket=[E_bv_old,self.ebvbound1hi]).root - E_bv_old
+                    ebv1uppernotes = "\n"
+                except:
+                    E_bv_olduppererror = "N/A"
+                    if self.chisqfunc3error(E_bv_old,3,otherstup,) != self.chisqfunc3error(self.ebvbound1hi,3,otherstup,):
+                        ebv1uppernotes = "cannot go high enough to\nchange chi^2 by 12.77"
+                    elif self.chisqfunc3error(E_bv_old,3,otherstup,) == self.chisqfunc3error(self.ebvbound1hi,3,otherstup,):
+                        ebv1uppernotes = "sitting at upper bound\n"
+                errorsthisrow.append([E_bv_oldlowererror,E_bv_olduppererror])
+                errornotesthisrow.append([ebv1lowernotes,ebv1uppernotes])
+                ###
+                otherstup = (Z_old_1,age_old_1,M_old_1,E_bv_old,age_old_2,M_old_2,E_bv_new,Z_new,age_new,M_new,valid_filters_this_row,ul_filters_this_row,curr_row)
+                try:
+                    Z_old_2lowererror = Z_old_2 - opt.root_scalar(self.chisqfunc3error, args=(4,otherstup,),method="brentq",bracket=[self.Zbound2lo,Z_old_2]).root
+                    Z_old_2lowernotes = "\n"
+                except:
+                    Z_old_2lowererror = "N/A"
+                    if self.chisqfunc3error(Z_old_2,4,otherstup,) != self.chisqfunc3error(self.Zbound2lo,4,otherstup,):
+                        Z_old_2lowernotes = "cannot go low enough to\nchange chi^2 by 12.77"
+                    elif self.chisqfunc3error(Z_old_2,4,otherstup,) == self.chisqfunc3error(self.Zbound2lo,4,otherstup,):
+                        Z_old_2lowernotes = "sitting at lower bound\n"
+                try:
+                    Z_old_2uppererror = opt.root_scalar(self.chisqfunc3error, args=(4,otherstup,),method="brentq",bracket=[Z_old_2,self.Zbound2hi]).root - Z_old_2
+                    Z_old_2uppernotes = "\n"
+                except:
+                    Z_old_2uppererror = "N/A"
+                    if self.chisqfunc3error(Z_old_2,4,otherstup,) != self.chisqfunc3error(self.Zbound2hi,4,otherstup,):
+                        Z_old_2uppernotes = "cannot go high enough to\nchange chi^2 by 12.77"
+                    elif self.chisqfunc3error(Z_old_2,4,otherstup,) == self.chisqfunc3error(self.Zbound2hi,4,otherstup,):
+                        Z_old_2uppernotes = "sitting at upper bound\n"
+                errorsthisrow.append([Z_old_2lowererror,Z_old_2uppererror])
+                errornotesthisrow.append([Z_old_2lowernotes,Z_old_2uppernotes])
+                ###
+                otherstup = (Z_old_1,age_old_1,M_old_1,E_bv_old,Z_old_2,M_old_2,E_bv_new,Z_new,age_new,M_new,valid_filters_this_row,ul_filters_this_row,curr_row)              
+                try:
+                    age_old_2lowererror = (age_old_2 - opt.root_scalar(self.chisqfunc3error, args=(5,otherstup,),method="brentq",bracket=[self.agebound2lo,age_old_2]).root)
+                    age_old_2lowernotes = "\n"
+                except:
+                    age_old_2lowererror = "N/A"
+                    if self.chisqfunc3error(age_old_2,5,otherstup,) != self.chisqfunc3error(self.agebound2lo,5,otherstup,):
+                        age_old_2lowernotes = "cannot go low enough to\nchange chi^2 by 12.77"
+                    elif self.chisqfunc3error(age_old_2,5,otherstup,) == self.chisqfunc3error(self.agebound2lo,5,otherstup,):
+                        age_old_2lowernotes = "sitting at lower bound\n"
+                try:    
+                    age_old_2uppererror = (opt.root_scalar(self.chisqfunc3error, args=(5,otherstup,),method="brentq",bracket=[age_old_2,self.agebound2hi]).root - age_old_2)
+                    age_old_2uppernotes = "\n"
+                except:
+                    age_old_2uppererror = "N/A"
+                    if self.chisqfunc3error(age_old_2,5,otherstup,) != self.chisqfunc3error(self.agebound2hi,5,otherstup,):
+                        age_old_2uppernotes = "cannot go high enough to\nchange chi^2 by 12.77"
+                    elif self.chisqfunc3error(age_old_2,5,otherstup,) == self.chisqfunc3error(self.agebound2hi,5,otherstup,):
+                        age_old_2uppernotes = "sitting at upper bound\n"
+                errorsthisrow.append([age_old_2lowererror,age_old_2uppererror])
+                errornotesthisrow.append([age_old_2lowernotes,age_old_2uppernotes])
+                ###
+                otherstup = (Z_old_1,age_old_1,M_old_1,E_bv_old,Z_old_2,age_old_2,E_bv_new,Z_new,age_new,M_new,valid_filters_this_row,ul_filters_this_row,curr_row)              
+                try:
+                    M_old_2lowererror = M_old_2 - opt.root_scalar(self.chisqfunc3error, args=(6,otherstup,),method="brentq",bracket=[self.Mbound2lo,M_old_2]).root
+                    M_old_2lowernotes = "\n"
+                except:
+                    M_old_2lowererror = "N/A"
+                    if self.chisqfunc3error(M_old_2,6,otherstup,) != self.chisqfunc3error(self.Mbound2lo,6,otherstup,):
+                        M_old_2lowernotes = "cannot go low enough to\nchange chi^2 by 12.77"
+                    elif self.chisqfunc3error(M_old_2,6,otherstup,) == self.chisqfunc3error(self.Mbound2lo,6,otherstup,):
+                        M_old_2lowernotes = "sitting at lower bound\n"
+                try:
+                    M_old_2uppererror = opt.root_scalar(self.chisqfunc3error, args=(6,otherstup,),method="brentq",bracket=[M_old_2,self.Mbound2hi]).root - M_old_2
+                    M_old_2uppernotes = "\n"
+                except:
+                    M_old_2uppererror = "N/A"
+                    if self.chisqfunc3error(M_old_2,6,otherstup,) != self.chisqfunc3error(self.Mbound2hi,6,otherstup,):
+                        M_old_2uppernotes = "cannot go high enough to\nchange chi^2 by 12.77"
+                    elif self.chisqfunc3error(M_old_2,6,otherstup,) == self.chisqfunc3error(self.Mbound2hi,6,otherstup,):
+                        M_old_2uppernotes = "sitting at upper bound\n"
+                errorsthisrow.append([M_old_2lowererror,M_old_2uppererror])
+                errornotesthisrow.append([M_old_2lowernotes,M_old_2uppernotes])
+                ###
+                otherstup = (Z_old_1,age_old_1,M_old_1,E_bv_old,Z_old_2,age_old_2,M_old_2,Z_new,age_new,M_new,valid_filters_this_row,ul_filters_this_row,curr_row)                           
+                try:
+                    E_bv_newlowererror = E_bv_new - opt.root_scalar(self.chisqfunc3error, args=(7,otherstup,),method="brentq",bracket=[self.ebvbound2lo,E_bv_new]).root
+                    ebv2lowernotes = "\n"
+                except:
+                    E_bv_newlowererror = "N/A"
+                    if self.chisqfunc3error(E_bv_new,7,otherstup,) != self.chisqfunc3error(self.ebvbound2lo,7,otherstup,):
+                        ebv2lowernotes = "cannot go low enough to\nchange chi^2 by 12.77"
+                    elif self.chisqfunc3error(E_bv_new,7,otherstup,) == self.chisqfunc3error(self.ebvbound2lo,7,otherstup,):
+                        ebv2lowernotes = "sitting at lower bound\n"
+                try:
+                    E_bv_newuppererror = opt.root_scalar(self.chisqfunc3error, args=(7,otherstup,),method="brentq",bracket=[E_bv_new,self.ebvbound2hi]).root - E_bv_new
+                    ebv2uppernotes = "\n"
+                except:
+                    E_bv_newuppererror = "N/A"
+                    if self.chisqfunc3error(E_bv_new,7,otherstup,) != self.chisqfunc3error(self.ebvbound2hi,7,otherstup,):
+                        ebv2uppernotes = "cannot go high enough to\nchange chi^2 by 12.77"
+                    elif self.chisqfunc3error(E_bv_new,7,otherstup,) == self.chisqfunc3error(self.ebvbound2hi,7,otherstup,):
+                        ebv2uppernotes = "sitting at upper bound\n"
+                errorsthisrow.append([E_bv_newlowererror,E_bv_newuppererror])
+                errornotesthisrow.append([ebv2lowernotes,ebv2uppernotes])
+                ###
+                otherstup = (Z_old_1,age_old_1,M_old_1,E_bv_old,Z_old_2,age_old_2,M_old_2,E_bv_new,age_new,M_new,valid_filters_this_row,ul_filters_this_row,curr_row)                           
+                try:
+                    Z_newlowererror = Z_new - opt.root_scalar(self.chisqfunc3error, args=(8,otherstup,),method="brentq",bracket=[self.Zbound3lo,Z_new]).root
+                    Z_newlowernotes = "\n"
+                except:
+                    Z_newlowererror = "N/A"
+                    if self.chisqfunc3error(Z_new,8,otherstup,) != self.chisqfunc3error(self.Zbound3lo,8,otherstup,):
+                        Z_newlowernotes = "cannot go low enough to\nchange chi^2 by 12.77"
+                    elif self.chisqfunc3error(Z_new,8,otherstup,) == self.chisqfunc3error(self.Zbound3lo,8,otherstup,):
+                        Z_newlowernotes = "sitting at lower bound\n"
+                try:
+                    Z_newuppererror = opt.root_scalar(self.chisqfunc3error, args=(8,otherstup,),method="brentq",bracket=[Z_new,self.Zbound3hi]).root - Z_new
+                    Z_newuppernotes = "\n"
+                except:
+                    Z_newuppererror = "N/A"
+                    if self.chisqfunc3error(Z_new,8,otherstup,) != self.chisqfunc3error(self.Zbound3hi,8,otherstup,):
+                        Z_newuppernotes = "cannot go high enough to\nchange chi^2 by 12.77"
+                    elif self.chisqfunc3error(Z_new,8,otherstup,) == self.chisqfunc3error(self.Zbound3hi,8,otherstup,):
+                        Z_newuppernotes = "sitting at upper bound\n"
+                errorsthisrow.append([Z_newlowererror,Z_newuppererror])
+                errornotesthisrow.append([Z_newlowernotes,Z_newuppernotes])
+                ###
+                otherstup = (Z_old_1,age_old_1,M_old_1,E_bv_old,Z_old_2,age_old_2,M_old_2,E_bv_new,Z_new,M_new,valid_filters_this_row,ul_filters_this_row,curr_row)                           
+                try:
+                    age_newlowererror = age_new - opt.root_scalar(self.chisqfunc3error, args=(9,otherstup,),method="brentq",bracket=[self.agebound3lo,age_new]).root
+                    age_newlowernotes = "\n"
+                except:
+                    age_newlowererror = "N/A"
+                    if self.chisqfunc3error(age_new,9,otherstup,) != self.chisqfunc3error(self.agebound3lo,9,otherstup,):
+                        age_newlowernotes = "cannot go low enough to\nchange chi^2 by 12.77"
+                    elif self.chisqfunc3error(age_new,9,otherstup,) == self.chisqfunc3error(self.agebound3lo,9,otherstup,):
+                        age_newlowernotes = "sitting at lower bound\n"
+                try:
+                    age_newuppererror = opt.root_scalar(self.chisqfunc3error, args=(9,otherstup,),method="brentq",bracket=[age_new,self.agebound3hi]).root - age_new
+                    age_newuppernotes = "\n"
+                except:
+                    age_newuppererror = "N/A"
+                    if self.chisqfunc3error(age_new,9,otherstup,) != self.chisqfunc3error(self.agebound3hi,9,otherstup,):
+                        age_newuppernotes = "cannot go high enough to\nchange chi^2 by 12.77"
+                    elif self.chisqfunc3error(age_new,9,otherstup,) == self.chisqfunc3error(self.agebound3hi,9,otherstup,):
+                        age_newuppernotes = "sitting at upper bound\n"
+                errorsthisrow.append([age_newlowererror,age_newuppererror])
+                errornotesthisrow.append([age_newlowernotes,age_newuppernotes])
+                ###
+                otherstup = (Z_old_1,age_old_1,M_old_1,E_bv_old,Z_old_2,age_old_2,M_old_2,E_bv_new,Z_new,age_new,valid_filters_this_row,ul_filters_this_row,curr_row)                           
+                try:
+                    M_newlowererror = M_new - opt.root_scalar(self.chisqfunc3error, args=(10,otherstup,),method="brentq",bracket=[self.Mbound3lo,M_new]).root
+                    M_newlowernotes = "\n"
+                except:
+                    M_newlowererror = "N/A"
+                    if self.chisqfunc3error(M_new,10,otherstup,) != self.chisqfunc3error(self.Mbound3lo,10,otherstup,):
+                        M_newlowernotes = "cannot go low enough to\nchange chi^2 by 12.77"
+                    elif self.chisqfunc3error(M_new,10,otherstup,) == self.chisqfunc3error(self.Mbound3lo,10,otherstup,):
+                        M_newlowernotes = "sitting at lower bound\n"
+                try:
+                    M_newuppererror = opt.root_scalar(self.chisqfunc3error, args=(10,otherstup,),method="brentq",bracket=[M_new,self.Mbound3hi]).root - M_new
+                    M_newuppernotes = "\n"
+                except:
+                    M_newuppererror = "N/A"
+                    if self.chisqfunc3error(M_new,10,otherstup,) != self.chisqfunc3error(self.Mbound3hi,10,otherstup,):
+                        M_newuppernotes = "cannot go high enough to\nchange chi^2 by 12.77"
+                    elif self.chisqfunc3error(M_new,10,otherstup,) == self.chisqfunc3error(self.Mbound3hi,10,otherstup,):
+                        M_newuppernotes = "sitting at upper bound\n"
+                errorsthisrow.append([M_newlowererror,M_newuppererror])
+                errornotesthisrow.append([M_newlowernotes,M_newuppernotes])
+                ###
                 self.errorsallrows.append(errorsthisrow)
                 self.errornotes.append(errornotesthisrow)
            
@@ -1656,6 +2336,10 @@ class ChiSquared():
                 self.rsol_list = []
                 for curr_row in range(self.bandfluxes.shape[0]): 
                     self.display_results_double(curr_row)
+            elif self.triple_cluster == True:
+                self.rsol_list = []
+                for curr_row in range(self.bandfluxes.shape[0]): 
+                    self.display_results_triple(curr_row)
 
     def save_output(self):
 
@@ -1776,6 +2460,73 @@ class ChiSquared():
                     from tkinter import messagebox
                     tk.messagebox.showerror('Error','An error occurred. This can happen if a file is open while trying to overwrite it. Please close any relevant files and try again.') 
 
+        elif self.triple_cluster == True:
+
+            old_1_models = self.bandfluxes.copy(deep=True)
+            old_2_models = self.bandfluxes.copy(deep=True)
+            new_models = self.bandfluxes.copy(deep=True)
+            self.truefluxerrors = self.bandfluxerrors.copy(deep=True)
+
+            for curr_row in range(self.bandfluxes.shape[0]):
+                valid_filters_this_row = []
+                ul_filters_this_row = []
+                for valid_ind,arraytup in enumerate(zip(self.bandfluxes.loc[curr_row,:],self.ul_frame.loc[curr_row,:])):
+                    if np.isnan(arraytup[0]) == False:
+                        valid_filters_this_row.append(valid_ind)
+                    if arraytup[1] == 1:
+                        ul_filters_this_row.append(valid_ind)
+    
+                best_tup = (self.results[curr_row].x[0],self.results[curr_row].x[1],self.results[curr_row].x[2],self.results[curr_row].x[3],self.results[curr_row].x[4],self.results[curr_row].x[5],self.results[curr_row].x[6],self.results[curr_row].x[7],self.results[curr_row].x[8],self.results[curr_row].x[9],self.results[curr_row].x[10])
+                old1,old2,new = self.minichisqfunc_triple(best_tup,valid_filters_this_row)
+                usedold1 = 0
+                usedold2 = 0
+                usednew = 0
+                for colno,col in enumerate(old_1_models.loc[curr_row,:]):
+                    if np.isnan(col) == False:
+                        old_1_models.iat[curr_row,colno] = old1[usedold1]
+                        usedold1 += 1
+                for colno,col in enumerate(old_2_models.loc[curr_row,:]):
+                    if np.isnan(col) == False:
+                        old_2_models.iat[curr_row,colno] = old2[usedold2]
+                        usedold2 += 1
+                for colno,col in enumerate(new_models.loc[curr_row,:]):
+                    if np.isnan(col) == False:
+                        new_models.iat[curr_row,colno] = new[usednew]
+                        usednew += 1
+
+                for colno, arraytup in enumerate(zip(self.bandfluxerrors.loc[curr_row,:],self.ul_frame.loc[curr_row,:],self.bandfluxes.loc[curr_row,:])):
+                    if np.isnan(arraytup[0]) == False:
+                        self.truefluxerrors.iat[curr_row,colno] = (arraytup[0])
+                    if arraytup[1] == 1:
+                        if self.ulmeth == "Limit":
+                            self.truefluxerrors.iat[curr_row,colno] = (arraytup[0]*-3)
+                        elif self.ulmeth == "Standard":
+                            self.truefluxerrors.iat[curr_row,colno] = (arraytup[2]*-1/3)
+                
+            if self.fluxresults == 1:
+
+                if self.model_chosen == "UVIT_HST":        
+                    colnames = {"F148W_meas_flux [mJy]" : [], "F148W_err [mJy]" : [], "F148W_avg_wav [nm]" : [], "F148W_old_1_flux" : [], "F148W_old_2_flux" : [], "F148W_new_flux" : [], "F169M_meas_flux [mJy]" : [], "F169M_err [mJy]" : [], "F169M_avg_wav [nm]" : [], "F169M_old_1_flux [mJy]" : [], "F169M_old_2_flux [mJy]" : [], "F169M_new_flux [mJy]" : [], "F172M_meas_flux [mJy]" : [], "F172M_err [mJy]" : [], "F172M_avg_wav [nm]" : [], "F172M_old_1_flux [mJy]" : [], "F172M_old_2_flux [mJy]" : [], "F172M_new_flux [mJy]" : [], "N219M_meas_flux [mJy]" : [], "N219M_err [mJy]" : [], "N219M_avg_wav [nm]" : [], "N219M_old_1_flux [mJy]" : [], "N219M_old_2_flux [mJy]" : [], "N219M_new_flux [mJy]" : [], "N279N_meas_flux [mJy]" : [], "N279N_err [mJy]" : [], "N279N_avg_wav [nm]" : [], "N279N_old_1_flux [mJy]" : [], "N279N_old_2_flux [mJy]" : [], "N279N_new_flux [mJy]" : [], "f275w_meas_flux [mJy]" : [], "f275w_err [mJy]" : [], "f275w_avg_wav [nm]" : [], "f275w_old_1_flux [mJy]" : [], "f275w_old_2_flux [mJy]" : [], "f275w_new_flux [mJy]" : [], "f336w_meas_flux [mJy]" : [], "f336w_err [mJy]" : [], "f336w_avg_wav [nm]" : [], "f336w_old_1_flux [mJy]" : [], "f336w_old_2_flux [mJy]" : [], "f336w_new_flux [mJy]" : [], "f475w_meas_flux [mJy]" : [], "f475w_err [mJy]" : [], "f475w_avg_wav [nm]" : [], "f475w_old_1_flux [mJy]" : [], "f475w_old_2_flux [mJy]" : [], "f475w_new_flux [mJy]" : [], "f814w_meas_flux [mJy]" : [], "f814w_err [mJy]" : [], "f814w_avg_wav [nm]" : [], "f814w_old_1_flux [mJy]" : [], "f814w_old_2_flux [mJy]" : [], "f814w_new_flux [mJy]" : [], "f110w_meas_flux [mJy]" : [], "f110w_err [mJy]" : [], "f110w_avg_wav [nm]" : [], "f110w_old_1_flux [mJy]" : [], "f110w_old_2_flux [mJy]" : [], "f110w_new_flux [mJy]" : [], "f160w_meas_flux [mJy]" : [], "f160w_err [mJy]" : [], "f160w_avg_wav [nm]" : [], "f160w_old_1_flux [mJy]" : [], "f160w_old_2_flux [mJy]" : [], "f160w_new_flux [mJy]" : []}
+                elif self.model_chosen == "UVIT_SDSS_Spitzer":
+                    colnames = {"F148W_meas_flux [mJy]" : [], "F148W_err [mJy]" : [], "F148W_avg_wav [nm]" : [], "F148W_old_1_flux [mJy]" : [], "F148W_old_2_flux" : [], "F148W_new_flux" : [], "F169M_meas_flux [mJy]" : [], "F169M_err [mJy]" : [], "F169M_avg_wav [nm]" : [], "F169M_old_1_flux [mJy]" : [], "F169M_old_2_flux [mJy]" : [], "F169M_new_flux [mJy]" : [], "F172M_meas_flux [mJy]" : [], "F172M_err [mJy]" : [], "F172M_avg_wav [nm]" : [], "F172M_old_1_flux [mJy]" : [], "F172M_old_2_flux [mJy]" : [], "F172M_new_flux [mJy]" : [], "N219M_meas_flux [mJy]" : [], "N219M_err [mJy]" : [], "N219M_avg_wav [nm]" : [], "N219M_old_1_flux [mJy]" : [], "N219M_old_2_flux [mJy]" : [], "N219M_new_flux [mJy]" : [], "N279N_meas_flux [mJy]" : [], "N279N_err [mJy]" : [], "N279N_avg_wav [nm]" : [], "N279N_old_1_flux [mJy]" : [], "N279N_old_2_flux [mJy]" : [], "N279N_new_flux [mJy]" : [], "u_prime_meas_flux [mJy]" : [], "u_prime_err [mJy]" : [], "u_prime_avg_wav [nm]" : [], "u_prime_old_1_flux [mJy]" : [], "u_prime_old_2_flux [mJy]" : [], "u_prime_new_flux [mJy]" : [], "g_prime_meas_flux [mJy]" : [], "g_prime_err [mJy]" : [], "g_prime_avg_wav [nm]" : [], "g_prime_old_1_flux [mJy]" : [],  "g_prime_old_2_flux [mJy]" : [], "g_prime_new_flux [mJy]" : [], "r_prime_meas_flux [mJy]" : [], "r_prime_err [mJy]" : [], "r_prime_avg_wav [nm]" : [], "r_prime_old_1_flux [mJy]" : [], "r_prime_old_2_flux [mJy]" : [], "r_prime_new_flux [mJy]" : [], "i_prime_meas_flux [mJy]" : [], "i_prime_err [mJy]" : [], "i_prime_avg_wav [nm]" : [], "i_prime_old_1_flux [mJy]" : [], "i_prime_old_2_flux [mJy]" : [], "i_prime_new_flux [mJy]" : [],  "z_prime_meas_flux [mJy]" : [], "z_prime_err [mJy]" : [], "z_prime_avg_wav [nm]" : [], "z_prime_old_1_flux [mJy]" : [], "z_prime_old_2_flux [mJy]" : [], "z_prime_new_flux [mJy]" : [], "IRAC1_meas_flux [mJy]" : [], "IRAC1_err [mJy]" : [], "IRAC1_avg_wav [nm]" : [], "IRAC1_old_1_flux [mJy]" : [], "IRAC1_old_2_flux [mJy]" : [], "IRAC1_new_flux [mJy]" : [], "IRAC2_meas_flux [mJy]" : [], "IRAC2_err [mJy]" : [], "IRAC2_avg_wav [nm]" : [], "IRAC2_old_1_flux [mJy]" : [], "IRAC2_old_2_flux [mJy]" : [], "IRAC2_new_flux [mJy]" : []}
+                fluxresultsdf = pd.DataFrame(colnames)
+                for curr_row in range(self.bandfluxes.shape[0]):
+                    if self.model_chosen == "UVIT_HST": 
+                        rowdict = {"F148W_meas_flux [mJy]" : self.bandfluxes.iat[curr_row,0], "F148W_err [mJy]" : self.truefluxerrors.iat[curr_row,0], "F148W_avg_wav [nm]" : self.avgwvlist[0], "F148W_old_1_flux [mJy]" : old_1_models.iat[curr_row,0], "F148W_old_2_flux [mJy]" : old_2_models.iat[curr_row,0], "F148W_new_flux [mJy]" : new_models.iat[curr_row,0], "F169M_meas_flux [mJy]" : self.bandfluxes.iat[curr_row,1], "F169M_err [mJy]" : self.truefluxerrors.iat[curr_row,1], "F169M_avg_wav [nm]" : self.avgwvlist[1], "F169M_old_1_flux [mJy]" : old_1_models.iat[curr_row,1], "F169M_old_2_flux [mJy]" : old_2_models.iat[curr_row,1], "F169M_new_flux [mJy]" : new_models.iat[curr_row,1], "F172M_meas_flux [mJy]" : self.bandfluxes.iat[curr_row,2], "F172M_err [mJy]" : self.truefluxerrors.iat[curr_row,2], "F172M_avg_wav [nm]" : self.avgwvlist[2], "F172M_old_1_flux [mJy]" : old_1_models.iat[curr_row,2], "F172M_old_2_flux [mJy]" : old_2_models.iat[curr_row,2], "F172M_new_flux [mJy]" : new_models.iat[curr_row,2], "N219M_meas_flux [mJy]" : self.bandfluxes.iat[curr_row,3], "N219M_err [mJy]" : self.truefluxerrors.iat[curr_row,3], "N219M_avg_wav [nm]" : self.avgwvlist[3], "N219M_old_1_flux [mJy]" : old_1_models.iat[curr_row,3], "N219M_old_2_flux [mJy]" : old_2_models.iat[curr_row,3], "N219M_new_flux [mJy]" : new_models.iat[curr_row,3], "N279N_meas_flux [mJy]" : self.bandfluxes.iat[curr_row,4], "N279N_err [mJy]" : self.truefluxerrors.iat[curr_row,4], "N279N_avg_wav [nm]" : self.avgwvlist[4], "N279N_old_1_flux [mJy]" : old_1_models.iat[curr_row,4], "N279N_old_2_flux [mJy]" : old_2_models.iat[curr_row,4], "N279N_new_flux [mJy]" : new_models.iat[curr_row,4], "f275w_meas_flux [mJy]" : self.bandfluxes.iat[curr_row,5], "f275w_err [mJy]" : self.truefluxerrors.iat[curr_row,5], "f275w_avg_wav [nm]" : self.avgwvlist[5], "f275w_old_1_flux [mJy]" : old_1_models.iat[curr_row,5], "f275w_old_2_flux [mJy]" : old_2_models.iat[curr_row,5], "f275w_new_flux [mJy]" : new_models.iat[curr_row,5], "f336w_meas_flux [mJy]" : self.bandfluxes.iat[curr_row,6], "f336w_err [mJy]" : self.truefluxerrors.iat[curr_row,6], "f336w_avg_wav [nm]" : self.avgwvlist[6], "f336w_old_1_flux [mJy]" : old_1_models.iat[curr_row,6], "f336w_old_2_flux [mJy]" : old_2_models.iat[curr_row,6], "f336w_new_flux [mJy]" : new_models.iat[curr_row,6], "f475w_meas_flux [mJy]" : self.bandfluxes.iat[curr_row,7], "f475w_err [mJy]" : self.truefluxerrors.iat[curr_row,7], "f475w_avg_wav [nm]" : self.avgwvlist[7], "f475w_old_1_flux [mJy]" : old_1_models.iat[curr_row,7], "f475w_old_2_flux [mJy]" : old_2_models.iat[curr_row,7], "f475w_new_flux [mJy]" : new_models.iat[curr_row,7], "f814w_meas_flux [mJy]" : self.bandfluxes.iat[curr_row,8], "f814w_err [mJy]" : self.truefluxerrors.iat[curr_row,8], "f814w_avg_wav [nm]" : self.avgwvlist[8], "f814w_old_1_flux [mJy]" : old_1_models.iat[curr_row,8], "f814w_old_2_flux [mJy]" : old_2_models.iat[curr_row,8], "f814w_new_flux [mJy]" : new_models.iat[curr_row,8], "f110w_meas_flux [mJy]" : self.bandfluxes.iat[curr_row,9], "f110w_err [mJy]" : self.truefluxerrors.iat[curr_row,9], "f110w_avg_wav [nm]" : self.avgwvlist[9], "f110w_old_1_flux [mJy]" : old_1_models.iat[curr_row,9], "f110w_old_2_flux [mJy]" : old_2_models.iat[curr_row,9], "f110w_new_flux [mJy]" : new_models.iat[curr_row,9], "f160w_meas_flux [mJy]" : self.bandfluxes.iat[curr_row,10], "f160w_err [mJy]" : self.truefluxerrors.iat[curr_row,10], "f160w_avg_wav [nm]" : self.avgwvlist[10], "f160w_old_1_flux [mJy]" : old_1_models.iat[curr_row,10], "f160w_old_2_flux [mJy]" : old_2_models.iat[curr_row,10],"f160w_new_flux [mJy]" : new_models.iat[curr_row,10]}
+                    elif self.model_chosen == "UVIT_SDSS_Spitzer": 
+                        rowdict = {"F148W_meas_flux [mJy]" : self.bandfluxes.iat[curr_row,0], "F148W_err [mJy]" : self.truefluxerrors.iat[curr_row,0], "F148W_avg_wav [nm]" : self.avgwvlist[0], "F148W_old_1_flux [mJy]" : old_1_models.iat[curr_row,0], "F148W_old_2_flux [mJy]" : old_2_models.iat[curr_row,0], "F148W_new_flux [mJy]" : new_models.iat[curr_row,0], "F169M_meas_flux [mJy]" : self.bandfluxes.iat[curr_row,1], "F169M_err [mJy]" : self.truefluxerrors.iat[curr_row,1], "F169M_avg_wav [nm]" : self.avgwvlist[1], "F169M_old_1_flux [mJy]" : old_1_models.iat[curr_row,1], "F169M_old_2_flux [mJy]" : old_2_models.iat[curr_row,1], "F169M_new_flux [mJy]" : new_models.iat[curr_row,1], "F172M_meas_flux [mJy]" : self.bandfluxes.iat[curr_row,2], "F172M_err [mJy]" : self.truefluxerrors.iat[curr_row,2], "F172M_avg_wav [nm]" : self.avgwvlist[2], "F172M_old_1_flux [mJy]" : old_1_models.iat[curr_row,2], "F172M_old_2_flux [mJy]" : old_2_models.iat[curr_row,2], "F172M_new_flux [mJy]" : new_models.iat[curr_row,2], "N219M_meas_flux [mJy]" : self.bandfluxes.iat[curr_row,3], "N219M_err [mJy]" : self.truefluxerrors.iat[curr_row,3], "N219M_avg_wav [nm]" : self.avgwvlist[3], "N219M_old_1_flux [mJy]" : old_1_models.iat[curr_row,3], "N219M_old_2_flux [mJy]" : old_2_models.iat[curr_row,3], "N219M_new_flux [mJy]" : new_models.iat[curr_row,3], "N279N_meas_flux [mJy]" : self.bandfluxes.iat[curr_row,4], "N279N_err [mJy]" : self.truefluxerrors.iat[curr_row,4], "N279N_avg_wav [nm]" : self.avgwvlist[4], "N279N_old_1_flux [mJy]" : old_1_models.iat[curr_row,4], "N279N_old_2_flux [mJy]" : old_2_models.iat[curr_row,4], "N279N_new_flux [mJy]" : new_models.iat[curr_row,4], "u_prime_meas_flux [mJy]" : self.bandfluxes.iat[curr_row,5], "u_prime_err [mJy]" : self.truefluxerrors.iat[curr_row,5], "u_prime_avg_wav [nm]" : self.avgwvlist[5], "u_prime_old_1_flux [mJy]" : old_1_models.iat[curr_row,5], "u_prime_old_2_flux [mJy]" : old_2_models.iat[curr_row,5], "u_prime_new_flux [mJy]" : new_models.iat[curr_row,5], "g_prime_meas_flux [mJy]" : self.bandfluxes.iat[curr_row,6], "g_prime_err [mJy]" : self.truefluxerrors.iat[curr_row,6], "g_prime_avg_wav [nm]" : self.avgwvlist[6], "g_prime_old_1_flux [mJy]" : old_1_models.iat[curr_row,6], "g_prime_old_2_flux [mJy]" : old_2_models.iat[curr_row,6], "g_prime_new_flux [mJy]" : new_models.iat[curr_row,6], "r_prime_meas_flux [mJy]" : self.bandfluxes.iat[curr_row,7], "r_prime_err [mJy]" : self.truefluxerrors.iat[curr_row,7], "r_prime_avg_wav [nm]" : self.avgwvlist[7], "r_prime_old_1_flux [mJy]" : old_1_models.iat[curr_row,7], "r_prime_old_2_flux [mJy]" : old_2_models.iat[curr_row,7], "r_prime_new_flux [mJy]" : new_models.iat[curr_row,7], "i_prime_meas_flux [mJy]" : self.bandfluxes.iat[curr_row,8], "i_prime_err [mJy]" : self.truefluxerrors.iat[curr_row,8], "i_prime_avg_wav [nm]" : self.avgwvlist[8], "i_prime_old_1_flux [mJy]" : old_1_models.iat[curr_row,8], "i_prime_old_2_flux [mJy]" : old_2_models.iat[curr_row,8], "i_prime_new_flux [mJy]" : new_models.iat[curr_row,8], "z_prime_meas_flux [mJy]" : self.bandfluxes.iat[curr_row,9], "z_prime_err [mJy]" : self.truefluxerrors.iat[curr_row,9], "z_prime_avg_wav [nm]" : self.avgwvlist[9], "z_prime_old_1_flux [mJy]" : old_1_models.iat[curr_row,9], "z_prime_old_2_flux [mJy]" : old_2_models.iat[curr_row,9], "z_prime_new_flux [mJy]" : new_models.iat[curr_row,9], "IRAC1_meas_flux [mJy]" : self.bandfluxes.iat[curr_row,10], "IRAC1_err [mJy]" : self.truefluxerrors.iat[curr_row,10], "IRAC1_avg_wav [nm]" : self.avgwvlist[10], "IRAC1_old_1_flux [mJy]" : old_1_models.iat[curr_row,10], "IRAC1_old_2_flux [mJy]" : old_2_models.iat[curr_row,10], "IRAC1_new_flux [mJy]" : new_models.iat[curr_row,10], "IRAC2_meas_flux [mJy]" : self.bandfluxes.iat[curr_row,11], "IRAC2_err [mJy]" : self.truefluxerrors.iat[curr_row,11], "IRAC2_avg_wav [nm]" : self.avgwvlist[11], "IRAC2_old_1_flux [mJy]" : old_1_models.iat[curr_row,11],  "IRAC2_old_2_flux [mJy]" : old_2_models.iat[curr_row,11], "IRAC2_new_flux [mJy]" : new_models.iat[curr_row,11]}
+                    fluxresultsdf =fluxresultsdf.append(rowdict,ignore_index=True)
+                for curr_row in range(self.bandfluxes.shape[0]):
+                    fluxresultsdf = fluxresultsdf.rename(index={curr_row:"Source at row {}".format(self.rows[curr_row]+2)})
+                try:
+                    fluxresultsdf.to_csv("{}".format(self.fluxfilename))
+                except:
+                    import tkinter as tk
+                    from tkinter import messagebox
+                    tk.messagebox.showerror('Error','An error occurred. This can happen if a file is open while trying to overwrite it. Please close any relevant files and try again.') 
+
+
+
         if self.chiparams == 1:
             
             if self.single_cluster == True:
@@ -1809,7 +2560,26 @@ class ChiSquared():
                     import tkinter as tk
                     from tkinter import messagebox
                     tk.messagebox.showerror('Error','An error occurred. This can happen if a file is open while trying to overwrite it. Please close any relevant files and try again.')             
-    
+
+            elif self.triple_cluster == True:
+                import math
+                colnames = {'Source_ID' : [], 'minimized chi^2' : [], 'log(Z_old_1)' : [], 'log(Z_old_1)_err_lo' : [], 'log(Z_old_1)_err_hi' : [], 'log(age_old_1)/10' : [], 'log(age_old_1)/10_err_lo' : [], 'log(age_old_1)/10_err_hi' : [], 'log(M_old_1)/10' : [], 'log(M_old_1)/10_err_lo' : [], 'log(M_old_1)/10_err_hi' : [], 'E(B-V)_old' : [],  'E(B-V)_old_err_lo' : [], 'E(B-V)_old_err_hi' : [], 'log(Z_old_2)' : [], 'log(Z_old_2)_err_lo' : [], 'log(Z_old_2)_err_hi' : [], 'log(age_old_2)/10' : [], 'log(age_old_2)/10_err_lo' : [], 'log(age_old_2)/10_err_hi' : [], 'log(M_old_2)/10' : [], 'log(M_old_2)/10_err_lo' : [], 'log(M_old_2)/10_err_hi' : [], 'E(B-V)_new' : [], 'E(B-V)_new_err_lo' : [], 'E(B-V)_new_err_hi' : [], 'log(Z_new)' : [], 'log(Z_new)_err_lo' : [], 'log(Z_new)_err_hi' : [], 'log(age_new)/10' : [], 'log(age_new)/10_err_lo' : [], 'log(age_new)/10_err_hi' : [], 'log(M_new)/10' : [], 'log(M_new)/10_err_lo' : [], 'log(M_new)/10_err_hi' : []}
+                chiparamsdf = pd.DataFrame(colnames).copy(deep=True)
+                for curr_row in range(self.bandfluxes.shape[0]):
+                    rowdict = {'Source_ID' : self.source_ids[curr_row], 'minimized chi^2' : self.results[curr_row].fun, 'log(Z_old_1)' : self.results[curr_row].x[0], 'log(Z_old_1)_err_lo' : self.errorsallrows[curr_row][0][0], 'log(Z_old_1)_err_hi' : self.errorsallrows[curr_row][0][1], 'log(age_old_1)/10' : self.results[curr_row].x[1], 'log(age_old_1)/10_err_lo' : self.errorsallrows[curr_row][1][0], 'log(age_old_1)/10_err_hi' : self.errorsallrows[curr_row][1][1], 'log(M_old_1)/10' : self.results[curr_row].x[2], 'log(M_old_1)/10_err_lo' : self.errorsallrows[curr_row][2][0], 'log(M_old_1)/10_err_hi' : self.errorsallrows[curr_row][2][1], 'E(B-V)_old' : self.results[curr_row].x[3], 'E(B-V)_old_err_lo' : self.errorsallrows[curr_row][3][0], 'E(B-V)_old_err_hi' : self.errorsallrows[curr_row][3][1], 'log(Z_old_2)' : self.results[curr_row].x[4], 'log(Z_old_2)_err_lo' : self.errorsallrows[curr_row][4][0], 'log(Z_old_2)_err_hi' : self.errorsallrows[curr_row][4][1], 'log(age_old_2)/10' : self.results[curr_row].x[5], 'log(age_old_2)/10_err_lo' : self.errorsallrows[curr_row][5][0], 'log(age_old_2)/10_err_hi' : self.errorsallrows[curr_row][5][1], 'log(M_old_2)/10' : self.results[curr_row].x[6], 'log(M_old_2)/10_err_lo' : self.errorsallrows[curr_row][6][0], 'log(M_old_2)/10_err_hi' : self.errorsallrows[curr_row][6][1], 'E(B-V)_new' : self.results[curr_row].x[7], 'E(B-V)_new_err_lo' : self.errorsallrows[curr_row][7][0], 'E(B-V)_new_err_hi' : self.errorsallrows[curr_row][7][1],'log(Z_new)' : self.results[curr_row].x[8], 'log(Z_new)_err_lo' : self.errorsallrows[curr_row][8][0], 'log(Z_new)_err_hi' : self.errorsallrows[curr_row][8][1], 'log(age_new)/10' : self.results[curr_row].x[9], 'log(age_new)/10_err_lo' : self.errorsallrows[curr_row][9][0], 'log(age_new)/10_err_hi' : self.errorsallrows[curr_row][9][1], 'log(M_new)/10' : self.results[curr_row].x[10], 'log(M_new)/10_err_lo' : self.errorsallrows[curr_row][10][0], 'log(M_new)/10_err_hi' : self.errorsallrows[curr_row][10][1]}
+                    chiparamsdf = chiparamsdf.append(rowdict,ignore_index=True)
+                for curr_row in range(self.bandfluxes.shape[0]):
+                    chiparamsdf = chiparamsdf.rename(index={curr_row:"Source at row {}".format(self.rows[curr_row]+2)})
+                try:
+                    chiparamsdf.to_csv("{}".format(self.chifilename))
+                except:
+                    import tkinter as tk
+                    from tkinter import messagebox
+                    tk.messagebox.showerror('Error','An error occurred. This can happen if a file is open while trying to overwrite it. Please close any relevant files and try again.')             
+
+
+
+
     def display_results_single(self,curr_row):
         import ctypes
         ctypes.windll.shcore.SetProcessDpiAwareness(1)
@@ -2047,6 +2817,7 @@ class ChiSquared():
         byebyebutt.place(x=423,y=830)
         topw.mainloop()
 
+    
     def display_results_double(self,curr_row):
         import ctypes
         ctypes.windll.shcore.SetProcessDpiAwareness(1)
@@ -2361,6 +3132,383 @@ class ChiSquared():
         noteshi7 = tk.Label(colpack6,text="{}".format(M_cool_sticker5),font="Arial, 6").pack()
         noteshi8 = tk.Label(colpack6,text="{}".format(ebv_cool_sticker5),font="Arial, 6").pack()
 
+        def closethesource():
+            topw.destroy()
+        byebyebutt = tk.Button(topw, bd=3, font="Arial 10", text="Next source",command=closethesource,padx=30,pady=5)
+        byebyebutt.place(x=423,y=830)
+        topw.mainloop()
+
+    def display_results_triple(self,curr_row):
+        import ctypes
+        ctypes.windll.shcore.SetProcessDpiAwareness(1)
+        import tkinter as tk
+        topw = tk.Tk()
+        topw.geometry("1460x900+250+20")
+        topw.title("Optimization results")
+        topw.resizable(0,0)
+        
+        import matplotlib
+        from matplotlib.figure import Figure
+        from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+        matplotlib.use('TkAgg')
+        import numpy as np
+
+        valid_filters_this_row = []
+        ul_filters_this_row = []
+        for valid_ind,arraytup in enumerate(zip(self.bandfluxes.loc[curr_row,:],self.ul_frame.loc[curr_row,:])):
+            if np.isnan(arraytup[0]) == False:
+                valid_filters_this_row.append(valid_ind)
+            if arraytup[1] == 1:
+                ul_filters_this_row.append(valid_ind)
+        valid_notul_filters_this_row = [i for i in valid_filters_this_row if i not in ul_filters_this_row]
+
+        valid_fluxes_this_row = []
+        for valid_ind in valid_filters_this_row:
+            valid_fluxes_this_row.append(self.bandfluxes.iat[curr_row,valid_ind])
+
+        valid_notul_fluxes_this_row = []
+        for valid_ind in valid_notul_filters_this_row:
+            valid_notul_fluxes_this_row.append(self.bandfluxes.iat[curr_row,valid_ind])
+    
+        valid_ul_fluxes_this_row = []
+        for valid_ind in ul_filters_this_row:
+            valid_ul_fluxes_this_row.append(self.bandfluxes.iat[curr_row,valid_ind])
+
+        valid_errors_this_row = []
+        for valid_ind in valid_filters_this_row:
+            valid_errors_this_row.append(self.truefluxerrors.iat[curr_row,valid_ind])
+
+        valid_notul_errors_this_row = []
+        for valid_ind in valid_notul_filters_this_row:
+            valid_notul_errors_this_row.append(self.truefluxerrors.iat[curr_row,valid_ind])
+
+        valid_ul_errors_this_row = []
+        for valid_ind in ul_filters_this_row:
+            valid_ul_errors_this_row.append(self.truefluxerrors.iat[curr_row,valid_ind]*-1)  
+
+        valid_avgwv_this_row = []
+        for valid_ind in valid_filters_this_row:
+            valid_avgwv_this_row.append(self.avgwvlist[valid_ind])
+
+        valid_notul_avgwv_this_row = []
+        for valid_ind in valid_notul_filters_this_row:
+            valid_notul_avgwv_this_row.append(self.avgwvlist[valid_ind])
+
+        valid_ul_avgwv_this_row = []
+        for valid_ind in ul_filters_this_row:
+            valid_ul_avgwv_this_row.append(self.avgwvlist[valid_ind])
+
+        valid_actualfilters_this_row = []
+        for valid_ind in valid_filters_this_row:
+            valid_actualfilters_this_row.append(self.filternames[valid_ind])
+    
+
+        fig = Figure(figsize=(10.5,6))
+        abc = fig.add_subplot(111)
+        best_tup = (self.results[curr_row].x[0],self.results[curr_row].x[1],self.results[curr_row].x[2],self.results[curr_row].x[3],self.results[curr_row].x[4],self.results[curr_row].x[5],self.results[curr_row].x[6],self.results[curr_row].x[7],self.results[curr_row].x[8],self.results[curr_row].x[9],self.results[curr_row].x[10])
+        abc.scatter(valid_avgwv_this_row,valid_fluxes_this_row,color="orange")
+        abc.set_xlabel("Wavelength [nm]")
+        abc.set_ylabel("Flux [mJy]")
+        abc.set_title("Source at row {} (Source ID {})".format(self.rows[curr_row]+2, self.source_ids[curr_row]))
+        abc.errorbar(valid_notul_avgwv_this_row,valid_notul_fluxes_this_row,yerr=valid_notul_errors_this_row,fmt="o",color="orange")
+        if self.model_chosen == "UVIT_HST":
+            abc.errorbar(valid_ul_avgwv_this_row,valid_ul_fluxes_this_row,yerr=valid_ul_errors_this_row,uplims=True,fmt="o",color="green")
+        old1mod = self.minichisqfunc_triple(best_tup,valid_filters_this_row)[0]
+        old2mod = self.minichisqfunc_triple(best_tup,valid_filters_this_row)[1]
+        newmod = self.minichisqfunc_triple(best_tup,valid_filters_this_row)[2]
+        abc.plot(valid_avgwv_this_row,old1mod,color="red")
+        abc.plot(valid_avgwv_this_row,old2mod,color="blue")
+        abc.plot(valid_avgwv_this_row,old2mod,color="m")
+        sumofmodels = [old1mod[i] + old2mod[i] + newmod[i] for i in range(len(old1mod))]
+        abc.plot(valid_avgwv_this_row,sumofmodels,color="limegreen")
+
+        if self.plotscale == 1:
+            if self.xticker == 1:
+                abc.set_xticks([int(i) for i in np.arange(200,max(valid_avgwv_this_row),200)])
+            elif self.xticker == 0:
+                better_avgwv_this_row = []
+                for ind, wv in enumerate(valid_avgwv_this_row[0:len(valid_avgwv_this_row)-1]):
+                    if valid_avgwv_this_row[ind + 1] - valid_avgwv_this_row[ind] > 80:
+                        better_avgwv_this_row.append(wv)
+                abc.set_xticks(better_avgwv_this_row)
+
+        if self.plotscale == 0:
+            abc.set_xscale('log')
+            abc.set_yscale('log')
+            if self.xticker == 1:
+                abc.set_xticks([int(i) for i in np.arange(200,max(valid_avgwv_this_row),200)])
+            elif self.xticker == 0:
+                better_avgwv_this_row = []
+                for ind, wv in enumerate(valid_avgwv_this_row[0:len(valid_avgwv_this_row)-1]):
+                    if valid_avgwv_this_row[ind + 1] - valid_avgwv_this_row[ind] > 20:
+                        better_avgwv_this_row.append(wv)
+                abc.set_xticks(better_avgwv_this_row)
+            abc.get_xaxis().set_major_formatter(matplotlib.ticker.ScalarFormatter())
+
+        if self.saveplots == 1:
+            saveimgname = self.imgfilename.replace("X","{}".format(self.rows[curr_row]+2))
+            fig.savefig('{}'.format(saveimgname), bbox_inches='tight', dpi=150)
+
+        canvas = FigureCanvasTkAgg(fig, master=topw)
+        canvas.get_tk_widget().pack(anchor=tk.E)
+        canvas.draw()
+
+        label1 = tk.Label(topw,text="Average wavelength of each filter (x):")
+        label1.place(x=50,y=20)
+        textbox1 = tk.Text(topw,height=6,width=30)
+        for filtername,avgwv in zip(valid_actualfilters_this_row,valid_avgwv_this_row):
+            textbox1.insert(tk.END,"{}      {}\n".format(filtername,avgwv))
+        textbox1.place(x=50,y=50)
+        label2 = tk.Label(topw,text="Bandfluxes (y, orange):")
+        label2.place(x=50,y=195)
+        textbox2 = tk.Text(topw,height=6,width=30)
+        for filtername,bf in zip(valid_actualfilters_this_row,valid_fluxes_this_row):
+            textbox2.insert(tk.END,"{}      {}\n".format(filtername,format(bf,'.8e')))
+        textbox2.place(x=50,y=225)
+        label3 = tk.Label(topw,text="Bandflux errors:")
+        label3.place(x=50,y=370)
+        textbox3 = tk.Text(topw,height=6,width=30)
+        for filtername,bfe in zip(valid_actualfilters_this_row,valid_errors_this_row):
+            textbox3.insert(tk.END,"{}      {}\n".format(filtername,format(bfe,'.8e')))
+        textbox3.place(x=50,y=400)
+        label4 = tk.Label(topw,text="Old_1 cluster model fluxes (y, red):")
+        label4.place(x=50,y=545)
+        textbox4 = tk.Text(topw,height=6,width=30)
+        for filtername,mod in zip(valid_actualfilters_this_row,self.minichisqfunc_triple(best_tup,valid_filters_this_row)[0]):
+            textbox4.insert(tk.END,"{}      {}\n".format(filtername,format(mod,'.8e')))
+        textbox4.place(x=50,y=575)
+        label5 = tk.Label(topw,text="Old_2 cluster model fluxes (y, blue):")
+        label5.place(x=50,y=720)
+        textbox5 = tk.Text(topw,height=6,width=30)
+        for filtername,mod in zip(valid_actualfilters_this_row,self.minichisqfunc_triple(best_tup,valid_filters_this_row)[1]):
+            textbox5.insert(tk.END,"{}      {}\n".format(filtername,format(mod,'.8e')))
+        textbox5.place(x=50,y=750)
+        label6 = tk.Label(topw,text="New cluster model fluxes (y, majenta):")
+        label6.place(x=50,y=820)
+        textbox6 = tk.Text(topw,height=6,width=30)
+        for filtername,mod in zip(valid_actualfilters_this_row,self.minichisqfunc_triple(best_tup,valid_filters_this_row)[2]):
+            textbox6.insert(tk.END,"{}      {}\n".format(filtername,format(mod,'.8e')))
+        textbox6.place(x=50,y=750)
+        groove = tk.Canvas(topw,width=185,height=120,bd=4,relief=tk.RIDGE)
+        groove.place(x=405,y=655)
+        label7 = tk.Label(topw,text="Lowest chi^2 value")
+        label7.place(x=425,y=665)
+        label7a = tk.Label(topw,text="{}".format(format(self.results[curr_row].fun,'.6e')),font=("Arial",12))
+        label7a.place(x=437,y=715)
+
+        import math
+        Z_old_1_sticker1 = format(self.results[curr_row].x[0],'.6e')
+        try:
+            Z_old_1_sticker2 = format(self.errorsallrows[curr_row][0][0],'.6e')
+        except:
+            Z_old_1_sticker2 = "       N/A       "
+        try:
+            Z_old_1_sticker3 = format(self.errorsallrows[curr_row][0][1],'.6e')
+        except:
+            Z_old_1_sticker3 = "       N/A       "
+        Z_old_1_sticker4 = self.errornotes[curr_row][0][0]
+        Z_old_1_sticker5 = self.errornotes[curr_row][0][1]
+
+        age_old_1_sticker1 = format(self.results[curr_row].x[1],'.6e')
+        try:
+            age_old_1_sticker2 = format(self.errorsallrows[curr_row][1][0],'.6e')
+        except:
+            age_old_1_sticker2 = "       N/A       "
+        try:
+            age_old_1_sticker3 = format(self.errorsallrows[curr_row][1][1],'.6e')
+        except:
+            age_old_1_sticker3 = "       N/A       "
+        age_old_1_sticker4 = self.errornotes[curr_row][1][0]
+        age_old_1_sticker5 = self.errornotes[curr_row][1][1]  
+
+        M_old_1_sticker1 = format(self.results[curr_row].x[2],'.6e')
+        try:
+            M_old_1_sticker2 = format(self.errorsallrows[curr_row][2][0],'.6')
+        except:
+            M_old_1_sticker2 = "       N/A       "
+        try:
+            M_old_1_sticker3 = format(self.errorsallrows[curr_row][2][1],'.6e')
+        except:
+            M_old_1_sticker3 = "       N/A       "
+        M_old_1_sticker4 = self.errornotes[curr_row][2][0]
+        M_old_1_sticker5 = self.errornotes[curr_row][2][1]
+
+        ebv_old_sticker1 = format(self.results[curr_row].x[3],'.6e')
+        try:
+            ebv_old_sticker2 = format(self.errorsallrows[curr_row][3][0],'.6e')
+        except:
+            ebv_old_sticker2 = "       N/A       "
+        try:
+            ebv_old_sticker3 = format(self.errorsallrows[curr_row][3][1],'.6e')
+        except:
+            ebv_old_sticker3 = "       N/A     "
+        ebv_old_sticker4 = self.errornotes[curr_row][3][0]
+        ebv_old_sticker5 = self.errornotes[curr_row][3][1]
+
+        Z_old_2_sticker1 = format(self.results[curr_row].x[4],'.6e')
+        try:
+            Z_old_2_sticker2 = format(self.errorsallrows[curr_row][4][0],'.6e')
+        except:
+            Z_old_2_sticker2 = "       N/A       "
+        try:
+            Z_old_2_sticker3 = format(self.errorsallrows[curr_row][4][1],'.6e')
+        except:
+            Z_old_2_sticker3 = "       N/A       "
+        Z_old_2_sticker4 = self.errornotes[curr_row][4][0]
+        Z_old_2_sticker5 = self.errornotes[curr_row][4][1]
+
+        age_old_2_sticker1 = format(self.results[curr_row].x[5],'.6e')
+        try:
+            age_old_2_sticker2 = format(self.errorsallrows[curr_row][5][0],'.6e')
+        except:
+            age_old_2_sticker2 = "       N/A       "
+        try:
+            age_old_2_sticker3 = format(self.errorsallrows[curr_row][5][1],'.6e')
+        except:
+            age_old_2_sticker3 = "       N/A       "
+        age_old_2_sticker4 = self.errornotes[curr_row][5][0]
+        age_old_2_sticker5 = self.errornotes[curr_row][5][1]
+
+        M_old_2_sticker1 = format(self.results[curr_row].x[6],'.6e')
+        try:
+            M_old_2_sticker2 = format(self.errorsallrows[curr_row][6][0],'.6e')
+        except:
+            M_old_2_sticker2 = "       N/A       "
+        try:
+            M_old_2_sticker3 = format(self.errorsallrows[curr_row][6][1],'.6e')
+        except:
+            M_old_2_sticker3 = "       N/A       "
+        M_old_2_sticker4 = self.errornotes[curr_row][6][0]
+        M_old_2_sticker5 = self.errornotes[curr_row][6][1]
+
+        ebv_new_sticker1 = format(self.results[curr_row].x[7],'.6e')
+        try:
+            ebv_new_sticker2 = format(self.errorsallrows[curr_row][7][0],'.6e')
+        except:
+            ebv_new_sticker2 = "       N/A       "
+        try:
+            ebv_new_sticker3 = format(self.errorsallrows[curr_row][7][1],'.6e')
+        except:
+            ebv_new_sticker3 = "       N/A       "
+        ebv_new_sticker4 = self.errornotes[curr_row][7][0]
+        ebv_new_sticker5 = self.errornotes[curr_row][7][1]
+
+        Z_new_sticker1 = format(self.results[curr_row].x[8],'.6e')
+        try:
+            Z_new_sticker2 = format(self.errorsallrows[curr_row][8][0],'.6e')
+        except:
+            Z_new_sticker2 = "       N/A       "
+        try:
+            Z_new_sticker3 = format(self.errorsallrows[curr_row][8][1],'.6e')
+        except:
+            Z_new_sticker3 = "       N/A       "
+        Z_new_sticker4 = self.errornotes[curr_row][8][0]
+        Z_new_sticker5 = self.errornotes[curr_row][8][1]
+
+        age_new_sticker1 = format(self.results[curr_row].x[9],'.6e')
+        try:
+            age_new_sticker2 = format(self.errorsallrows[curr_row][9][0],'.6e')
+        except:
+            age_new_sticker2 = "       N/A       "
+        try:
+            age_new_sticker3 = format(self.errorsallrows[curr_row][9][1],'.6e')
+        except:
+            age_new_sticker3 = "       N/A       "
+        age_new_sticker4 = self.errornotes[curr_row][9][0]
+        age_new_sticker5 = self.errornotes[curr_row][9][1]
+
+        M_new_sticker1 = format(self.results[curr_row].x[10],'.6e')
+        try:
+            M_new_sticker2 = format(self.errorsallrows[curr_row][10][0],'.6e')
+        except:
+            M_new_sticker2 = "       N/A       "
+        try:
+            M_new_sticker3 = format(self.errorsallrows[curr_row][10][1],'.6e')
+        except:
+            M_new_sticker3 = "       N/A       "
+        M_new_sticker4 = self.errornotes[curr_row][10][0]
+        M_new_sticker5 = self.errornotes[curr_row][10][1]
+
+        colpack1 = tk.Frame(topw)
+        colpack1.place(x=650,y=600)
+        colpack2 = tk.Frame(topw)
+        colpack2.place(x=790,y=600)
+        colpack3 = tk.Frame(topw)
+        colpack3.place(x=910,y=600)
+        colpack4 = tk.Frame(topw)
+        colpack4.place(x=1020,y=600)
+        colpack5 = tk.Frame(topw)
+        colpack5.place(x=1180,y=600)
+        colpack6 = tk.Frame(topw)
+        colpack6.place(x=1290,y=600)
+        parameterhead = tk.Label(colpack1,text="Parameter",bg="azure").pack(pady=3)
+        parameter1 = tk.Label(colpack1,text="log(Z_old_1)").pack(pady=3)
+        parameter2 = tk.Label(colpack1,text="log(age_old_1)/10").pack(pady=3)
+        parameter3 = tk.Label(colpack1,text="log(M_old_1)/10").pack(pady=3)
+        parameter4 = tk.Label(colpack1,text="E(B-V)_old").pack(pady=3)
+        parameter5 = tk.Label(colpack1,text="log(Z_old_2)").pack(pady=3)
+        parameter6 = tk.Label(colpack1,text="log(age_old_2)/10").pack(pady=3)
+        parameter7 = tk.Label(colpack1,text="log(M_old_2)/10").pack(pady=3)
+        parameter8 = tk.Label(colpack1,text="E(B-V)_new").pack(pady=3)
+        parameter9 = tk.Label(colpack1,text="log(Z_new)").pack(pady=3)
+        parameter10 = tk.Label(colpack1,text="log(age_new)/10").pack(pady=3)
+        parameter11 = tk.Label(colpack1,text="log(M_new)/10").pack(pady=3)
+        besthead = tk.Label(colpack2,text="Best fit value",bg="azure").pack(pady=3)
+        best1 = tk.Label(colpack2,text="{}".format(Z_old_1_sticker1)).pack(pady=3)
+        best2 = tk.Label(colpack2,text="{}".format(age_old_1_sticker1)).pack(pady=3)
+        best3 = tk.Label(colpack2,text="{}".format(M_old_1_sticker1)).pack(pady=3)
+        best4 = tk.Label(colpack2,text="{}".format(ebv_old_sticker1)).pack(pady=3)
+        best5 = tk.Label(colpack2,text="{}".format(Z_old_2_sticker1)).pack(pady=3)
+        best6 = tk.Label(colpack2,text="{}".format(age_old_2_sticker1)).pack(pady=3)
+        best7 = tk.Label(colpack2,text="{}".format(M_old_2_sticker1)).pack(pady=3)
+        best8 = tk.Label(colpack2,text="{}".format(ebv_new_sticker1)).pack(pady=3)
+        best9 = tk.Label(colpack2,text="{}".format(Z_new_sticker1)).pack(pady=3)
+        best10 = tk.Label(colpack2,text="{}".format(age_new_sticker1)).pack(pady=3)
+        best11 = tk.Label(colpack2,text="{}".format(M_new_sticker1)).pack(pady=3)
+        errlohead = tk.Label(colpack3,text="Lower error",bg="azure").pack(pady=3)
+        errlo1 = tk.Label(colpack3,text="{}".format(Z_old_1_sticker2)).pack(pady=3)
+        errlo2 = tk.Label(colpack3,text="{}".format(age_old_1_sticker2)).pack(pady=3)
+        errlo3 = tk.Label(colpack3,text="{}".format(M_old_1_sticker2)).pack(pady=3)
+        errlo4 = tk.Label(colpack3,text="{}".format(ebv_old_sticker2)).pack(pady=3)
+        errlo5 = tk.Label(colpack3,text="{}".format(Z_old_2_sticker2)).pack(pady=3)
+        errlo6 = tk.Label(colpack3,text="{}".format(age_old_2_sticker2)).pack(pady=3)
+        errlo7 = tk.Label(colpack3,text="{}".format(M_old_2_sticker2)).pack(pady=3)
+        errlo8 = tk.Label(colpack3,text="{}".format(ebv_new_sticker2)).pack(pady=3)
+        errlo9 = tk.Label(colpack3,text="{}".format(Z_new_sticker2)).pack(pady=3)
+        errlo10 = tk.Label(colpack3,text="{}".format(age_new_sticker2)).pack(pady=3)
+        noteslohead = tk.Label(colpack4,text="Lower error notes",bg="azure").pack(pady=3)
+        noteslo1 = tk.Label(colpack4,text="{}".format(Z_old_1_sticker3)).pack(pady=3)
+        noteslo2 = tk.Label(colpack4,text="{}".format(age_old_1_sticker3)).pack(pady=3)
+        noteslo3 = tk.Label(colpack4,text="{}".format(M_old_1_sticker3)).pack(pady=3)
+        noteslo4 = tk.Label(colpack4,text="{}".format(ebv_old_sticker3)).pack(pady=3)
+        noteslo5 = tk.Label(colpack4,text="{}".format(Z_old_2_sticker3)).pack(pady=3)
+        noteslo6 = tk.Label(colpack4,text="{}".format(age_old_2_sticker3)).pack(pady=3)
+        noteslo7 = tk.Label(colpack4,text="{}".format(M_old_2_sticker3)).pack(pady=3)
+        noteslo8 = tk.Label(colpack4,text="{}".format(ebv_new_sticker3)).pack(pady=3)
+        noteslo9 = tk.Label(colpack4,text="{}".format(Z_new_sticker3)).pack(pady=3)
+        noteslo10 = tk.Label(colpack4,text="{}".format(age_new_sticker3)).pack(pady=3)
+        errhihead = tk.Label(colpack5,text="Upper error",bg="azure").pack(pady=3)
+        errhi1 = tk.Label(colpack5,text="{}".format(Z_old_1_sticker4)).pack(pady=3)
+        errhi2 = tk.Label(colpack5,text="{}".format(age_old_1_sticker4)).pack(pady=3)
+        errhi3 = tk.Label(colpack5,text="{}".format(M_old_1_sticker4)).pack(pady=3)
+        errhi4 = tk.Label(colpack5,text="{}".format(ebv_old_sticker4)).pack(pady=3)
+        errhi5 = tk.Label(colpack5,text="{}".format(Z_old_2_sticker4)).pack(pady=3)
+        errhi6 = tk.Label(colpack5,text="{}".format(age_old_2_sticker4)).pack(pady=3)
+        errhi7 = tk.Label(colpack5,text="{}".format(M_old_2_sticker4)).pack(pady=3)
+        errhi8 = tk.Label(colpack5,text="{}".format(ebv_new_sticker4)).pack(pady=3)
+        errhi9 = tk.Label(colpack5,text="{}".format(Z_new_sticker4)).pack(pady=3)
+        errhi10 = tk.Label(colpack5,text="{}".format(age_new_sticker4)).pack(pady=3)
+        noteshihead = tk.Label(colpack6,text="Upper error notes",bg="azure").pack(pady=3)
+        noteshi1 = tk.Label(colpack6,text="{}".format(Z_old_1_sticker5)).pack(pady=3)
+        noteshi2 = tk.Label(colpack6,text="{}".format(age_old_1_sticker5)).pack(pady=3)
+        noteshi3 = tk.Label(colpack6,text="{}".format(M_old_1_sticker5)).pack(pady=3)
+        noteshi4 = tk.Label(colpack6,text="{}".format(ebv_old_sticker5)).pack(pady=3)
+        noteshi5 = tk.Label(colpack6,text="{}".format(Z_old_2_sticker5)).pack(pady=3)
+        noteshi6 = tk.Label(colpack6,text="{}".format(age_old_2_sticker5)).pack(pady=3)
+        noteshi7 = tk.Label(colpack6,text="{}".format(M_old_2_sticker5)).pack(pady=3)
+        noteshi8 = tk.Label(colpack6,text="{}".format(ebv_new_sticker5)).pack(pady=3)
+        noteshi9 = tk.Label(colpack6,text="{}".format(Z_new_sticker5)).pack(pady=3)
+        noteshi10 = tk.Label(colpack6,text="{}".format(age_new_sticker5)).pack(pady=3)
 
         def closethesource():
             topw.destroy()
