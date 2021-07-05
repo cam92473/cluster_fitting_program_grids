@@ -1146,7 +1146,7 @@ class ChiSquared():
             import numpy as np
             import tkinter as tk
             
-            raw_columns = ["F148W_AB","F148W_err","F169M_AB","F169M_err","F172M_AB","F172M_err","N219M_AB","N219M_err","N279N_AB","N279N_err","IRAC1","IRAC1_err","IRAC2","IRAC2_err","u_prime","u_prime_err","g_prime","g_prime_err","r_prime","r_prime_err","i_prime","i_prime_err","z_prime","z_prime_err"]
+            raw_columns = ["F148W_AB","F148W_err","F169M_AB","F169M_err","F172M_AB","F172M_err","N219M_AB","N219M_err","N279N_AB","N279N_err","u_prime","u_prime_err","g_prime","g_prime_err","r_prime","r_prime_err","i_prime","i_prime_err","z_prime","z_prime_err","IRAC1","IRAC1_err","IRAC2","IRAC2_err"]
 
             self.raw_magnitudes_frame = pd.DataFrame()
             for rawname in raw_columns:
@@ -1306,7 +1306,7 @@ class ChiSquared():
         
         elif self.model_chosen == "UVIT_SDSS_Spitzer":
 
-            self.filternames = ["F148W","F169M","F172M","N219M","N279N","IRAC1","IRAC2","u_prime","g_prime","r_prime","i_prime","z_prime"]
+            self.filternames = ["F148W","F169M","F172M","N219M","N279N","u_prime","g_prime","r_prime","i_prime","z_prime","IRAC1","IRAC2"]
             self.bandfluxes = pd.DataFrame()
             self.bandfluxerrors = pd.DataFrame()
             self.avgwvlist = [150.2491,161.4697,170.856,199.1508,276.0,355.1,468.6,616.6,748,893,3550,4490]
@@ -3218,7 +3218,7 @@ class ChiSquared():
         newmod = self.minichisqfunc_triple(best_tup,valid_filters_this_row)[2]
         abc.plot(valid_avgwv_this_row,old1mod,color="red")
         abc.plot(valid_avgwv_this_row,old2mod,color="blue")
-        abc.plot(valid_avgwv_this_row,old2mod,color="m")
+        abc.plot(valid_avgwv_this_row,newmod,color="m")
         sumofmodels = [old1mod[i] + old2mod[i] + newmod[i] for i in range(len(old1mod))]
         abc.plot(valid_avgwv_this_row,sumofmodels,color="limegreen")
 
