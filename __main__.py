@@ -7,7 +7,7 @@ import pandas as pd
 class ChiSquared():
     def __init__(self):
         self.filenamevar = ""
-        self.guessernamevar= ""
+        self.guessernamevar = ""
         self.chosenstar = "     1-cluster fit     "
         self.checkedset= 0
         self.checked2set = 0
@@ -17,11 +17,9 @@ class ChiSquared():
         self.checker3set = 1
         self.checker4set = 1
         self.sliderval1set = 0
-        self.sliderval2set = 0
         self.rownumberset = ""
         self.dset = "785000"
         self.sliderstring1set = "log-log axes"
-        self.sliderstring2set = "average filter wavelength"
         self.ulmethset = "Standard"
         self.model_chosen_set = "UVIT_HST"
         self.starlist1 = ["0","0.75","0.3","0.1","N/A","N/A","N/A","N/A","N/A","N/A","N/A"]
@@ -162,15 +160,12 @@ class ChiSquared():
                                     self.chiparams = checker3.get()
                                     self.saveplots = checker4.get()
                                     self.plotscale = currentsliderval1.get()
-                                    self.xticker = currentsliderval2.get()
                                     self.checker1set = checker1.get()
                                     self.checker2set = checker2.get()
                                     self.checker3set = checker3.get()
                                     self.checker4set = checker4.get()
                                     self.sliderval1set = currentsliderval1.get()
-                                    self.sliderval1set = currentsliderval2.get()
                                     self.sliderstring1set = sliderstring1.get()
-                                    self.sliderstring2set = sliderstring2.get()
                                     self.checkedset = checked.get()
                                     self.checked2set = checked2.get()
                                     self.checked3set = checked3.get()
@@ -636,52 +631,30 @@ class ChiSquared():
         checker4 = tk.IntVar()
         checker4.set(self.checker4set)
         sliderstring1 = tk.StringVar()
-        sliderstring2 = tk.StringVar()
         currentsliderval1 = tk.IntVar()
         currentsliderval1.set(self.sliderval1set)
-        currentsliderval2 = tk.IntVar()
-        currentsliderval2.set(self.sliderval2set)
         fluxname = tk.StringVar()
         chiname = tk.StringVar()
         imgname = tk.StringVar()
         sliderstring1.set(self.sliderstring1set)
-        sliderstring2.set(self.sliderstring2set)
         def changesliderstring1(useless):
             if currentsliderval1.get() == 1:
                 sliderstring1.set(" linear axes  ")
             elif currentsliderval1.get() == 0:
                 sliderstring1.set("log-log axes")
-        def changesliderstring2(useless):
-            if currentsliderval2.get() == 1:
-                sliderstring2.set("200 nm (cleaner-looking)")
-            elif currentsliderval2.get() == 0:
-                sliderstring2.set("average filter wavelength")
         
         def grent1():
             if plotslider1['state'] == tk.NORMAL:
                 plotslider1['state'] = tk.DISABLED
-                plotslider2['state'] = tk.DISABLED
                 sliderstring1.set("                     ")
-                sliderstring2.set("                     ")
                 sliderlabel1.config(bg="gray95")
-                sliderlabel2.config(bg="gray95")
             elif plotslider1['state'] == tk.DISABLED:
                 plotslider1['state'] = tk.NORMAL
-                plotslider2['state'] = tk.NORMAL
                 sliderlabel1.config(bg="white")
-                sliderlabel2.config(bg="white")
-                if currentsliderval1.get() == 1 and currentsliderval2.get() == 1:
+                if currentsliderval1.get() == 1:
                     sliderstring1.set(" linear axes  ")
-                    sliderstring2.set("200 nm (cleaner-looking)")
-                elif currentsliderval1.get() == 0 and currentsliderval2.get() == 1:
+                elif currentsliderval1.get() == 0:
                     sliderstring1.set("log-log axes")
-                    sliderstring2.set("200 nm (cleaner-looking)")
-                elif currentsliderval1.get() == 1 and currentsliderval2.get() == 0:
-                    sliderstring1.set(" linear axes  ")
-                    sliderstring2.set("average filter wavelength")
-                elif currentsliderval1.get() == 0 and currentsliderval2.get() == 0:
-                    sliderstring1.set("log-log axes")
-                    sliderstring2.set("average filter wavelength")
 
         def grent2():
             if buttentry2['state'] == tk.NORMAL:
@@ -707,19 +680,15 @@ class ChiSquared():
                 
         checkbutt1 = tk.Checkbutton(mwin,text="Display results",variable=checker1,command=grent1,bg='azure2')
         plotslider1 = tk.Scale(mwin,from_=0,to=1,orient=tk.HORIZONTAL,showvalue=0,length=65,width=25,variable=currentsliderval1, command=changesliderstring1)
-        plotslider1.place(x=560,y=200)
+        plotslider1.place(x=500,y=200)
         grayframe1= tk.Frame(mwin,bg="gray95",bd=3)
         grayframe1.place(x=350,y=200)
         sliderlabel1 = tk.Label(grayframe1,textvariable=sliderstring1,padx=5,bg='white')
         sliderlabel1.pack()
-        sandwichtext = tk.Label(mwin,text="Place x-ticks every: ",bg='azure2')
-        sandwichtext.place(x=352,y=238)
-        plotslider2 = tk.Scale(mwin,from_=0,to=1,orient=tk.HORIZONTAL,showvalue=0,length=65,width=25,variable=currentsliderval2, command=changesliderstring2)
-        plotslider2.place(x=560,y=270)
-        grayframe2= tk.Frame(mwin,bg="gray95",bd=3)
-        grayframe2.place(x=350,y=270)
-        sliderlabel2 = tk.Label(grayframe2,textvariable=sliderstring2,padx=5,bg='white')
-        sliderlabel2.pack()
+        if currentsliderval1.get() == 0:
+            plotslider1.set(0)
+        if currentsliderval1 == 1:
+            plotslider1.set(1)
         checkbutt2 = tk.Checkbutton(mwin,text="Save resulting flux data",variable=checker2,command=grent2,bg='azure2')
         checkbutt3 = tk.Checkbutton(mwin,text="Save chi^2 and minimized parameters",variable=checker3,command=grent3,bg='azure2')
         checkbutt4 = tk.Checkbutton(mwin,text="Save plot images (1 per source X)",variable=checker4,command=grent4,bg='azure2')
@@ -732,12 +701,12 @@ class ChiSquared():
             buttentry3['state'] = tk.DISABLED
         if checker4.get() == 0:
             buttentry4['state'] = tk.DISABLED
-        checkbutt1.place(x=320,y=160)
-        checkbutt2.place(x=340,y=320)
-        checkbutt3.place(x=340,y=390)
+        checkbutt1.place(x=340,y=170)
+        checkbutt2.place(x=340,y=270)
+        checkbutt3.place(x=340,y=365)
         checkbutt4.place(x=340,y=460)
-        buttentry2.place(x=345,y=350)
-        buttentry3.place(x=345,y=420)
+        buttentry2.place(x=345,y=300)
+        buttentry3.place(x=345,y=395)
         buttentry4.place(x=345,y=490)
 
         user_Zbound1lo = tk.StringVar()
@@ -1089,7 +1058,8 @@ class ChiSquared():
         grent4()
         disable("3")
         disable2("3")
-        enterguessername['state'] = tk.DISABLED
+        if self.guessernamevar == "":
+            enterguessername['state'] = tk.DISABLED
         stuffy(3)
         mwin.mainloop()
 
@@ -2658,26 +2628,12 @@ class ChiSquared():
         abc.plot(valid_avgwv_this_row,self.minichisqfunc_single(best_tup,valid_filters_this_row),color="blue")
 
         if self.plotscale == 1:
-            if self.xticker == 1:
-                abc.set_xticks([int(i) for i in np.arange(200,max(valid_avgwv_this_row),200)])
-            elif self.xticker == 0:
-                better_avgwv_this_row = []
-                for ind, wv in enumerate(valid_avgwv_this_row[0:len(valid_avgwv_this_row)-1]):
-                    if valid_avgwv_this_row[ind + 1] - valid_avgwv_this_row[ind] > 80:
-                        better_avgwv_this_row.append(wv)
-                abc.set_xticks(better_avgwv_this_row)
+            pass
 
         if self.plotscale == 0:
             abc.set_xscale('log')
             abc.set_yscale('log')
-            if self.xticker == 1:
-                abc.set_xticks([int(i) for i in np.arange(200,max(valid_avgwv_this_row),200)])
-            elif self.xticker == 0:
-                better_avgwv_this_row = []
-                for ind, wv in enumerate(valid_avgwv_this_row[0:len(valid_avgwv_this_row)-1]):
-                    if valid_avgwv_this_row[ind + 1] - valid_avgwv_this_row[ind] > 20:
-                        better_avgwv_this_row.append(wv)
-                abc.set_xticks(better_avgwv_this_row)
+            abc.set_xticks([140,200,500,1000,1500])
             abc.get_xaxis().set_major_formatter(matplotlib.ticker.ScalarFormatter())
 
         if self.saveplots == 1:
@@ -2901,26 +2857,12 @@ class ChiSquared():
         abc.plot(valid_avgwv_this_row,sumofmodels,color="limegreen")
 
         if self.plotscale == 1:
-            if self.xticker == 1:
-                abc.set_xticks([int(i) for i in np.arange(200,max(valid_avgwv_this_row),200)])
-            elif self.xticker == 0:
-                better_avgwv_this_row = []
-                for ind, wv in enumerate(valid_avgwv_this_row[0:len(valid_avgwv_this_row)-1]):
-                    if valid_avgwv_this_row[ind + 1] - valid_avgwv_this_row[ind] > 80:
-                        better_avgwv_this_row.append(wv)
-                abc.set_xticks(better_avgwv_this_row)
+            pass
 
         if self.plotscale == 0:
             abc.set_xscale('log')
             abc.set_yscale('log')
-            if self.xticker == 1:
-                abc.set_xticks([int(i) for i in np.arange(200,max(valid_avgwv_this_row),200)])
-            elif self.xticker == 0:
-                better_avgwv_this_row = []
-                for ind, wv in enumerate(valid_avgwv_this_row[0:len(valid_avgwv_this_row)-1]):
-                    if valid_avgwv_this_row[ind + 1] - valid_avgwv_this_row[ind] > 20:
-                        better_avgwv_this_row.append(wv)
-                abc.set_xticks(better_avgwv_this_row)
+            abc.set_xticks([140,200,500,1000,1500])
             abc.get_xaxis().set_major_formatter(matplotlib.ticker.ScalarFormatter())
 
         if self.saveplots == 1:
@@ -3223,26 +3165,12 @@ class ChiSquared():
         abc.plot(valid_avgwv_this_row,sumofmodels,color="limegreen")
 
         if self.plotscale == 1:
-            if self.xticker == 1:
-                abc.set_xticks([int(i) for i in np.arange(200,max(valid_avgwv_this_row),200)])
-            elif self.xticker == 0:
-                better_avgwv_this_row = []
-                for ind, wv in enumerate(valid_avgwv_this_row[0:len(valid_avgwv_this_row)-1]):
-                    if valid_avgwv_this_row[ind + 1] - valid_avgwv_this_row[ind] > 80:
-                        better_avgwv_this_row.append(wv)
-                abc.set_xticks(better_avgwv_this_row)
+            pass
 
         if self.plotscale == 0:
             abc.set_xscale('log')
             abc.set_yscale('log')
-            if self.xticker == 1:
-                abc.set_xticks([int(i) for i in np.arange(200,max(valid_avgwv_this_row),200)])
-            elif self.xticker == 0:
-                better_avgwv_this_row = []
-                for ind, wv in enumerate(valid_avgwv_this_row[0:len(valid_avgwv_this_row)-1]):
-                    if valid_avgwv_this_row[ind + 1] - valid_avgwv_this_row[ind] > 20:
-                        better_avgwv_this_row.append(wv)
-                abc.set_xticks(better_avgwv_this_row)
+            abc.set_xticks([140,200,500,1000,1500])
             abc.get_xaxis().set_major_formatter(matplotlib.ticker.ScalarFormatter())
 
         if self.saveplots == 1:
