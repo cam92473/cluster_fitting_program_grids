@@ -174,7 +174,7 @@ class ChiSquared():
                                     self.model_chosen_set = user_model_cho.get()
                                     self.ulmeth = user_ulmeth.get()
                                     self.ulmethset = user_ulmeth.get()
-                                    
+
                                     try:
                                         self.d = float(user_d.get())
                                         self.dset = user_d.get()
@@ -344,7 +344,7 @@ class ChiSquared():
                                             self.Zguess1 = self.inputguesses['log(Z_old_1)']
                                             self.ageguess1 = self.inputguesses['log(age_old_1)/10']
                                             self.Mguess1 = self.inputguesses['log(M_old_1)/10']
-                                            self.ebvguess1 = self.inputguesses['E(B-V)_1']
+                                            self.ebvguess1 = self.inputguesses['E(B-V)_old']
                                             self.Zguess2 = self.inputguesses['log(Z_old_2)']
                                             self.ageguess2 = self.inputguesses['log(age_old_2)/10']
                                             self.Mguess2 = self.inputguesses['log(M_old_2)/10']
@@ -352,7 +352,7 @@ class ChiSquared():
                                             self.Zguess3 = self.inputguesses['log(Z_young)']
                                             self.ageguess3 = self.inputguesses['log(age_young)/10']
                                             self.Mguess3 = self.inputguesses['log(M_young)/10']
-
+                                        
                                         self.Zbound1lo = float(user_Zbound1lo.get())
                                         self.Zbound1hi = float(user_Zbound1hi.get())
                                         self.agebound1lo = float(user_agebound1lo.get())
@@ -375,6 +375,7 @@ class ChiSquared():
                                         self.agebound3hi = float(user_agebound3hi.get())
                                         self.Mbound3lo = float(user_Mbound3lo.get())
                                         self.Mbound3hi = float(user_Mbound3hi.get())
+
                                         if self.model_chosen == "UVIT_HST":
                                             self.stardict3[0][0] = user_Zbound1lo.get()
                                             self.stardict3[0][1] = user_Zbound1hi.get()
