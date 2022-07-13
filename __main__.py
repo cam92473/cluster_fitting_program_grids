@@ -1428,7 +1428,7 @@ class ChiSquared():
             import numpy as np
             import tkinter as tk
             
-            raw_columns = ["F148W_AB","F148W_err","FUV","FUV_err","F169M_AB","F169M_err","F172M_AB","F172M_err","N219M_AB","N219M_err","NUV","NUV_err","N279N_AB","N279N_err","U_vega","U_err","V_vega","V_err","B_vega","B_err","R_vega","R_err","I_vega","I_err","J_vega","J_err","H_vega","H_err","K_vega","K_err"]
+            raw_columns = ["F148W_AB","F148W_err","FUV","FUV_err","F169M_AB","F169M_err","F172M_AB","F172M_err","N219M_AB","N219M_err","NUV","NUV_err","N279N_AB","N279N_err","U_vega","U_err","B_vega","B_err","V_vega","V_err","R_vega","R_err","I_vega","I_err","J_vega","J_err","H_vega","H_err","K_vega","K_err"]
 
             self.raw_magnitudes_frame = pd.DataFrame()
             for rawname in raw_columns:
