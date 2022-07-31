@@ -1,0 +1,3 @@
+row,weighted mean Z1,weighted mean age1,weighted mean M1s,weighted mean ebv1,weighted var Z1,weighted var age1,weighted var M1,weighted var ebv1,model flux using weighted mean parameters,chi2 using weighted mean parameters,new M1,new chi2
+2,-2.1,0.66,0.75,1.0,0.0,0.0,0.0,0.0,10655.549976140777,7589480.598947242,0.75,7589480.598947242
+3,-2.1,0.66,0.725433985564128,1.0,0.0,0.0,0.0,0.0,7258.882430387128,3180606.463302875,0.725433985764328,3180606.4633026803
