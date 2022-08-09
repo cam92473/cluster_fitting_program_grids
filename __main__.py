@@ -14,15 +14,17 @@ class ChiSquared():
         self.checker2set = 1
         self.checker3set = 1
         self.checker4set = 1
+        self.checker5set = 0
         self.dset = "785000"
         self.sliderval1set = 0
         self.rownumberset = ""
         self.sliderstring1set = "log-log axes"
         self.model_chosen_set = "UVIT_HST"
+        self.ulmethset = "Standard"
 
-        self.starlist1 = ["0.3","0","0.75","N/A","N/A","N/A","N/A","N/A","N/A"]
-        self.starlist2 = ["0.6","0","1.4","0.8","0","1.4","N/A","N/A","N/A"]
-        self.starlist3 = ["0.6","0","1","0.6","0","1","0.72","0","0.7"]
+        self.starlist1 = ["0","0.75","N/A","N/A","N/A","N/A"]
+        self.starlist2 = ["0","1.4","0","1.4","N/A","N/A"]
+        self.starlist3 = ["0","1","0","1","0","0.7"]
         #UVIT_HST
         self.stardict1 = [["-2.5","0.3","0"],[".66",".90","0"],["0","1","0"],["N/A","N/A","N/A"],["N/A","N/A","N/A"],["N/A","N/A","N/A"],["N/A","N/A","N/A"],["N/A","N/A","N/A"]]
         self.stardict2 = [["-2.1","-0.1","0"],[".66","1.01","0"],["0","2","0"],["-2.1","-0.1","0"],[".66","1.01","0"],["0","2","0"],["N/A","N/A","N/A"],["N/A","N/A","N/A"]]
@@ -40,10 +42,12 @@ class ChiSquared():
             self.intro_gui()
             self.buildGrid()
             self.extract_measured_flux()
+            self.extract_ul()
             self.convert_to_AB()
             self.convert_to_bandflux()
             self.prepare_for_interpolation()
             self.minimize_chisq()
+            self.find_param_errors()
             self.display_all_results()
             self.save_output()
     
@@ -146,6 +150,7 @@ class ChiSquared():
                                     self.checker2set = checker2.get()
                                     self.checker3set = checker3.get()
                                     self.checker4set = checker4.get()
+                                    self.checker5set = checker5.get()
                                     self.checkedset = checked.get()
                                     self.checked2set = checked2.get()
                                     self.sliderval1set = currentsliderval1.get()
@@ -153,6 +158,9 @@ class ChiSquared():
                                     
                                     self.model_chosen = user_model_cho.get()
                                     self.model_chosen_set = user_model_cho.get()
+                                    self.ulmeth = user_ulmeth.get()
+                                    self.ulmethset = user_ulmeth.get()
+
 
                                     if checker2.get() == 1:
                                         self.weightedmeanvarname = weightedmeanvarname.get()
@@ -160,6 +168,10 @@ class ChiSquared():
                                         self.gridname = gridname.get()
                                     if checker4.get() == 1:
                                         self.imgfilename = imgname.get()
+                                    if checker5.get() == 1:
+                                        self.silent = True
+                                    else:
+                                        self.silent = False
                                     
                                     self.single_cluster = False
                                     self.double_cluster = False
@@ -177,23 +189,27 @@ class ChiSquared():
 
                                         self.single_cluster = True
 
-                                        self.Mguess1 = float(user_Mguess1.get())
                                         self.Mbound1lo = float(user_Mbound1lo.get())
                                         self.Mbound1hi = float(user_Mbound1hi.get())
                                         
                                         self.Z1lowest = float(user_Z1lowest.get())
                                         self.Z1highest = float(user_Z1highest.get())
                                         self.Z1num = int(user_Z1num.get())
+                                        if self.Z1num == 0:
+                                            raise Exception('One of the grid dimensions has length 0. Please reenter the number of values.')
                                         self.age1lowest = float(user_age1lowest.get())
                                         self.age1highest = float(user_age1highest.get())
                                         self.age1num = int(user_age1num.get())
+                                        if self.age1num == 0:
+                                            raise Exception('One of the grid dimensions has length 0. Please reenter the number of values.')
                                         self.ebv1lowest = float(user_ebv1lowest.get())
                                         self.ebv1highest = float(user_ebv1highest.get())
                                         self.ebv1num = int(user_ebv1num.get())
-
-                                        self.starlist1[0] = user_Mguess1.get()                                            
-                                        self.starlist1[1] = user_Mbound1lo.get()
-                                        self.starlist1[2] = user_Mbound1hi.get()
+                                        if self.ebv1num == 0:
+                                            raise Exception('One of the grid dimensions has length 0. Please reenter the number of values.')
+                                         
+                                        self.starlist1[0] = user_Mbound1lo.get()
+                                        self.starlist1[1] = user_Mbound1hi.get()
                                         if user_model_cho.get() == "UVIT_HST":
                                             self.stardict1[0][0] = user_Z1lowest.get()
                                             self.stardict1[0][1] = user_Z1highest.get()
@@ -229,7 +245,6 @@ class ChiSquared():
                                         
                                         self.double_cluster = True
 
-                                        self.Mguess1 = float(user_Mguess1.get())
                                         self.Mbound1lo = float(user_Mbound1lo.get())
                                         self.Mbound1hi = float(user_Mbound1hi.get())
                                         self.Mguess2 = float(user_Mguess2.get())
@@ -239,28 +254,38 @@ class ChiSquared():
                                         self.Z1lowest = float(user_Z1lowest.get())
                                         self.Z1highest = float(user_Z1highest.get())
                                         self.Z1num = int(user_Z1num.get())
+                                        if self.Z1num == 0:
+                                            raise Exception('One of the grid dimensions has length 0. Please reenter the number of values.')
                                         self.age1lowest = float(user_age1lowest.get())
                                         self.age1highest = float(user_age1highest.get())
                                         self.age1num = int(user_age1num.get())
+                                        if self.age1num == 0:
+                                            raise Exception('One of the grid dimensions has length 0. Please reenter the number of values.')
                                         self.ebv1lowest = float(user_ebv1lowest.get())
                                         self.ebv1highest = float(user_ebv1highest.get())
                                         self.ebv1num = int(user_ebv1num.get())
+                                        if self.ebv1num == 0:
+                                            raise Exception('One of the grid dimensions has length 0. Please reenter the number of values.')
                                         self.Z2lowest = float(user_Z2lowest.get())
                                         self.Z2highest = float(user_Z2highest.get())
                                         self.Z2num = int(user_Z2num.get())
+                                        if self.Z2num == 0:
+                                            raise Exception('One of the grid dimensions has length 0. Please reenter the number of values.')
                                         self.age2lowest = float(user_age2lowest.get())
                                         self.age2highest = float(user_age2highest.get())
                                         self.age2num = int(user_age2num.get())
+                                        if self.age2num == 0:
+                                            raise Exception('One of the grid dimensions has length 0. Please reenter the number of values.')
                                         self.ebv2lowest = float(user_ebv2lowest.get())
                                         self.ebv2highest = float(user_ebv2highest.get())
                                         self.ebv2num = int(user_ebv2num.get())
+                                        if self.ebv2num == 0:
+                                            raise Exception('One of the grid dimensions has length 0. Please reenter the number of values.')
 
-                                        self.starlist2[0] = user_Mguess1.get()
-                                        self.starlist2[1] = user_Mbound1lo.get()
-                                        self.starlist2[2] = user_Mbound1hi.get()
-                                        self.starlist2[3] = user_Mguess2.get()
-                                        self.starlist2[4] = user_Mbound2lo.get()
-                                        self.starlist2[5] = user_Mbound2hi.get()
+                                        self.starlist2[0] = user_Mbound1lo.get()
+                                        self.starlist2[1] = user_Mbound1hi.get()
+                                        self.starlist2[2] = user_Mbound2lo.get()
+                                        self.starlist2[3] = user_Mbound2hi.get()
                                         if user_model_cho.get() == "UVIT_HST":
                                             self.stardict2[0][0] = user_Z1lowest.get()
                                             self.stardict2[0][1] = user_Z1highest.get()
@@ -323,50 +348,61 @@ class ChiSquared():
 
                                         self.triple_cluster = True
 
-                                        self.Mguess1 = float(user_Mguess1.get())
                                         self.Mbound1lo = float(user_Mbound1lo.get())
                                         self.Mbound1hi = float(user_Mbound1hi.get())
-                                        self.Mguess2 = float(user_Mguess2.get())
                                         self.Mbound2lo = float(user_Mbound2lo.get())
                                         self.Mbound2hi = float(user_Mbound2hi.get())
-                                        self.Mguess3 = float(user_Mguess3.get())
                                         self.Mbound3lo = float(user_Mbound3lo.get())
                                         self.Mbound3hi = float(user_Mbound3hi.get())
 
                                         self.Z1lowest = float(user_Z1lowest.get())
                                         self.Z1highest = float(user_Z1highest.get())
                                         self.Z1num = int(user_Z1num.get())
+                                        if self.Z1num == 0:
+                                            raise Exception('One of the grid dimensions has length 0. Please reenter the number of values.')
                                         self.age1lowest = float(user_age1lowest.get())
                                         self.age1highest = float(user_age1highest.get())
                                         self.age1num = int(user_age1num.get())
+                                        if self.age1num == 0:
+                                            raise Exception('One of the grid dimensions has length 0. Please reenter the number of values.')
                                         self.ebv1lowest = float(user_ebv1lowest.get())
                                         self.ebv1highest = float(user_ebv1highest.get())
                                         self.ebv1num = int(user_ebv1num.get())
+                                        if self.ebv1num == 0:
+                                            raise Exception('One of the grid dimensions has length 0. Please reenter the number of values.')
                                         self.Z2lowest = float(user_Z2lowest.get())
                                         self.Z2highest = float(user_Z2highest.get())
                                         self.Z2num = int(user_Z2num.get())
+                                        if self.Z2num == 0:
+                                            raise Exception('One of the grid dimensions has length 0. Please reenter the number of values.')
                                         self.age2lowest = float(user_age2lowest.get())
                                         self.age2highest = float(user_age2highest.get())
                                         self.age2num = int(user_age2num.get())
+                                        if self.age2num == 0:
+                                            raise Exception('One of the grid dimensions has length 0. Please reenter the number of values.')
                                         self.ebv2lowest = float(user_ebv2lowest.get())
                                         self.ebv2highest = float(user_ebv2highest.get())
                                         self.ebv2num = int(user_ebv2num.get())
+                                        if self.ebv2num == 0:
+                                            raise Exception('One of the grid dimensions has length 0. Please reenter the number of values.')
                                         self.Z3lowest = float(user_Z3lowest.get())
                                         self.Z3highest = float(user_Z3highest.get())
                                         self.Z3num = int(user_Z3num.get())
+                                        if self.Z3num == 0:
+                                            raise Exception('One of the grid dimensions has length 0. Please reenter the number of values.')
                                         self.age3lowest = float(user_age3lowest.get())
                                         self.age3highest = float(user_age3highest.get())
                                         self.age3num = int(user_age3num.get())
+                                        if self.age3num == 0:
+                                            raise Exception('One of the grid dimensions has length 0. Please reenter the number of values.')
 
-                                        self.starlist3[0] = user_Mguess1.get()
-                                        self.starlist3[1] = user_Mbound1lo.get()
-                                        self.starlist3[2] = user_Mbound1hi.get()
-                                        self.starlist3[3] = user_Mguess2.get()
-                                        self.starlist3[4] = user_Mbound2lo.get()
-                                        self.starlist3[5] = user_Mbound2hi.get()
-                                        self.starlist3[6] = user_Mguess3.get()
-                                        self.starlist3[7] = user_Mbound3lo.get()
-                                        self.starlist3[8] = user_Mbound3hi.get()
+                                        self.starlist3[0] = user_Mbound1lo.get()
+                                        self.starlist3[1] = user_Mbound1hi.get()
+                                        self.starlist3[2] = user_Mbound2lo.get()
+                                        self.starlist3[3] = user_Mbound2hi.get()
+                                        self.starlist3[4] = user_Mbound3lo.get()
+                                        self.starlist3[5] = user_Mbound3hi.get()
+
                                         if user_model_cho.get() == "UVIT_HST":
                                             self.stardict3[0][0] = user_Z1lowest.get()
                                             self.stardict3[0][1] = user_Z1highest.get()
@@ -490,13 +526,11 @@ class ChiSquared():
         canvasline2 = canvasline = tk.Canvas(mwin,bd=3,relief=tk.GROOVE,width=680,height=1060,bg='lavender')
         canvasline2.place(x=660,y=190)
 
-        user_Mguess1 = tk.DoubleVar()
         user_Mbound1lo = tk.DoubleVar()
         user_Mbound1hi = tk.DoubleVar()
         user_Mguess2 = tk.DoubleVar()
         user_Mbound2lo = tk.DoubleVar()
         user_Mbound2hi = tk.DoubleVar()
-        user_Mguess3 = tk.DoubleVar()
         user_Mbound3lo = tk.DoubleVar()
         user_Mbound3hi = tk.DoubleVar()
 
@@ -508,8 +542,6 @@ class ChiSquared():
         ystar3entries = 860
         ycheckbutton = 620
 
-        guesslabel = tk.Label(mwin,text="Initial guess",font="Arial 10 underline",bg="mint cream")
-        guesslabel.place(x=190,y=ystar1labels)
         lowerboundlabel = tk.Label(mwin,text="Lower bound",font="Arial 10 underline",bg="mint cream")
         lowerboundlabel.place(x=330,y=ystar1labels)
         upperboundlabel = tk.Label(mwin,text="Upper bound",font="Arial 10 underline",bg="mint cream")
@@ -522,62 +554,48 @@ class ChiSquared():
         label3 = tk.Label(mwin,text="log(M3)/10",font="Arial 10 underline",bg="mint cream")
         label3.place(x=50,y=ystar3labels+30)
 
-        entryguess1 = tk.Entry(mwin,textvariable=user_Mguess1,width=12)
-        entryguess1.place(x=190,y=ystar1entries)
         entrylowerbound1 = tk.Entry(mwin,textvariable=user_Mbound1lo,width=12)
         entrylowerbound1.place(x=330,y=ystar1entries)
         entryupperbound1 = tk.Entry(mwin,textvariable=user_Mbound1hi,width=12)
         entryupperbound1.place(x=470,y=ystar1entries)
 
-        entryguess2 = tk.Entry(mwin,textvariable=user_Mguess2,width=12)
-        entryguess2.place(x=190,y=ystar2entries)
         entrylowerbound2 = tk.Entry(mwin,textvariable=user_Mbound2lo,width=12)
         entrylowerbound2.place(x=330,y=ystar2entries)
         entryupperbound2 = tk.Entry(mwin,textvariable=user_Mbound2hi,width=12)
         entryupperbound2.place(x=470,y=ystar2entries)
 
-        entryguess3 = tk.Entry(mwin,textvariable=user_Mguess3,width=12)
-        entryguess3.place(x=190,y=ystar3entries)
         entrylowerbound3 = tk.Entry(mwin,textvariable=user_Mbound3lo,width=12)
         entrylowerbound3.place(x=330,y=ystar3entries)
         entryupperbound3 = tk.Entry(mwin,textvariable=user_Mbound3hi,width=12)
         entryupperbound3.place(x=470,y=ystar3entries)
         
         def enable(howmany):
-            entryguess1['state'] = tk.NORMAL
             entrylowerbound1['state'] = tk.NORMAL
             entryupperbound1['state'] = tk.NORMAL
             if howmany == "2":
-                entryguess2['state'] = tk.NORMAL
                 entrylowerbound2['state'] = tk.NORMAL
                 entryupperbound2['state'] = tk.NORMAL
             if howmany == "3":
-                entryguess2['state'] = tk.NORMAL
                 entrylowerbound2['state'] = tk.NORMAL
                 entryupperbound2['state'] = tk.NORMAL
-                entryguess3['state'] = tk.NORMAL
                 entrylowerbound3['state'] = tk.NORMAL
                 entryupperbound3['state'] = tk.NORMAL
 
         def disable(howmany):
-            entryguess1['state'] = tk.DISABLED
             entrylowerbound1['state'] = tk.DISABLED
             entryupperbound1['state'] = tk.DISABLED
             if howmany == "2":
-                entryguess2['state'] = tk.DISABLED
                 entrylowerbound2['state'] = tk.DISABLED
                 entryupperbound2['state'] = tk.DISABLED
             if howmany == "3":
-                entryguess2['state'] = tk.DISABLED
                 entrylowerbound2['state'] = tk.DISABLED
                 entryupperbound2['state'] = tk.DISABLED
-                entryguess3['state'] = tk.DISABLED
                 entrylowerbound3['state'] = tk.DISABLED
                 entryupperbound3['state'] = tk.DISABLED
 
 
         def stuff_vals():
-            entrylist = [entryguess1,entrylowerbound1,entryupperbound1,entryguess2,entrylowerbound2,entryupperbound2,entryguess3,entrylowerbound3,entryupperbound3]
+            entrylist = [entrylowerbound1,entryupperbound1,entrylowerbound2,entryupperbound2,entrylowerbound3,entryupperbound3]
             if starno_chosen.get() == "     1-cluster fit     ":
                 enable("3")
                 for i,entry in enumerate(entrylist):
@@ -623,6 +641,8 @@ class ChiSquared():
         checker3.set(self.checker3set)
         checker4 = tk.IntVar()
         checker4.set(self.checker4set)
+        checker5 = tk.IntVar()
+        checker5.set(self.checker5set)
         sliderstring1 = tk.StringVar()
         currentsliderval1 = tk.IntVar()
         currentsliderval1.set(self.sliderval1set)
@@ -686,6 +706,7 @@ class ChiSquared():
         checkbutt2 = tk.Checkbutton(mwin,text="Save weighted mean and variance data",variable=checker2,command=grent2,bg='azure2')
         checkbutt3 = tk.Checkbutton(mwin,text="Save parameter grids",variable=checker3,command=grent3,bg='azure2')
         checkbutt4 = tk.Checkbutton(mwin,text="Save plot images (1 per source X)",variable=checker4,command=grent4,bg='azure2')
+        checkbutt5 = tk.Checkbutton(mwin,text="Run silently",variable=checker5,bg='alice blue')
         buttentry2 = tk.Entry(mwin, textvariable = weightedmeanvarname, width=26)
         buttentry3 = tk.Entry(mwin, textvariable = gridname,width=26)
         buttentry4 = tk.Entry(mwin,textvariable = imgname,width=26)
@@ -699,6 +720,7 @@ class ChiSquared():
         checkbutt2.place(x=340,y=310)
         checkbutt3.place(x=340,y=405)
         checkbutt4.place(x=340,y=500)
+        checkbutt5.place(x=870,y=35)
         buttentry2.place(x=345,y=340)
         buttentry3.place(x=345,y=435)
         buttentry4.place(x=345,y=530)
@@ -1007,19 +1029,19 @@ class ChiSquared():
 
         def gray():
             if starno_chosen.get() == "     1-cluster fit     ":
-                if entryguess1['state'] == tk.NORMAL:
+                if entrylowerbound1['state'] == tk.NORMAL:
                     disable("1")
-                elif entryguess1['state'] == tk.DISABLED:
+                elif entrylowerbound1['state'] == tk.DISABLED:
                     enable("1")
             elif starno_chosen.get() == "     2-cluster fit     ":
-                if entryguess1['state'] == tk.NORMAL:
+                if entrylowerbound1['state'] == tk.NORMAL:
                     disable("2")
-                elif entryguess1['state'] == tk.DISABLED:
+                elif entrylowerbound1['state'] == tk.DISABLED:
                     enable("2")
             elif starno_chosen.get() == "     3-cluster fit     ":
-                if entryguess1['state'] == tk.NORMAL:
+                if entrylowerbound1['state'] == tk.NORMAL:
                     disable("3")
-                elif entryguess1['state'] == tk.DISABLED:
+                elif entrylowerbound1['state'] == tk.DISABLED:
                     enable("3")
         
         def gray2():
@@ -1039,6 +1061,13 @@ class ChiSquared():
                 elif entrybZ1lo['state'] == tk.DISABLED:
                     enable2("3")
 
+        user_ulmeth = tk.StringVar()
+        user_ulmeth.set(self.ulmethset)
+        ulmethoptions = ["Standard","Limit"]
+        labelulmeth = tk.Label(mwin,text="Upper limit calculation method",bg="alice blue")
+        labelulmeth.place(x=37,y=320)
+        ulmethmenu = tk.OptionMenu(mwin,user_ulmeth,*ulmethoptions)
+        ulmethmenu.place(x=37,y=350)
         user_model_cho = tk.StringVar()
         user_model_cho.set(self.model_chosen_set)
         modelchooptions = ["UVIT_HST", "UVIT_SDSS_Spitzer", "UVIT_Johnson_GALEX"]
@@ -1051,7 +1080,7 @@ class ChiSquared():
         staroptions = ["     1-cluster fit     ","     2-cluster fit     ","     3-cluster fit     "]
         starmenu = tk.OptionMenu(mwin,starno_chosen,*staroptions,command=stuffy)
         starmenu.place(x=32,y=530)
-        checkbutton = tk.Checkbutton(mwin,text="Edit guess and bounds for log(M)",variable=checked,command=gray,bg="mint cream")
+        checkbutton = tk.Checkbutton(mwin,text="Edit bounds for log(M)",variable=checked,command=gray,bg="mint cream")
         checkbutton.place(x=10,y=ycheckbutton)
         checkbutton2 = tk.Checkbutton(mwin,text="Edit parameters grid",variable=checked2,command=gray2,bg="lavender")
         checkbutton2.place(x=680,y=200)
@@ -1064,7 +1093,7 @@ class ChiSquared():
         labeltop.place(x=35,y=29)
 
         gobutton = tk.Button(mwin,text="Fit data",font=("Arial",10),command = collectfilename,pady=10,padx=25,bd=2)
-        gobutton.place(x=865,y=70)
+        gobutton.place(x=865,y=90)
         grent2()
         grent2()
         grent3()
@@ -1282,7 +1311,132 @@ class ChiSquared():
                         self.ab_magnitudes_frame[col] = self.ab_magnitudes_frame[col].apply(lambda x: x + 1.85)
             
             self.ab_magnitudes_frame.rename(columns={"U_vega" : "U_AB", "B_vega" : "B_AB", "V_vega" : "V_AB", "R_vega" : "R_AB", "I_vega" : "I_AB", "J_vega" : "J_AB", "H_vega" : "H_AB", "K_vega" : "K_AB"}, inplace=True)
+    
+    def extract_ul(self):
+
+        if self.model_chosen == "UVIT_HST":
+            import pandas as pd
+            import numpy as np
+            import tkinter as tk
+
+            raw_limits = ["F148W_ul","F169M_ul","F172M_ul","N219M_ul","N279N_ul","f275w_ul","f336w_ul","f475w_ul","f814w_ul","f110w_ul","f160w_ul"]
+            
+            self.ul_frame = pd.DataFrame()
+            for rawname in raw_limits:
+                self.ul_frame["{}".format(rawname)] = ""
+
+            saverowuls = []
+            savecoluls = []
+            badcoluls = []
+            first_time = True
+            for rowno in self.rows:
+                curr_rowdict = {}
+                for colname in raw_limits:
+                    try:
+                        if self.measuredata.at[rowno,colname] == ">":
+                            curr_rowdict[colname] = 1
+                            savecoluls.append(colname)
+                            saverowuls.append(str(rowno+2))
+                        else:
+                            curr_rowdict[colname] = 0
+                    except:
+                        curr_rowdict[colname] = np.nan
+                        badcoluls.append(colname)
+                self.ul_frame.loc[self.ul_frame.shape[0]] = curr_rowdict
+                
+                if first_time == True and len(badcoluls) > 0:
+                    miniwin2 = tk.Tk()
+                    miniwin2.geometry("10x10+800+500")
+                    savebadcols2 = list(dict.fromkeys(badcoluls))
+                    badstr2 = ""
+                    for badcol2 in savebadcols2:
+                        badstr2 += "{} or ".format(badcol2)
+                    badstr2 = badstr2[:-4]
+                    response2 = tk.messagebox.askquestion('Warning',"No upper limit columns found for {}. Do you wish to proceed?".format(badstr2))
+                    if response2 == "yes":
+                        miniwin2.destroy()
+                        first_time = False
+                    if response2 == "no":
+                        assert response2 == "yes", "Program terminated"
+            
+            if len(savecoluls) > 0:
+                miniwin = tk.Tk()
+                miniwin.geometry("10x10+800+500")
+                response = tk.messagebox.askquestion('Info',"Upper limits detected in columns {} in rows {}, respectively. If this sounds correct, click yes to continue.".format(", ".join(savecoluls),", ".join(saverowuls)))
+                if response == "yes":
+                    miniwin.destroy()
+                if response == "no":
+                    assert response == "yes", "Program terminated"
         
+        elif self.model_chosen == "UVIT_SDSS_Spitzer":
+            import pandas as pd
+            import numpy as np
+
+            raw_limits = ["F14_ul","F16_ul","F17_ul","N2_ul","N27_ul","a1_ul","a2_ul","a3_ul","a4_ul","a5_ul","a6_ul","a7_ul"]
+            
+            self.ul_frame = pd.DataFrame()
+            for rawname in raw_limits:
+                self.ul_frame["{}".format(rawname)] = ""
+
+            for rowno in self.rows:
+                curr_rowdict = {}
+                for colname in raw_limits:
+                  curr_rowdict[colname] = 0
+                self.ul_frame.loc[self.ul_frame.shape[0]] = curr_rowdict
+
+        elif self.model_chosen == "UVIT_Johnson_GALEX":
+            import pandas as pd
+            import numpy as np
+            import tkinter as tk
+
+            raw_limits = ["F148W_ul", "FUV_ul", "F169M_ul","F172M_ul","N219M_ul", "NUV_ul", "N279N_ul","U_ul","B_ul","V_ul","R_ul","I_ul","J_ul","H_ul","K_ul"]
+            
+            self.ul_frame = pd.DataFrame()
+            for rawname in raw_limits:
+                self.ul_frame["{}".format(rawname)] = ""
+
+            saverowuls = []
+            savecoluls = []
+            badcoluls = []
+            first_time = True
+            for rowno in self.rows:
+                curr_rowdict = {}
+                for colname in raw_limits:
+                    try:
+                        if self.measuredata.at[rowno,colname] == ">":
+                            curr_rowdict[colname] = 1
+                            savecoluls.append(colname)
+                            saverowuls.append(str(rowno+2))
+                        else:
+                            curr_rowdict[colname] = 0
+                    except:
+                        curr_rowdict[colname] = np.nan
+                        badcoluls.append(colname)
+                self.ul_frame.loc[self.ul_frame.shape[0]] = curr_rowdict
+                
+                if first_time == True and len(badcoluls) > 0:
+                    miniwin2 = tk.Tk()
+                    miniwin2.geometry("10x10+800+500")
+                    savebadcols2 = list(dict.fromkeys(badcoluls))
+                    badstr2 = ""
+                    for badcol2 in savebadcols2:
+                        badstr2 += "{} or ".format(badcol2)
+                    badstr2 = badstr2[:-4]
+                    response2 = tk.messagebox.askquestion('Warning',"No upper limit columns found for {}. Do you wish to proceed?".format(badstr2))
+                    if response2 == "yes":
+                        miniwin2.destroy()
+                        first_time = False
+                    if response2 == "no":
+                        assert response2 == "yes", "Program terminated"
+            
+            if len(savecoluls) > 0:
+                miniwin = tk.Tk()
+                miniwin.geometry("10x10+800+500")
+                response = tk.messagebox.askquestion('Info',"Upper limits detected in columns {} in rows {}, respectively. If this sounds correct, click yes to continue.".format(", ".join(savecoluls),", ".join(saverowuls)))
+                if response == "yes":
+                    miniwin.destroy()
+                if response == "no":
+                    assert response == "yes", "Program terminated"
 
     def convert_to_bandflux(self):
 
@@ -1461,11 +1615,12 @@ class ChiSquared():
             summands.append(((self.bandfluxes.iat[curr_row,valid_ind] - mean_models[i])/self.bandfluxerrors.iat[curr_row,valid_ind])**2)
 
         mean_chisq = sum(summands)
-        print("mean chisq: ", mean_chisq,"\n")
+        print("\nchisq of mean parameters: ", mean_chisq,"\n")
         return mean_models, mean_chisq
 
-    def minichisqfunc2_single(self,M1,Z1,age1,ebv1,valid_filters_this_row,curr_row):
-        print("New optimization: Testing row {} with Z1, age1, M1, ebv1: ".format(self.rows[curr_row]+2), Z1,age1,M1,ebv1)
+    def minichisqfunc2_single(self,M1,Z1,age1,ebv1,valid_filters_this_row,ul_filters_this_row,curr_row):
+        if self.silent is False:
+            print("Fitting M1 to other mean parameters: Testing row {} with Z1, age1, M1, ebv1: ".format(self.rows[curr_row]+2), Z1,age1,M1,ebv1)
 
         true_M = 10**(M1*10)
 
@@ -1477,14 +1632,24 @@ class ChiSquared():
 
         summands = []
         for i,valid_ind in enumerate(valid_filters_this_row):
-            summands.append(((self.bandfluxes.iat[curr_row,valid_ind] - mean_models[i])/self.bandfluxerrors.iat[curr_row,valid_ind])**2)
+            if valid_ind in ul_filters_this_row:
+                if self.ulmeth == "Limit":
+                    if mean_models[i] - self.bandfluxes.iat[curr_row,valid_ind] > 0:
+                        summands.append(((self.bandfluxes.iat[curr_row,valid_ind] - mean_models[i])/self.bandfluxerrors.iat[curr_row,valid_ind])**2)
+                    else:
+                        pass
+                elif self.ulmeth == "Standard":
+                    summands.append(((self.bandfluxes.iat[curr_row,valid_ind]/3 - mean_models[i])/(self.bandfluxes.iat[curr_row,valid_ind]/3))**2)
+            else:
+                summands.append(((self.bandfluxes.iat[curr_row,valid_ind] - mean_models[i])/self.bandfluxerrors.iat[curr_row,valid_ind])**2)
 
         new_chisq = sum(summands)
-        print("new chisq: ", new_chisq)
+        if self.silent is False:
+            print("chisq: ", new_chisq)
 
         return new_chisq
 
-    def minichisqfunc_double(self,M1,M2,Z1,age1,ebv1,Z2,age2,ebv2,valid_filters_this_row,curr_row):
+    def minichisqfunc_double(self,M1,M2,Z1,age1,ebv1,Z2,age2,ebv2,valid_filters_this_row,ul_filters_this_row,curr_row):
 
         true_M1 = 10**(M1*10)
         true_M2 = 10**(M2*10)
@@ -1502,16 +1667,25 @@ class ChiSquared():
         
         summands = []
         for i,valid_ind in enumerate(valid_filters_this_row):
-            summands.append(((self.bandfluxes.iat[curr_row,valid_ind] - mean_models1[i]-mean_models2[i])/self.bandfluxerrors.iat[curr_row,valid_ind])**2)
-
+            if valid_ind in ul_filters_this_row:
+                if self.ulmeth == "Limit":
+                    if mean_models1[i]+mean_models2[i] - self.bandfluxes.iat[curr_row,valid_ind] > 0:
+                        summands.append(((self.bandfluxes.iat[curr_row,valid_ind] - mean_models1[i]-mean_models2[i])/self.bandfluxerrors.iat[curr_row,valid_ind])**2)
+                    else:
+                        pass
+                elif self.ulmeth == "Standard":
+                    summands.append(((self.bandfluxes.iat[curr_row,valid_ind]/3 -mean_models1[i]-mean_models2[i])/(self.bandfluxes.iat[curr_row,valid_ind]/3))**2)
+            else:
+                summands.append(((self.bandfluxes.iat[curr_row,valid_ind] - mean_models1[i]-mean_models2[i])/self.bandfluxerrors.iat[curr_row,valid_ind])**2)
         mean_chisq = sum(summands)
-        print("mean chisq: ",mean_chisq,"\n")
+        print("\nchisq of mean parameters: ", mean_chisq,"\n")
         return mean_models1, mean_models2, mean_chisq
 
-    def minichisqfunc2_double(self,tup,Z1,age1,ebv1,Z2,age2,ebv2,valid_filters_this_row,curr_row):
+    def minichisqfunc2_double(self,tup,Z1,age1,ebv1,Z2,age2,ebv2,valid_filters_this_row,ul_filters_this_row,curr_row):
         M1, M2 = tup
 
-        print("New optimization: Testing row {} with Z1, age1, M1, ebv1, Z2, age2, M2, ebv2: ".format(self.rows[curr_row]+2), Z1,age1,M1,ebv1,Z2,age2,M2,ebv2)
+        if self.silent is False:
+            print("Fitting Ms to other mean parameters: Testing row {} with Z1, age1, M1, ebv1, Z2, age2, M2, ebv2: ".format(self.rows[curr_row]+2), Z1,age1,M1,ebv1,Z2,age2,M2,ebv2)
 
         true_M1 = 10**(M1*10)
         true_M2 = 10**(M2*10)
@@ -1529,14 +1703,24 @@ class ChiSquared():
         
         summands = []
         for i,valid_ind in enumerate(valid_filters_this_row):
-            summands.append(((self.bandfluxes.iat[curr_row,valid_ind] - mean_models1[i]-mean_models2[i])/self.bandfluxerrors.iat[curr_row,valid_ind])**2)
+            if valid_ind in ul_filters_this_row:
+                if self.ulmeth == "Limit":
+                    if mean_models1[i]+mean_models2[i] - self.bandfluxes.iat[curr_row,valid_ind] > 0:
+                        summands.append(((self.bandfluxes.iat[curr_row,valid_ind] - mean_models1[i]-mean_models2[i])/self.bandfluxerrors.iat[curr_row,valid_ind])**2)
+                    else:
+                        pass
+                elif self.ulmeth == "Standard":
+                    summands.append(((self.bandfluxes.iat[curr_row,valid_ind]/3 -mean_models1[i]-mean_models2[i])/(self.bandfluxes.iat[curr_row,valid_ind]/3))**2)
+            else:
+                summands.append(((self.bandfluxes.iat[curr_row,valid_ind] - mean_models1[i]-mean_models2[i])/self.bandfluxerrors.iat[curr_row,valid_ind])**2)
 
         new_chisq = sum(summands)
-        print("new chisq: ",new_chisq)
+        if self.silent is False:
+            print("chisq: ",new_chisq)
 
         return new_chisq
 
-    def minichisqfunc_triple(self,M_old_1,M_old_2,M_young,Z_old_1,age_old_1,ebv_old,Z_old_2,age_old_2,ebv_young,Z_young,age_young,valid_filters_this_row,curr_row):
+    def minichisqfunc_triple(self,M_old_1,M_old_2,M_young,Z_old_1,age_old_1,ebv_old,Z_old_2,age_old_2,ebv_young,Z_young,age_young,valid_filters_this_row,ul_filters_this_row,curr_row):
 
         true_M_old_1 = 10**(M_old_1*10)
         true_M_old_2 = 10**(M_old_2*10)
@@ -1560,18 +1744,28 @@ class ChiSquared():
 
         summands = []
         for i,valid_ind in enumerate(valid_filters_this_row):
-            summands.append(((self.bandfluxes.iat[curr_row,valid_ind] - mean_models1[i]-mean_models2[i]-mean_models3[i])/self.bandfluxerrors.iat[curr_row,valid_ind])**2)
+            if valid_ind in ul_filters_this_row:
+                if self.ulmeth == "Limit":
+                    if mean_models1[i]+mean_models2[i]+mean_models3[i] - self.bandfluxes.iat[curr_row,valid_ind] > 0:
+                        summands.append(((self.bandfluxes.iat[curr_row,valid_ind] - mean_models1[i]-mean_models2[i]-mean_models3[i])/self.bandfluxerrors.iat[curr_row,valid_ind])**2)
+                    else:
+                        pass
+                elif self.ulmeth == "Standard":
+                    summands.append(((self.bandfluxes.iat[curr_row,valid_ind]/3 -mean_models1[i]-mean_models2[i]-mean_models3[i])/(self.bandfluxes.iat[curr_row,valid_ind]/3))**2)
+            else:
+                summands.append(((self.bandfluxes.iat[curr_row,valid_ind] - mean_models1[i]-mean_models2[i]-mean_models3[i])/self.bandfluxerrors.iat[curr_row,valid_ind])**2)
 
         mean_chisq = sum(summands)
-        print("mean chisq: ",mean_chisq,"\n")
+        print("\nchisq of mean parameters: ", mean_chisq,"\n")
 
         return mean_models1,mean_models2,mean_models3, mean_chisq
 
-    def minichisqfunc2_triple(self,tup,Z_old_1,age_old_1,ebv_old,Z_old_2,age_old_2,ebv_young,Z_young,age_young,valid_filters_this_row,curr_row):
+    def minichisqfunc2_triple(self,tup,Z_old_1,age_old_1,ebv_old,Z_old_2,age_old_2,ebv_young,Z_young,age_young,valid_filters_this_row,ul_filters_this_row,curr_row):
 
         M_old_1,M_old_2,M_young = tup
 
-        print("New optimization: Testing row {} with Z1, age1, M1, ebv1, Z2, age2, M2, ebv2, Z3, age3, M3: ".format(self.rows[curr_row]+2), Z_old_1,age_old_1,M_old_1,ebv_old,Z_old_2,age_old_2,M_old_2,ebv_young,Z_young,age_young,M_young)
+        if self.silent is False:
+            print("Fitting Ms to other mean parameters: Testing row {} with Z1, age1, M1, ebv1, Z2, age2, M2, ebv2, Z3, age3, M3: ".format(self.rows[curr_row]+2), Z_old_1,age_old_1,M_old_1,ebv_old,Z_old_2,age_old_2,M_old_2,ebv_young,Z_young,age_young,M_young)
 
         true_M_old_1 = 10**(M_old_1*10)
         true_M_old_2 = 10**(M_old_2*10)
@@ -1595,15 +1789,26 @@ class ChiSquared():
 
         summands = []
         for i,valid_ind in enumerate(valid_filters_this_row):
-            summands.append(((self.bandfluxes.iat[curr_row,valid_ind] - mean_models1[i]-mean_models2[i]-mean_models3[i])/self.bandfluxerrors.iat[curr_row,valid_ind])**2)
+            if valid_ind in ul_filters_this_row:
+                if self.ulmeth == "Limit":
+                    if mean_models1[i]+mean_models2[i]+mean_models3[i] - self.bandfluxes.iat[curr_row,valid_ind] > 0:
+                        summands.append(((self.bandfluxes.iat[curr_row,valid_ind] - mean_models1[i]-mean_models2[i]-mean_models3[i])/self.bandfluxerrors.iat[curr_row,valid_ind])**2)
+                    else:
+                        pass
+                elif self.ulmeth == "Standard":
+                    summands.append(((self.bandfluxes.iat[curr_row,valid_ind]/3 -mean_models1[i]-mean_models2[i]-mean_models3[i])/(self.bandfluxes.iat[curr_row,valid_ind]/3))**2)
+            else:
+                summands.append(((self.bandfluxes.iat[curr_row,valid_ind] - mean_models1[i]-mean_models2[i]-mean_models3[i])/self.bandfluxerrors.iat[curr_row,valid_ind])**2)
 
         new_chisq = sum(summands)
-        print("new chisq: ",new_chisq)
+        if self.silent is False:
+            print("chisq: ",new_chisq)
 
         return new_chisq
 
-    def chisqfunc(self,M,Z,age,ebv,valid_filters_this_row,curr_row):
-        print("Testing row {} with log(Z), log(age)/10, log(M)/10, E_bv: ".format(self.rows[curr_row]+2), Z,age,M,ebv)
+    def chisqfunc(self,M,Z,age,ebv,valid_filters_this_row,ul_filters_this_row,curr_row):
+        if self.silent is False:
+            print("Testing row {} with log(Z), log(age)/10, log(M)/10, E_bv: ".format(self.rows[curr_row]+2), Z,age,M,ebv)
 
         true_M = 10**(M*10)
 
@@ -1615,16 +1820,27 @@ class ChiSquared():
 
         summands = []
         for i,valid_ind in enumerate(valid_filters_this_row):
-            summands.append(((self.bandfluxes.iat[curr_row,valid_ind] - models[i])/self.bandfluxerrors.iat[curr_row,valid_ind])**2)
+            if valid_ind in ul_filters_this_row:
+                if self.ulmeth == "Limit":
+                    if models[i] - self.bandfluxes.iat[curr_row,valid_ind] > 0:
+                        summands.append(((self.bandfluxes.iat[curr_row,valid_ind] - models[i])/self.bandfluxerrors.iat[curr_row,valid_ind])**2)
+                    else:
+                        pass
+                elif self.ulmeth == "Standard":
+                    summands.append(((self.bandfluxes.iat[curr_row,valid_ind]/3 - models[i])/(self.bandfluxes.iat[curr_row,valid_ind]/3))**2)
+            else:
+                summands.append(((self.bandfluxes.iat[curr_row,valid_ind] - models[i])/self.bandfluxerrors.iat[curr_row,valid_ind])**2)
 
         chisq = sum(summands)
-        print("chisq: ",chisq,"\n")
+        if self.silent is False:
+            print("chisq: ",chisq,"\n")
 
         return chisq
 
-    def chisqfunc2(self,tup,Z1,age1,E_bv1,Z2,age2,E_bv2,valid_filters_this_row,curr_row):
+    def chisqfunc2(self,tup,Z1,age1,E_bv1,Z2,age2,E_bv2,valid_filters_this_row,ul_filters_this_row,curr_row):
         M1,M2 = tup
-        print("Testing row {} with log(Z1), log(age1)/10, log(M1)/10, E_bv1, log(Z2), log(age2)/10, log(M2)/10, E_bv2: ".format(self.rows[curr_row]+2), Z1, age1, M1, E_bv1, Z2, age2, M2, E_bv2)
+        if self.silent is False:
+            print("Testing row {} with log(Z1), log(age1)/10, log(M1)/10, E_bv1, log(Z2), log(age2)/10, log(M2)/10, E_bv2: ".format(self.rows[curr_row]+2), Z1, age1, M1, E_bv1, Z2, age2, M2, E_bv2)
 
         true_M1 = 10**(M1*10)
         true_M2 = 10**(M2*10)
@@ -1642,15 +1858,26 @@ class ChiSquared():
 
         summands = []
         for i,valid_ind in enumerate(valid_filters_this_row):
-            summands.append(((self.bandfluxes.iat[curr_row,valid_ind] - models1[i]-models2[i])/self.bandfluxerrors.iat[curr_row,valid_ind])**2)
+            if valid_ind in ul_filters_this_row:
+                if self.ulmeth == "Limit":
+                    if models1[i]+models2[i] - self.bandfluxes.iat[curr_row,valid_ind] > 0:
+                        summands.append(((self.bandfluxes.iat[curr_row,valid_ind] - models1[i]-models2[i])/self.bandfluxerrors.iat[curr_row,valid_ind])**2)
+                    else:
+                        pass
+                elif self.ulmeth == "Standard":
+                    summands.append(((self.bandfluxes.iat[curr_row,valid_ind]/3 -models1[i]-models2[i])/(self.bandfluxes.iat[curr_row,valid_ind]/3))**2)
+            else:
+                summands.append(((self.bandfluxes.iat[curr_row,valid_ind] - models1[i]-models2[i])/self.bandfluxerrors.iat[curr_row,valid_ind])**2)
 
         chisq = sum(summands)
-        print("chisq: ",chisq,"\n")
+        if self.silent is False:
+            print("chisq: ",chisq,"\n")
         return chisq
 
-    def chisqfunc3(self,tup,Z_old_1,age_old_1,E_bv_old,Z_old_2,age_old_2,E_bv_new,Z_new,age_new,valid_filters_this_row,curr_row):
+    def chisqfunc3(self,tup,Z_old_1,age_old_1,E_bv_old,Z_old_2,age_old_2,E_bv_new,Z_new,age_new,valid_filters_this_row,ul_filters_this_row,curr_row):
         M_old_1,M_old_2,M_new = tup
-        print("Testing row {} with log(Z_old_1), log(age_old_1)/10, log(M_old_1)/10, E(B-V)_old, log(Z_old_2), log(age_old_2)/10, log(M_old_2)/10, E(B-V)_new, log(Z_new), log(age_new)/10, log(M_new)/10: ".format(self.rows[curr_row]+2),Z_old_1,age_old_1,M_old_1,E_bv_old,Z_old_2,age_old_2,M_old_2,E_bv_new,Z_new,age_new,M_new)
+        if self.silent is False:
+            print("Testing row {} with log(Z_old_1), log(age_old_1)/10, log(M_old_1)/10, E(B-V)_old, log(Z_old_2), log(age_old_2)/10, log(M_old_2)/10, E(B-V)_new, log(Z_new), log(age_new)/10, log(M_new)/10: ".format(self.rows[curr_row]+2),Z_old_1,age_old_1,M_old_1,E_bv_old,Z_old_2,age_old_2,M_old_2,E_bv_new,Z_new,age_new,M_new)
 
         true_M_old_1 = 10**(M_old_1*10)
         true_M_old_2 = 10**(M_old_2*10)
@@ -1674,20 +1901,199 @@ class ChiSquared():
 
         summands = []
         for i,valid_ind in enumerate(valid_filters_this_row):
-            summands.append(((self.bandfluxes.iat[curr_row,valid_ind] - models1[i]-models2[i]-models3[i])/self.bandfluxerrors.iat[curr_row,valid_ind])**2)
-
+            if valid_ind in ul_filters_this_row:
+                if self.ulmeth == "Limit":
+                    if models1[i]+models2[i]+models3[i] - self.bandfluxes.iat[curr_row,valid_ind] > 0:
+                        summands.append(((self.bandfluxes.iat[curr_row,valid_ind] - models1[i]-models2[i]-models3[i])/self.bandfluxerrors.iat[curr_row,valid_ind])**2)
+                    else:
+                        pass
+                elif self.ulmeth == "Standard":
+                    summands.append(((self.bandfluxes.iat[curr_row,valid_ind]/3 -models1[i]-models2[i]-models3[i])/(self.bandfluxes.iat[curr_row,valid_ind]/3))**2)
+            else:
+                summands.append(((self.bandfluxes.iat[curr_row,valid_ind] - models1[i]-models2[i]-models3[i])/self.bandfluxerrors.iat[curr_row,valid_ind])**2)
+                
         chisq = sum(summands)
-        print("chisq: ",chisq,"\n")
+        if self.silent is False:
+            print("chisq: ",chisq,"\n")
+        return chisq
+    
+    def chisqfuncerror(self,lead,leadsign,otherstup):
+
+        if leadsign == 0:
+            Z = lead
+            age,M,E_bv,valid_filters_this_row,ul_filters_this_row,curr_row = otherstup[0],otherstup[1],otherstup[2],otherstup[3],otherstup[4],otherstup[5]
+        elif leadsign == 1:
+            age = lead
+            Z,M,E_bv,valid_filters_this_row,ul_filters_this_row,curr_row = otherstup[0],otherstup[1],otherstup[2],otherstup[3],otherstup[4],otherstup[5]
+        elif leadsign == 2:
+            M = lead
+            Z,age,E_bv,valid_filters_this_row,ul_filters_this_row,curr_row = otherstup[0],otherstup[1],otherstup[2],otherstup[3],otherstup[4],otherstup[5]
+        elif leadsign == 3:
+            E_bv = lead
+            Z,age,M,valid_filters_this_row,ul_filters_this_row,curr_row = otherstup[0],otherstup[1],otherstup[2],otherstup[3],otherstup[4],otherstup[5]
+
+        true_M = 10**(M*10)
+
+        models = []
+        interpolist = self.interpolate(Z,age,valid_filters_this_row)
+        extinctolist = self.extinction(valid_filters_this_row)
+        for i in range(len(valid_filters_this_row)):
+            models.append(true_M*interpolist[i]*(10/self.d)**2*10**(-0.4*(E_bv*(extinctolist[i]+3.001))))
+
+        summands = []
+        for i,valid_ind in enumerate(valid_filters_this_row):
+            if valid_ind in ul_filters_this_row:
+                if self.ulmeth == "Limit":
+                    if models[i] - self.bandfluxes.iat[curr_row,valid_ind] > 0:
+                        summands.append(((self.bandfluxes.iat[curr_row,valid_ind] - models[i])/self.bandfluxerrors.iat[curr_row,valid_ind])**2)
+                    else:
+                        pass
+                elif self.ulmeth == "Standard":
+                    summands.append(((self.bandfluxes.iat[curr_row,valid_ind]/3 - models[i])/(self.bandfluxes.iat[curr_row,valid_ind]/3))**2)
+            else:
+                summands.append(((self.bandfluxes.iat[curr_row,valid_ind] - models[i])/self.bandfluxerrors.iat[curr_row,valid_ind])**2)
+
+
+        chisq = sum(summands) - self.results[curr_row].fun - 4.28
+        return chisq
+
+    def chisqfunc2error(self,lead,leadsign,otherstup):
+
+        if leadsign == 0:
+            Z1 = lead
+            age1,M1,E_bv1,Z2,age2,M2,E_bv2,valid_filters_this_row,ul_filters_this_row,curr_row = otherstup[0],otherstup[1],otherstup[2],otherstup[3],otherstup[4],otherstup[5],otherstup[6],otherstup[7],otherstup[8],otherstup[9]
+        elif leadsign == 1:
+            age1 = lead
+            Z1,M1,E_bv1,Z2,age2,M2,E_bv2,valid_filters_this_row,ul_filters_this_row,curr_row = otherstup[0],otherstup[1],otherstup[2],otherstup[3],otherstup[4],otherstup[5],otherstup[6],otherstup[7],otherstup[8],otherstup[9]
+        elif leadsign == 2:
+            M1 = lead
+            Z1,age1,E_bv1,Z2,age2,M2,E_bv2,valid_filters_this_row,ul_filters_this_row,curr_row = otherstup[0],otherstup[1],otherstup[2],otherstup[3],otherstup[4],otherstup[5],otherstup[6],otherstup[7],otherstup[8],otherstup[9]
+        elif leadsign == 3:
+            E_bv1 = lead
+            Z1,age1,M1,Z2,age2,M2,E_bv2,valid_filters_this_row,ul_filters_this_row,curr_row = otherstup[0],otherstup[1],otherstup[2],otherstup[3],otherstup[4],otherstup[5],otherstup[6],otherstup[7],otherstup[8],otherstup[9]
+        elif leadsign == 4:
+            Z2 = lead
+            Z1,age1,M1,E_bv1,age2,M2,E_bv2,valid_filters_this_row,ul_filters_this_row,curr_row = otherstup[0],otherstup[1],otherstup[2],otherstup[3],otherstup[4],otherstup[5],otherstup[6],otherstup[7],otherstup[8],otherstup[9]
+        elif leadsign == 5:
+            age2 = lead
+            Z1,age1,M1,E_bv1,Z2,M2,E_bv2,valid_filters_this_row,ul_filters_this_row,curr_row = otherstup[0],otherstup[1],otherstup[2],otherstup[3],otherstup[4],otherstup[5],otherstup[6],otherstup[7],otherstup[8],otherstup[9]
+        elif leadsign == 6:
+            M2 = lead
+            Z1,age1,M1,E_bv1,Z2,age2,E_bv2,valid_filters_this_row,ul_filters_this_row,curr_row = otherstup[0],otherstup[1],otherstup[2],otherstup[3],otherstup[4],otherstup[5],otherstup[6],otherstup[7],otherstup[8],otherstup[9]
+        elif leadsign == 7:
+            E_bv2 = lead
+            Z1,age1,M1,E_bv1,Z2,age2,M2,valid_filters_this_row,ul_filters_this_row,curr_row = otherstup[0],otherstup[1],otherstup[2],otherstup[3],otherstup[4],otherstup[5],otherstup[6],otherstup[7],otherstup[8],otherstup[9]
+
+        true_M1 = 10**(M1*10)
+        true_M2 = 10**(M2*10)
+
+        models1 = []
+        interpolist1 = self.interpolate(Z1,age1,valid_filters_this_row)
+        extinctolist1 =self.extinction(valid_filters_this_row)
+        for i in range(len(valid_filters_this_row)):
+            models1.append(true_M1*interpolist1[i]*(10/self.d)**2*10**(-0.4*(E_bv1*(extinctolist1[i]+3.001))))
+        models2 = []
+        interpolist2 = self.interpolate(Z2,age2,valid_filters_this_row)
+        extinctolist2 = self.extinction(valid_filters_this_row)
+        for i in range(len(valid_filters_this_row)):
+            models2.append(true_M2*interpolist2[i]*(10/self.d)**2*10**(-0.4*(E_bv2*(extinctolist2[i]+3.001))))
+
+        summands = []
+        for i,valid_ind in enumerate(valid_filters_this_row):
+            if valid_ind in ul_filters_this_row:
+                if self.ulmeth == "Limit":
+                    if models1[i]+models2[i] - self.bandfluxes.iat[curr_row,valid_ind] > 0:
+                        summands.append(((self.bandfluxes.iat[curr_row,valid_ind] - models1[i]-models2[i])/self.bandfluxerrors.iat[curr_row,valid_ind])**2)
+                    else:
+                        pass
+                elif self.ulmeth == "Standard":
+                    summands.append(((self.bandfluxes.iat[curr_row,valid_ind]/3 - models1[i]-models2[i])/(self.bandfluxes.iat[curr_row,valid_ind]/3))**2)
+            else:
+                summands.append(((self.bandfluxes.iat[curr_row,valid_ind] - models1[i]-models2[i])/self.bandfluxerrors.iat[curr_row,valid_ind])**2)
+
+        chisq = sum(summands) - self.results[curr_row].fun - 9.32
+        return chisq
+
+    def chisqfunc3error(self,lead,leadsign,otherstup):
+
+        if leadsign == 0:
+            Z_old_1 = lead
+            age_old_1,M_old_1,E_bv_old,Z_old_2,age_old_2,M_old_2,E_bv_new,Z_new,age_new,M_new,valid_filters_this_row,ul_filters_this_row,curr_row = otherstup[0],otherstup[1],otherstup[2],otherstup[3],otherstup[4],otherstup[5],otherstup[6],otherstup[7],otherstup[8],otherstup[9],otherstup[10],otherstup[11],otherstup[12]
+        elif leadsign == 1:
+            age_old_1 = lead
+            Z_old_1,M_old_1,E_bv_old,Z_old_2,age_old_2,M_old_2,E_bv_new,Z_new,age_new,M_new,valid_filters_this_row,ul_filters_this_row,curr_row = otherstup[0],otherstup[1],otherstup[2],otherstup[3],otherstup[4],otherstup[5],otherstup[6],otherstup[7],otherstup[8],otherstup[9],otherstup[10],otherstup[11],otherstup[12]
+        elif leadsign == 2:
+            M_old_1 = lead
+            Z_old_1,age_old_1,E_bv_old,Z_old_2,age_old_2,M_old_2,E_bv_new,Z_new,age_new,M_new,valid_filters_this_row,ul_filters_this_row,curr_row = otherstup[0],otherstup[1],otherstup[2],otherstup[3],otherstup[4],otherstup[5],otherstup[6],otherstup[7],otherstup[8],otherstup[9],otherstup[10],otherstup[11],otherstup[12]
+        elif leadsign == 3:
+            E_bv_old = lead
+            Z_old_1,age_old_1,M_old_1,Z_old_2,age_old_2,M_old_2,E_bv_new,Z_new,age_new,M_new,valid_filters_this_row,ul_filters_this_row,curr_row = otherstup[0],otherstup[1],otherstup[2],otherstup[3],otherstup[4],otherstup[5],otherstup[6],otherstup[7],otherstup[8],otherstup[9],otherstup[10],otherstup[11],otherstup[12]
+        elif leadsign == 4:
+            Z_old_2 = lead
+            Z_old_1,age_old_1,M_old_1,E_bv_old,age_old_2,M_old_2,E_bv_new,Z_new,age_new,M_new,valid_filters_this_row,ul_filters_this_row,curr_row = otherstup[0],otherstup[1],otherstup[2],otherstup[3],otherstup[4],otherstup[5],otherstup[6],otherstup[7],otherstup[8],otherstup[9],otherstup[10],otherstup[11],otherstup[12]
+        elif leadsign == 5:
+            age_old_2 = lead
+            Z_old_1,age_old_1,M_old_1,E_bv_old,Z_old_2,M_old_2,E_bv_new,Z_new,age_new,M_new,valid_filters_this_row,ul_filters_this_row,curr_row = otherstup[0],otherstup[1],otherstup[2],otherstup[3],otherstup[4],otherstup[5],otherstup[6],otherstup[7],otherstup[8],otherstup[9],otherstup[10],otherstup[11],otherstup[12]
+        elif leadsign == 6:
+            M_old_2 = lead
+            Z_old_1,age_old_1,M_old_1,E_bv_old,Z_old_2,age_old_2,E_bv_new,Z_new,age_new,M_new,valid_filters_this_row,ul_filters_this_row,curr_row = otherstup[0],otherstup[1],otherstup[2],otherstup[3],otherstup[4],otherstup[5],otherstup[6],otherstup[7],otherstup[8],otherstup[9],otherstup[10],otherstup[11],otherstup[12]
+        elif leadsign == 7:
+            E_bv_new = lead
+            Z_old_1,age_old_1,M_old_1,E_bv_old,Z_old_2,age_old_2,M_old_2,Z_new,age_new,M_new,valid_filters_this_row,ul_filters_this_row,curr_row = otherstup[0],otherstup[1],otherstup[2],otherstup[3],otherstup[4],otherstup[5],otherstup[6],otherstup[7],otherstup[8],otherstup[9],otherstup[10],otherstup[11],otherstup[12]
+        elif leadsign == 8:
+            Z_new = lead
+            Z_old_1,age_old_1,M_old_1,E_bv_old,Z_old_2,age_old_2,M_old_2,E_bv_new,age_new,M_new,valid_filters_this_row,ul_filters_this_row,curr_row = otherstup[0],otherstup[1],otherstup[2],otherstup[3],otherstup[4],otherstup[5],otherstup[6],otherstup[7],otherstup[8],otherstup[9],otherstup[10],otherstup[11],otherstup[12]
+        elif leadsign == 9:
+            age_new = lead
+            Z_old_1,age_old_1,M_old_1,E_bv_old,Z_old_2,age_old_2,M_old_2,E_bv_new,Z_new,M_new,valid_filters_this_row,ul_filters_this_row,curr_row = otherstup[0],otherstup[1],otherstup[2],otherstup[3],otherstup[4],otherstup[5],otherstup[6],otherstup[7],otherstup[8],otherstup[9],otherstup[10],otherstup[11],otherstup[12]
+        elif leadsign == 10:
+            M_new = lead
+            Z_old_1,age_old_1,M_old_1,E_bv_old,Z_old_2,age_old_2,M_old_2,E_bv_new,Z_new,age_new,valid_filters_this_row,ul_filters_this_row,curr_row = otherstup[0],otherstup[1],otherstup[2],otherstup[3],otherstup[4],otherstup[5],otherstup[6],otherstup[7],otherstup[8],otherstup[9],otherstup[10],otherstup[11],otherstup[12]
+
+        true_M_old_1 = 10**(M_old_1*10)
+        true_M_old_2 = 10**(M_old_2*10)
+        true_M_new = 10**(M_new*10)
+
+        models1 = []
+        interpolist1 = self.interpolate(Z_old_1,age_old_1,valid_filters_this_row)
+        extinctolist1 =self.extinction(valid_filters_this_row)
+        for i in range(len(valid_filters_this_row)):
+            models1.append(true_M_old_1*interpolist1[i]*(10/self.d)**2*10**(-0.4*(E_bv_old*(extinctolist1[i]+3.001))))
+        models2 = []
+        interpolist2 = self.interpolate(Z_old_2,age_old_2,valid_filters_this_row)
+        extinctolist2 = self.extinction(valid_filters_this_row)
+        for i in range(len(valid_filters_this_row)):
+            models2.append(true_M_old_2*interpolist2[i]*(10/self.d)**2*10**(-0.4*(E_bv_old*(extinctolist2[i]+3.001))))
+        models3 = []
+        interpolist3 = self.interpolate(Z_new,age_new,valid_filters_this_row)
+        extinctolist3 = self.extinction(valid_filters_this_row)
+        for i in range(len(valid_filters_this_row)):
+            models3.append(true_M_new*interpolist3[i]*(10/self.d)**2*10**(-0.4*(E_bv_new*(extinctolist3[i]+3.001))))
+
+        summands = []
+        for i,valid_ind in enumerate(valid_filters_this_row):
+            if valid_ind in ul_filters_this_row:
+                if self.ulmeth == "Limit":
+                    if models1[i]+models2[i]+models3[i] - self.bandfluxes.iat[curr_row,valid_ind] > 0:
+                        summands.append(((self.bandfluxes.iat[curr_row,valid_ind] - models1[i]-models2[i]-models3[i])/self.bandfluxerrors.iat[curr_row,valid_ind])**2)
+                    else:
+                        pass
+                elif self.ulmeth == "Standard":
+                    summands.append(((self.bandfluxes.iat[curr_row,valid_ind]/3 -models1[i]-models2[i]-models3[i])/(self.bandfluxes.iat[curr_row,valid_ind]/3))**2)
+            else:
+                summands.append(((self.bandfluxes.iat[curr_row,valid_ind] - models1[i]-models2[i]-models3[i])/self.bandfluxerrors.iat[curr_row,valid_ind])**2)
+
+        chisq = sum(summands) - self.results[curr_row].fun - 12.77
         return chisq
 
     def minimize_chisq(self):
         import numpy as np
-        from math import exp
+        from math import exp, sqrt
         from scipy.optimize import Bounds
         
         if self.single_cluster == True:
             bnds = Bounds([self.Mbound1lo],[self.Mbound1hi])
-            x0 = np.array([self.Mguess1])
+            x0 = np.array([(self.Mbound1lo+self.Mbound1hi)/2])
             self.results = []    
 
             self.mean_Z1s = []
@@ -1700,6 +2106,11 @@ class ChiSquared():
             self.var_M1s = []
             self.var_ebv1s = []
 
+            self.sigma_Z1s = []
+            self.sigma_age1s = []
+            self.sigma_M1s = []
+            self.sigma_ebv1s = []
+
             self.gridM1s = []
             self.gridChisqs = []
 
@@ -1711,9 +2122,13 @@ class ChiSquared():
 
             for curr_row in range(self.bandfluxes.shape[0]): 
                 valid_filters_this_row = []
-                for valid_ind,bandflux in enumerate(self.bandfluxes.loc[curr_row,:]):
-                    if np.isnan(bandflux) == False:
+                ul_filters_this_row = []
+                for valid_ind,arraytup in enumerate(zip(self.bandfluxes.loc[curr_row,:],self.ul_frame.loc[curr_row,:])):
+                    if np.isnan(arraytup[0]) == False:
                         valid_filters_this_row.append(valid_ind)
+                    if arraytup[1] == 1: 
+                        ul_filters_this_row.append(valid_ind)
+
                 gridChisq = np.zeros((self.Z1num,self.age1num,self.ebv1num))
                 gridM = np.zeros((self.Z1num,self.age1num,self.ebv1num))
                 Wtot = 0
@@ -1782,6 +2197,11 @@ class ChiSquared():
                 self.var_M1s.append(0)
                 self.var_ebv1s.append(0)
 
+                self.sigma_Z1s.append(0)
+                self.sigma_age1s.append(0)
+                self.sigma_M1s.append(0)
+                self.sigma_ebv1s.append(0)
+
                 for i in range(self.Z1num):
                     for j in range(self.age1num):
                         for k in range(self.ebv1num):
@@ -1805,10 +2225,19 @@ class ChiSquared():
                 self.var_M1s[curr_row] /= Wtot
                 self.var_ebv1s[curr_row] /= Wtot
 
+                self.sigma_Z1s[curr_row] = sqrt(self.var_Z1s[curr_row])
+                self.sigma_age1s[curr_row] = sqrt(self.var_age1s[curr_row])
+                self.sigma_M1s[curr_row] = sqrt(self.var_M1s[curr_row])
+                self.sigma_ebv1s[curr_row] = sqrt(self.var_ebv1s[curr_row])
+
                 print("weighted var Z1 ", self.var_Z1s[curr_row])
+                print("sigma Z1 (sqrt weighted var Z1) ", self.sigma_Z1s[curr_row])
                 print("weighted var age1 ", self.var_age1s[curr_row])
+                print("sigma age1 (sqrt weighted var age1) ", self.sigma_age1s[curr_row])
                 print("weighted var M1 ", self.var_M1s[curr_row])
+                print("sigma M1 (sqrt weighted var M1) ", self.sigma_M1s[curr_row])
                 print("weighted var ebv1 ", self.var_ebv1s[curr_row])
+                print("sigma ebv1 (sqrt weighted var ebv1) ", self.sigma_ebv1s[curr_row])
 
                 x02 = np.array([self.mean_M1s[curr_row]])
                 res2 = opt.minimize(self.minichisqfunc2_single, x02, args=(self.mean_Z1s[curr_row],self.mean_age1s[curr_row],self.mean_ebv1s[curr_row],valid_filters_this_row,curr_row,), bounds=bnds)
@@ -1816,15 +2245,15 @@ class ChiSquared():
                 newchi2 = res2.fun
                 newM1 = res2.x[0]
 
-                print("new chi2: ", newchi2)
-                print("new M1: ", newM1)
+                print("chi2 of fitted M to other mean parameters: ", newchi2)
+                print("fitted M1 to other mean parameters: ", newM1)
 
                 self.newchi2s.append(newchi2)
                 self.newM1s.append(newM1)
         
         elif self.double_cluster == True:
             bnds = Bounds([self.Mbound1lo,self.Mbound2lo],[self.Mbound1hi,self.Mbound2hi])
-            x0 = np.array([self.Mguess1,self.Mguess2])
+            x0 = np.array([(self.Mbound1lo+self.Mbound1hi)/2,(self.Mbound2lo+self.Mbound2hi)/2])
             self.results = []
             self.mean_Z1s = []
             self.mean_age1s = []
@@ -1844,6 +2273,15 @@ class ChiSquared():
             self.var_M2s = []
             self.var_ebv2s = []
 
+            self.sigma_Z1s = []
+            self.sigma_age1s = []
+            self.sigma_M1s = []
+            self.sigma_ebv1s = []
+            self.sigma_Z2s = []
+            self.sigma_age2s = []
+            self.sigma_M2s = []
+            self.sigma_ebv2s = []
+
             self.gridM1s = []
             self.gridM2s = []
             self.gridChisqs = []
@@ -1857,9 +2295,13 @@ class ChiSquared():
             
             for curr_row in range(self.bandfluxes.shape[0]): 
                 valid_filters_this_row = []
-                for valid_ind,bandflux in enumerate(self.bandfluxes.loc[curr_row,:]):
-                    if np.isnan(bandflux) == False:
+                ul_filters_this_row = []
+                for valid_ind,arraytup in enumerate(zip(self.bandfluxes.loc[curr_row,:],self.ul_frame.loc[curr_row,:])):
+                    if np.isnan(arraytup[0]) == False:
                         valid_filters_this_row.append(valid_ind)
+                    if arraytup[1] == 1: 
+                        ul_filters_this_row.append(valid_ind)
+
                 gridChisq = np.zeros((self.Z1num,self.age1num,self.ebv1num,self.Z2num,self.age2num,self.ebv2num))
                 gridM1 = np.zeros((self.Z1num,self.age1num,self.ebv1num,self.Z2num,self.age2num,self.ebv2num))
                 gridM2 = np.zeros((self.Z1num,self.age1num,self.ebv1num,self.Z2num,self.age2num,self.ebv2num))
@@ -1969,6 +2411,15 @@ class ChiSquared():
                 self.var_M2s.append(0)
                 self.var_ebv2s.append(0)
 
+                self.sigma_Z1s.append(0)
+                self.sigma_age1s.append(0)
+                self.sigma_M1s.append(0)
+                self.sigma_ebv1s.append(0)
+                self.sigma_Z2s.append(0)
+                self.sigma_age2s.append(0)
+                self.sigma_M2s.append(0)
+                self.sigma_ebv2s.append(0)
+
                 for i in range(self.Z1num):
                     for j in range(self.age1num):
                         for k in range(self.ebv1num):
@@ -2008,14 +2459,31 @@ class ChiSquared():
                 self.var_M2s[curr_row] /= Wtot
                 self.var_ebv2s[curr_row] /= Wtot
 
+                self.sigma_Z1s[curr_row] = sqrt(self.var_Z1s[curr_row])
+                self.sigma_age1s[curr_row] = sqrt(self.var_age1s[curr_row])
+                self.sigma_M1s[curr_row] = sqrt(self.var_M1s[curr_row])
+                self.sigma_ebv1s[curr_row] = sqrt(self.var_ebv1s[curr_row])
+                self.sigma_Z2s[curr_row] = sqrt(self.var_Z2s[curr_row])
+                self.sigma_age2s[curr_row] = sqrt(self.var_age2s[curr_row])
+                self.sigma_M2s[curr_row] = sqrt(self.var_M2s[curr_row])
+                self.sigma_ebv2s[curr_row] = sqrt(self.var_ebv2s[curr_row])
+
                 print("weighted var Z1 ", self.var_Z1s[curr_row])
+                print("sigma Z1 (sqrt weighted var Z1) ", self.sigma_Z1s[curr_row])
                 print("weighted var age1 ", self.var_age1s[curr_row])
+                print("sigma age1 (sqrt weighted var age1) ", self.sigma_age1s[curr_row])
                 print("weighted var M1 ", self.var_M1s[curr_row])
+                print("sigma M1 (sqrt weighted var M1) ", self.sigma_M1s[curr_row])
                 print("weighted var ebv1 ", self.var_ebv1s[curr_row])
+                print("sigma ebv1 (sqrt weighted var ebv1) ", self.sigma_ebv1s[curr_row])
                 print("weighted var Z2 ", self.var_Z2s[curr_row])
+                print("sigma Z2 (sqrt weighted var Z2) ", self.sigma_Z2s[curr_row])
                 print("weighted var age2 ", self.var_age2s[curr_row])
+                print("sigma age2 (sqrt weighted var age2) ", self.sigma_age2s[curr_row])
                 print("weighted var M2 ", self.var_M2s[curr_row])
+                print("sigma M2 (sqrt weighted var M2) ", self.sigma_M2s[curr_row])
                 print("weighted var ebv2 ", self.var_ebv2s[curr_row])
+                print("sigma ebv2 (sqrt weighted var ebv2) ", self.sigma_ebv2s[curr_row])
 
                 x02 = np.array([self.mean_M1s[curr_row],self.mean_M2s[curr_row]])
                 res2 = opt.minimize(self.minichisqfunc2_double, x02, args=(self.mean_Z1s[curr_row],self.mean_age1s[curr_row],self.mean_ebv1s[curr_row],self.mean_Z2s[curr_row],self.mean_age2s[curr_row],self.mean_ebv2s[curr_row],valid_filters_this_row,curr_row,), bounds=bnds)
@@ -2024,9 +2492,9 @@ class ChiSquared():
                 newM1 = res2.x[0]
                 newM2 = res2.x[1]
 
-                print("new chi2: ", newchi2)
-                print("new M1: ", newM1)
-                print("new M2: ", newM2)
+                print("chi2 of fitted Ms to other mean parameters: ", newchi2)
+                print("fitted M1 to other mean parameters: ", newM1)
+                print("fitted M2 to other mean parameters: ", newM2)
 
                 self.newchi2s.append(newchi2)
                 self.newM1s.append(newM1)
@@ -2034,7 +2502,7 @@ class ChiSquared():
 
         elif self.triple_cluster == True:
             bnds = Bounds([self.Mbound1lo,self.Mbound2lo,self.Mbound3lo],[self.Mbound1hi,self.Mbound2hi,self.Mbound3hi])
-            x0 = np.array([self.Mguess1,self.Mguess2,self.Mguess3])
+            x0 = np.array([(self.Mbound1lo+self.Mbound1hi)/2,(self.Mbound2lo+self.Mbound2hi)/2,(self.Mbound3lo+self.Mbound3hi)/2])
             self.results = []
             self.mean_Z1s = []
             self.mean_age1s = []
@@ -2060,6 +2528,18 @@ class ChiSquared():
             self.var_age3s = []
             self.var_M3s = []
 
+            self.sigma_Z1s = []
+            self.sigma_age1s = []
+            self.sigma_M1s = []
+            self.sigma_ebv1s = []
+            self.sigma_Z2s = []
+            self.sigma_age2s = []
+            self.sigma_M2s = []
+            self.sigma_ebv2s = []
+            self.sigma_Z3s = []
+            self.sigma_age3s = []
+            self.sigma_M3s = []
+
             self.gridM1s = []
             self.gridM2s = []
             self.gridM3s = []
@@ -2075,9 +2555,13 @@ class ChiSquared():
             
             for curr_row in range(self.bandfluxes.shape[0]): 
                 valid_filters_this_row = []
-                for valid_ind,bandflux in enumerate(self.bandfluxes.loc[curr_row,:]):
-                    if np.isnan(bandflux) == False:
+                ul_filters_this_row = []
+                for valid_ind,arraytup in enumerate(zip(self.bandfluxes.loc[curr_row,:],self.ul_frame.loc[curr_row,:])):
+                    if np.isnan(arraytup[0]) == False:
                         valid_filters_this_row.append(valid_ind)
+                    if arraytup[1] == 1: 
+                        ul_filters_this_row.append(valid_ind)
+
                 gridChisq = np.zeros((self.Z1num,self.age1num,self.ebv1num,self.Z2num,self.age2num,self.ebv2num,self.Z3num,self.age3num))
                 gridM1 = np.zeros((self.Z1num,self.age1num,self.ebv1num,self.Z2num,self.age2num,self.ebv2num,self.Z3num,self.age3num))
                 gridM2 = np.zeros((self.Z1num,self.age1num,self.ebv1num,self.Z2num,self.age2num,self.ebv2num,self.Z3num,self.age3num))
@@ -2216,7 +2700,19 @@ class ChiSquared():
                 self.var_ebv2s.append(0)
                 self.var_Z3s.append(0)
                 self.var_age3s.append(0)
-                self.var_M3s.append(0)                
+                self.var_M3s.append(0)             
+
+                self.sigma_Z1s.append(0)
+                self.sigma_age1s.append(0)
+                self.sigma_M1s.append(0)
+                self.sigma_ebv1s.append(0)
+                self.sigma_Z2s.append(0)
+                self.sigma_age2s.append(0)
+                self.sigma_M2s.append(0)
+                self.sigma_ebv2s.append(0)
+                self.sigma_Z3s.append(0)
+                self.sigma_age3s.append(0)
+                self.sigma_M3s.append(0)        
 
                 for i in range(self.Z1num):
                     for j in range(self.age1num):
@@ -2267,19 +2763,42 @@ class ChiSquared():
                 self.var_ebv2s[curr_row] /= Wtot
                 self.var_Z3s[curr_row] /= Wtot
                 self.var_age3s[curr_row] /= Wtot
-                self.var_M3s[curr_row] /= Wtot                
+                self.var_M3s[curr_row] /= Wtot      
+
+                self.sigma_Z1s[curr_row] = sqrt(self.var_Z1s[curr_row])
+                self.sigma_age1s[curr_row] = sqrt(self.var_age1s[curr_row])
+                self.sigma_M1s[curr_row] = sqrt(self.var_M1s[curr_row])
+                self.sigma_ebv1s[curr_row] = sqrt(self.var_ebv1s[curr_row])
+                self.sigma_Z2s[curr_row] = sqrt(self.var_Z2s[curr_row])
+                self.sigma_age2s[curr_row] = sqrt(self.var_age2s[curr_row])
+                self.sigma_M2s[curr_row] = sqrt(self.var_M2s[curr_row])
+                self.sigma_ebv2s[curr_row] = sqrt(self.var_ebv2s[curr_row])
+                self.sigma_Z3s[curr_row] = sqrt(self.var_Z3s[curr_row])
+                self.sigma_age3s[curr_row] = sqrt(self.var_age3s[curr_row])
+                self.sigma_M3s[curr_row] = sqrt(self.var_M3s[curr_row])          
 
                 print("weighted var Z1 ", self.var_Z1s[curr_row])
+                print("sigma Z1 (sqrt weighted var Z1) ", self.sigma_Z1s[curr_row])
                 print("weighted var age1 ", self.var_age1s[curr_row])
+                print("sigma age1 (sqrt weighted var age1) ", self.sigma_age1s[curr_row])
                 print("weighted var M1 ", self.var_M1s[curr_row])
+                print("sigma M1 (sqrt weighted var M1) ", self.sigma_M1s[curr_row])
                 print("weighted var ebv1 ", self.var_ebv1s[curr_row])
+                print("sigma ebv1 (sqrt weighted var ebv1) ", self.sigma_ebv1s[curr_row])
                 print("weighted var Z2 ", self.var_Z2s[curr_row])
+                print("sigma Z2 (sqrt weighted var Z2) ", self.sigma_Z2s[curr_row])
                 print("weighted var age2 ", self.var_age2s[curr_row])
+                print("sigma age2 (sqrt weighted var age2) ", self.sigma_age2s[curr_row])
                 print("weighted var M2 ", self.var_M2s[curr_row])
+                print("sigma M2 (sqrt weighted var M2) ", self.sigma_M2s[curr_row])
                 print("weighted var ebv2 ", self.var_ebv2s[curr_row])
+                print("sigma ebv2 (sqrt weighted var ebv2) ", self.sigma_ebv2s[curr_row])
                 print("weighted var Z3 ", self.var_Z3s[curr_row])
+                print("sigma Z3 (sqrt weighted var Z3) ", self.sigma_Z3s[curr_row])
                 print("weighted var age3 ", self.var_age3s[curr_row])
-                print("weighted var M3 ", self.var_M3s[curr_row])                
+                print("sigma age3 (sqrt weighted var age3) ", self.sigma_age3s[curr_row])
+                print("weighted var M3 ", self.var_M3s[curr_row])
+                print("sigma M3 (sqrt weighted var M3) ", self.sigma_M3s[curr_row])
 
                 x02 = np.array([self.mean_M1s[curr_row],self.mean_M2s[curr_row],self.mean_M3s[curr_row]])
                 res2 = opt.minimize(self.minichisqfunc2_triple, x02, args=(self.mean_Z1s[curr_row],self.mean_age1s[curr_row],self.mean_ebv1s[curr_row],self.mean_Z2s[curr_row],self.mean_age2s[curr_row],self.mean_ebv2s[curr_row],self.mean_Z3s[curr_row],self.mean_age3s[curr_row],valid_filters_this_row,curr_row,), bounds=bnds)
@@ -2289,15 +2808,580 @@ class ChiSquared():
                 newM2 = res2.x[1]
                 newM3 = res2.x[2]
 
-                print("new chi2: ", newchi2)
-                print("new M1: ", newM1)
-                print("new M2: ", newM2)
-                print("new M3: ", newM3)
+                print("chi2 of fitted Ms to other mean parameters: ", newchi2)
+                print("fitted M1 to other mean parameters: ", newM1)
+                print("fitted M2 to other mean parameters: ", newM2)
+                print("fitted M3 to other mean parameters: ", newM3)
 
                 self.newchi2s.append(newchi2)
                 self.newM1s.append(newM1)
                 self.newM2s.append(newM2)
                 self.newM3s.append(newM3)
+
+    def find_param_errors(self):
+        import numpy as np
+
+        if self.single_cluster == True:
+
+            self.errorsallrows = []
+            self.errornotes = []
+            for curr_row in range(self.bandfluxes.shape[0]):  
+                valid_filters_this_row = []
+                ul_filters_this_row = []
+                for valid_ind,arraytup in enumerate(zip(self.bandfluxes.loc[curr_row,:],self.ul_frame.loc[curr_row,:])):
+                    if np.isnan(arraytup[0]) == False:
+                        valid_filters_this_row.append(valid_ind)
+                    if arraytup[1] == 1:
+                        ul_filters_this_row.append(valid_ind)
+                errorsthisrow = []
+                errornotesthisrow = []
+                Z,age,M,E_bv = self.results[curr_row].x[0],self.results[curr_row].x[1],self.results[curr_row].x[2],self.results[curr_row].x[3]
+                ###
+                otherstup = (age,M,E_bv,valid_filters_this_row,ul_filters_this_row,curr_row)
+                try:
+                    Zlowererror = Z - opt.root_scalar(self.chisqfuncerror, args=(0,otherstup,),method="brentq",bracket=[self.Zbound1lo[curr_row],Z]).root
+                    Zlowernotes = "\n"
+                except:
+                    Zlowererror = "N/A"
+                    if self.chisqfuncerror(Z,0,otherstup,) != self.chisqfuncerror(self.Zbound1lo[curr_row],0,otherstup,):
+                        Zlowernotes = "cannot go low enough to\nchange chi^2 by 4.17"
+                    elif self.chisqfuncerror(Z,0,otherstup,) == self.chisqfuncerror(self.Zbound1lo[curr_row],0,otherstup,):
+                        Zlowernotes = "sitting at lower bound\n"
+                try:
+                    Zuppererror = opt.root_scalar(self.chisqfuncerror, args=(0,otherstup,),method="brentq",bracket=[Z,self.Zbound1hi[curr_row]]).root - Z
+                    Zuppernotes = "\n"
+                except:
+                    Zuppererror = "N/A"
+                    if self.chisqfuncerror(Z,0,otherstup,) != self.chisqfuncerror(self.Zbound1hi[curr_row],0,otherstup,):
+                        Zuppernotes = "cannot go high enough to\nchange chi^2 by 4.17"
+                    elif self.chisqfuncerror(Z,0,otherstup,) == self.chisqfuncerror(self.Zbound1hi[curr_row],0,otherstup,):
+                        Zuppernotes = "sitting at upper bound\n"
+                errorsthisrow.append([Zlowererror,Zuppererror])
+                errornotesthisrow.append([Zlowernotes,Zuppernotes])
+                ###
+                otherstup = (Z,M,E_bv,valid_filters_this_row,ul_filters_this_row,curr_row)              
+                try:
+                    agelowererror = (age - opt.root_scalar(self.chisqfuncerror, args=(1,otherstup,),method="brentq",bracket=[self.agebound1lo[curr_row],age]).root)
+                    agelowernotes = "\n"
+                except:
+                    agelowererror = "N/A"
+                    if self.chisqfuncerror(age,1,otherstup,) != self.chisqfuncerror(self.agebound1lo[curr_row],1,otherstup,):
+                        agelowernotes = "cannot go low enough to\nchange chi^2 by 4.17"
+                    elif self.chisqfuncerror(age,1,otherstup,) == self.chisqfuncerror(self.agebound1lo[curr_row],1,otherstup,):
+                        agelowernotes = "sitting at lower bound\n"
+                try:    
+                    ageuppererror = (opt.root_scalar(self.chisqfuncerror, args=(1,otherstup,),method="brentq",bracket=[age,self.agebound1hi[curr_row]]).root - age)
+                    ageuppernotes = "\n"
+                except:
+                    ageuppererror = "N/A"
+                    if self.chisqfuncerror(age,1,otherstup,) != self.chisqfuncerror(self.agebound1hi[curr_row],1,otherstup,):
+                        ageuppernotes = "cannot go high enough to\nchange chi^2 by 4.17"
+                    elif self.chisqfuncerror(age,1,otherstup,) == self.chisqfuncerror(self.agebound1hi[curr_row],1,otherstup,):
+                        ageuppernotes = "sitting at upper bound\n"
+                errorsthisrow.append([agelowererror,ageuppererror])
+                errornotesthisrow.append([agelowernotes,ageuppernotes])
+                ###
+                otherstup = (Z,age,E_bv,valid_filters_this_row,ul_filters_this_row,curr_row)     
+                try:
+                    Mlowererror = M - opt.root_scalar(self.chisqfuncerror, args=(2,otherstup,),method="brentq",bracket=[self.Mbound1lo[curr_row],M]).root
+                    Mlowernotes = "\n"
+                except:
+                    Mlowererror = "N/A"
+                    if self.chisqfuncerror(M,2,otherstup,) != self.chisqfuncerror(self.Mbound1lo[curr_row],2,otherstup,):
+                        Mlowernotes = "cannot go low enough to\nchange chi^2 by 4.17"
+                    elif self.chisqfuncerror(M,2,otherstup,) == self.chisqfuncerror(self.Mbound1lo[curr_row],2,otherstup,):
+                        Mlowernotes = "sitting at lower bound\n"
+                try:
+                    Muppererror = opt.root_scalar(self.chisqfuncerror, args=(2,otherstup,),method="brentq",bracket=[M,self.Mbound1hi[curr_row]]).root - M
+                    Muppernotes = "\n"
+                except:
+                    Muppererror = "N/A"
+                    if self.chisqfuncerror(M,2,otherstup,) != self.chisqfuncerror(self.Mbound1hi[curr_row],2,otherstup,):
+                        Muppernotes = "cannot go high enough to\nchange chi^2 by 4.17"
+                    elif self.chisqfuncerror(M,2,otherstup,) == self.chisqfuncerror(self.Mbound1hi[curr_row],2,otherstup,):
+                        Muppernotes = "sitting at upper bound\n"
+                errorsthisrow.append([Mlowererror,Muppererror])
+                errornotesthisrow.append([Mlowernotes,Muppernotes])
+                ###
+                otherstup = (Z,age,M,valid_filters_this_row,ul_filters_this_row,curr_row)                           
+                try:
+                    E_bvlowererror = E_bv - opt.root_scalar(self.chisqfuncerror, args=(3,otherstup,),method="brentq",bracket=[self.ebvbound1lo[curr_row],E_bv]).root
+                    ebvlowernotes = "\n"
+                except:
+                    E_bvlowererror = "N/A"
+                    if self.chisqfuncerror(E_bv,3,otherstup,) != self.chisqfuncerror(self.ebvbound1lo[curr_row],3,otherstup,):
+                        ebvlowernotes = "cannot go low enough to\nchange chi^2 by 4.17"
+                    elif self.chisqfuncerror(E_bv,3,otherstup,) == self.chisqfuncerror(self.ebvbound1lo[curr_row],3,otherstup,):
+                        ebvlowernotes = "sitting at lower bound\n"
+                try:
+                    E_bvuppererror = opt.root_scalar(self.chisqfuncerror, args=(3,otherstup,),method="brentq",bracket=[E_bv,self.ebvbound1hi[curr_row]]).root - E_bv
+                    ebvuppernotes = "\n"
+                except:
+                    E_bvuppererror = "N/A"
+                    if self.chisqfuncerror(E_bv,3,otherstup,) != self.chisqfuncerror(self.ebvbound1hi[curr_row],3,otherstup,):
+                        ebvuppernotes = "cannot go high enough to\nchange chi^2 by 4.17"
+                    elif self.chisqfuncerror(E_bv,3,otherstup,) == self.chisqfuncerror(self.ebvbound1hi[curr_row],3,otherstup,):
+                        ebvuppernotes = "sitting at upper bound\n"
+                errorsthisrow.append([E_bvlowererror,E_bvuppererror])
+                errornotesthisrow.append([ebvlowernotes,ebvuppernotes])
+                ###
+                self.errorsallrows.append(errorsthisrow)
+                self.errornotes.append(errornotesthisrow)
+
+
+        elif self.double_cluster == True:
+            self.errornotes = []
+            self.errorsallrows = []
+            for curr_row in range(self.bandfluxes.shape[0]):  
+                valid_filters_this_row = []
+                ul_filters_this_row = []
+                for valid_ind,arraytup in enumerate(zip(self.bandfluxes.loc[curr_row,:],self.ul_frame.loc[curr_row,:])):
+                    if np.isnan(arraytup[0]) == False:
+                        valid_filters_this_row.append(valid_ind)
+                    if arraytup[1] == 1:
+                        ul_filters_this_row.append(valid_ind)
+                errorsthisrow = []
+                errornotesthisrow = []
+                Z1,age1,M1,E_bv1,Z2,age2,M2,E_bv2 = self.results[curr_row].x[0],self.results[curr_row].x[1],self.results[curr_row].x[2],self.results[curr_row].x[3],self.results[curr_row].x[4],self.results[curr_row].x[5],self.results[curr_row].x[6],self.results[curr_row].x[7]
+                ###
+                otherstup = (age1,M1,E_bv1,Z2,age2,M2,E_bv2,valid_filters_this_row,ul_filters_this_row,curr_row)
+                try:
+                    Z1lowererror = Z1 - opt.root_scalar(self.chisqfunc2error, args=(0,otherstup,),method="brentq",bracket=[self.Zbound1lo[curr_row],Z1]).root
+                    Z1lowernotes = "\n"
+                except:
+                    Z1lowererror = "N/A"
+                    if self.chisqfunc2error(Z1,0,otherstup,) != self.chisqfunc2error(self.Zbound1lo[curr_row],0,otherstup,):
+                        Z1lowernotes = "cannot go low enough to\nchange chi^2 by 9.28"
+                    elif self.chisqfunc2error(Z1,0,otherstup,) == self.chisqfunc2error(self.Zbound1lo[curr_row],0,otherstup,):
+                        Z1lowernotes = "sitting at lower bound\n"
+                try:
+                    Z1uppererror = opt.root_scalar(self.chisqfunc2error, args=(0,otherstup,),method="brentq",bracket=[Z1,self.Zbound1hi[curr_row]]).root - Z1
+                    Z1uppernotes = "\n"
+                except:
+                    Z1uppererror = "N/A"
+                    if self.chisqfunc2error(Z1,0,otherstup,) != self.chisqfunc2error(self.Zbound1hi[curr_row],0,otherstup,):
+                        Z1uppernotes = "cannot go high enough to\nchange chi^2 by 9.28"
+                    elif self.chisqfunc2error(Z1,0,otherstup,) == self.chisqfunc2error(self.Zbound1hi[curr_row],0,otherstup,):
+                        Z1uppernotes = "sitting at upper bound\n"
+                errorsthisrow.append([Z1lowererror,Z1uppererror])
+                errornotesthisrow.append([Z1lowernotes,Z1uppernotes])
+                ###
+                otherstup = (Z1,M1,E_bv1,Z2,age2,M2,E_bv2,valid_filters_this_row,ul_filters_this_row,curr_row)              
+                try:
+                    age1lowererror = (age1 - opt.root_scalar(self.chisqfunc2error, args=(1,otherstup,),method="brentq",bracket=[self.agebound1lo[curr_row],age1]).root)
+                    age1lowernotes = "\n"
+                except:
+                    age1lowererror = "N/A"
+                    if self.chisqfunc2error(age1,1,otherstup,) != self.chisqfunc2error(self.agebound1lo[curr_row],1,otherstup,):
+                        age1lowernotes = "cannot go low enough to\nchange chi^2 by 9.28"
+                    elif self.chisqfunc2error(age1,1,otherstup,) == self.chisqfunc2error(self.agebound1lo[curr_row],1,otherstup,):
+                        age1lowernotes = "sitting at lower bound\n"
+                try:    
+                    age1uppererror = (opt.root_scalar(self.chisqfunc2error, args=(1,otherstup,),method="brentq",bracket=[age1,self.agebound1hi[curr_row]]).root - age1)
+                    age1uppernotes = "\n"
+                except:
+                    age1uppererror = "N/A"
+                    if self.chisqfunc2error(age1,1,otherstup,) != self.chisqfunc2error(self.agebound1hi[curr_row],1,otherstup,):
+                        age1uppernotes = "cannot go high enough to\nchange chi^2 by 9.28"
+                    elif self.chisqfunc2error(age1,1,otherstup,) == self.chisqfunc2error(self.agebound1hi[curr_row],1,otherstup,):
+                        age1uppernotes = "sitting at upper bound\n"
+                errorsthisrow.append([age1lowererror,age1uppererror])
+                errornotesthisrow.append([age1lowernotes,age1uppernotes])
+                ###
+                otherstup = (Z1,age1,E_bv1,Z2,age2,M2,E_bv2,valid_filters_this_row,ul_filters_this_row,curr_row)              
+                try:
+                    M1lowererror = M1 - opt.root_scalar(self.chisqfunc2error, args=(2,otherstup,),method="brentq",bracket=[self.Mbound1lo[curr_row],M1]).root
+                    M1lowernotes = "\n"
+                except:
+                    M1lowererror = "N/A"
+                    if self.chisqfunc2error(M1,2,otherstup,) != self.chisqfunc2error(self.Mbound1lo[curr_row],2,otherstup,):
+                        M1lowernotes = "cannot go low enough\nto change chi^2 by 9.28"
+                    elif self.chisqfunc2error(M1,2,otherstup,) == self.chisqfunc2error(self.Mbound1lo[curr_row],2,otherstup,):
+                        M1lowernotes = "sitting at lower bound\n"
+                try:
+                    M1uppererror = opt.root_scalar(self.chisqfunc2error, args=(2,otherstup,),method="brentq",bracket=[M1,self.Mbound1hi[curr_row]]).root - M1
+                    M1uppernotes = "\n"
+                except:
+                    M1uppererror = "N/A"
+                    if self.chisqfunc2error(M1,2,otherstup,) != self.chisqfunc2error(self.Mbound1hi[curr_row],2,otherstup,):
+                        M1uppernotes = "cannot go high enough\nto change chi^2 by 9.28"
+                    elif self.chisqfunc2error(M1,2,otherstup,) == self.chisqfunc2error(self.Mbound1hi[curr_row],2,otherstup,):
+                        M1uppernotes = "sitting at upper bound\n"
+                errorsthisrow.append([M1lowererror,M1uppererror])
+                errornotesthisrow.append([M1lowernotes,M1uppernotes])
+                ###
+                otherstup = (Z1,age1,M1,Z2,age2,M2,E_bv2,valid_filters_this_row,ul_filters_this_row,curr_row)                           
+                try:
+                    E_bv1lowererror = E_bv1 - opt.root_scalar(self.chisqfunc2error, args=(3,otherstup,),method="brentq",bracket=[self.ebvbound1lo[curr_row],E_bv1]).root
+                    ebv1lowernotes = "\n"
+                except:
+                    E_bv1lowererror = "N/A"
+                    if self.chisqfunc2error(E_bv1,3,otherstup,) != self.chisqfunc2error(self.ebvbound1lo[curr_row],3,otherstup,):
+                        ebv1lowernotes = "cannot go low enough to\nchange chi^2 by 9.28"
+                    elif self.chisqfunc2error(E_bv1,3,otherstup,) == self.chisqfunc2error(self.ebvbound1lo[curr_row],3,otherstup,):
+                        ebv1lowernotes = "sitting at lower bound\n"
+                try:
+                    E_bv1uppererror = opt.root_scalar(self.chisqfunc2error, args=(3,otherstup,),method="brentq",bracket=[E_bv1,self.ebvbound1hi[curr_row]]).root - E_bv1
+                    ebv1uppernotes = "\n"
+                except:
+                    E_bv1uppererror = "N/A"
+                    if self.chisqfunc2error(E_bv1,3,otherstup,) != self.chisqfunc2error(self.ebvbound1hi[curr_row],3,otherstup,):
+                        ebv1uppernotes = "cannot go high enough to\nchange chi^2 by 9.28"
+                    elif self.chisqfunc2error(E_bv1,3,otherstup,) == self.chisqfunc2error(self.ebvbound1hi[curr_row],3,otherstup,):
+                        ebv1uppernotes = "sitting at upper bound\n"
+                errorsthisrow.append([E_bv1lowererror,E_bv1uppererror])
+                errornotesthisrow.append([ebv1lowernotes,ebv1uppernotes])
+                ###
+                otherstup = (Z1,age1,M1,E_bv1,age2,M2,E_bv2,valid_filters_this_row,ul_filters_this_row,curr_row)
+                try:
+                    Z2lowererror = Z2 - opt.root_scalar(self.chisqfunc2error, args=(4,otherstup,),method="brentq",bracket=[self.Zbound2lo[curr_row],Z2]).root
+                    Z2lowernotes = "\n"
+                except:
+                    Z2lowererror = "N/A"
+                    if self.chisqfunc2error(Z2,4,otherstup,) != self.chisqfunc2error(self.Zbound2lo[curr_row],4,otherstup,):
+                        Z2lowernotes = "cannot go low enough to\nchange chi^2 by 9.28"
+                    elif self.chisqfunc2error(Z2,4,otherstup,) == self.chisqfunc2error(self.Zbound2lo[curr_row],4,otherstup,):
+                        Z2lowernotes = "sitting at lower bound\n"
+                try:
+                    Z2uppererror = opt.root_scalar(self.chisqfunc2error, args=(4,otherstup,),method="brentq",bracket=[Z2,self.Zbound2hi[curr_row]]).root - Z2
+                    Z2uppernotes = "\n"
+                except:
+                    Z2uppererror = "N/A"
+                    if self.chisqfunc2error(Z2,4,otherstup,) != self.chisqfunc2error(self.Zbound2hi[curr_row],4,otherstup,):
+                        Z2uppernotes = "cannot go high enough to\nchange chi^2 by 9.28"
+                    elif self.chisqfunc2error(Z2,4,otherstup,) == self.chisqfunc2error(self.Zbound2hi[curr_row],4,otherstup,):
+                        Z2uppernotes = "sitting at upper bound\n"
+                errorsthisrow.append([Z2lowererror,Z2uppererror])
+                errornotesthisrow.append([Z2lowernotes,Z2uppernotes])
+                ###
+                otherstup = (Z1,age1,M1,E_bv1,Z2,M2,E_bv2,valid_filters_this_row,ul_filters_this_row,curr_row)              
+                try:
+                    age2lowererror = (age2 - opt.root_scalar(self.chisqfunc2error, args=(5,otherstup,),method="brentq",bracket=[self.agebound2lo[curr_row],age2]).root)
+                    age2lowernotes = "\n"
+                except:
+                    age2lowererror = "N/A"
+                    if self.chisqfunc2error(age2,5,otherstup,) != self.chisqfunc2error(self.agebound2lo[curr_row],5,otherstup,):
+                        age2lowernotes = "cannot go low enough to\nchange chi^2 by 9.28"
+                    elif self.chisqfunc2error(age2,5,otherstup,) == self.chisqfunc2error(self.agebound2lo[curr_row],5,otherstup,):
+                        age2lowernotes = "sitting at lower bound\n"
+                try:    
+                    age2uppererror = (opt.root_scalar(self.chisqfunc2error, args=(5,otherstup,),method="brentq",bracket=[age2,self.agebound2hi[curr_row]]).root - age2)
+                    age2uppernotes = "\n"
+                except:
+                    age2uppererror = "N/A"
+                    if self.chisqfunc2error(age2,5,otherstup,) != self.chisqfunc2error(self.agebound2hi[curr_row],5,otherstup,):
+                        age2uppernotes = "cannot go high enough to\nchange chi^2 by 9.28"
+                    elif self.chisqfunc2error(age2,5,otherstup,) == self.chisqfunc2error(self.agebound2hi[curr_row],5,otherstup,):
+                        age2uppernotes = "sitting at upper bound\n"
+                errorsthisrow.append([age2lowererror,age2uppererror])
+                errornotesthisrow.append([age2lowernotes,age2uppernotes])
+                ###
+                otherstup = (Z1,age1,M1,E_bv1,Z2,age2,E_bv2,valid_filters_this_row,ul_filters_this_row,curr_row)              
+                try:
+                    M2lowererror = M2 - opt.root_scalar(self.chisqfunc2error, args=(6,otherstup,),method="brentq",bracket=[self.Mbound2lo[curr_row],M2]).root
+                    M2lowernotes = "\n"
+                except:
+                    M2lowererror = "N/A"
+                    if self.chisqfunc2error(M2,6,otherstup,) != self.chisqfunc2error(self.Mbound2lo[curr_row],6,otherstup,):
+                        M2lowernotes = "cannot go low enough to\nchange chi^2 by 9.28"
+                    elif self.chisqfunc2error(M2,6,otherstup,) == self.chisqfunc2error(self.Mbound2lo[curr_row],6,otherstup,):
+                        M2lowernotes = "sitting at lower bound\n"
+                try:
+                    M2uppererror = opt.root_scalar(self.chisqfunc2error, args=(6,otherstup,),method="brentq",bracket=[M2,self.Mbound2hi[curr_row]]).root - M2
+                    M2uppernotes = "\n"
+                except:
+                    M2uppererror = "N/A"
+                    if self.chisqfunc2error(M2,6,otherstup,) != self.chisqfunc2error(self.Mbound2hi[curr_row],6,otherstup,):
+                        M2uppernotes = "cannot go high enough to\nchange chi^2 by 9.28"
+                    elif self.chisqfunc2error(M2,6,otherstup,) == self.chisqfunc2error(self.Mbound2hi[curr_row],6,otherstup,):
+                        M2uppernotes = "sitting at upper bound\n"
+                errorsthisrow.append([M2lowererror,M2uppererror])
+                errornotesthisrow.append([M2lowernotes,M2uppernotes])
+                ###
+                otherstup = (Z1,age1,M1,E_bv1,Z2,age2,M2,valid_filters_this_row,ul_filters_this_row,curr_row)                           
+                try:
+                    E_bv2lowererror = E_bv2 - opt.root_scalar(self.chisqfunc2error, args=(7,otherstup,),method="brentq",bracket=[self.ebvbound2lo[curr_row],E_bv2]).root
+                    ebv2lowernotes = "\n"
+                except:
+                    E_bv2lowererror = "N/A"
+                    if self.chisqfunc2error(E_bv2,7,otherstup,) != self.chisqfunc2error(self.ebvbound2lo[curr_row],7,otherstup,):
+                        ebv2lowernotes = "cannot go low enough to\nchange chi^2 by 9.28"
+                    elif self.chisqfunc2error(E_bv2,7,otherstup,) == self.chisqfunc2error(self.ebvbound2lo[curr_row],7,otherstup,):
+                        ebv2lowernotes = "sitting at lower bound\n"
+                try:
+                    E_bv2uppererror = opt.root_scalar(self.chisqfunc2error, args=(7,otherstup,),method="brentq",bracket=[E_bv2,self.ebvbound2hi[curr_row]]).root - E_bv2
+                    ebv2uppernotes = "\n"
+                except:
+                    E_bv2uppererror = "N/A"
+                    if self.chisqfunc2error(E_bv2,7,otherstup,) != self.chisqfunc2error(self.ebvbound2hi[curr_row],7,otherstup,):
+                        ebv2uppernotes = "cannot go high enough to\nchange chi^2 by 9.28"
+                    elif self.chisqfunc2error(E_bv2,7,otherstup,) == self.chisqfunc2error(self.ebvbound2hi[curr_row],7,otherstup,):
+                        ebv2uppernotes = "sitting at upper bound\n"
+                errorsthisrow.append([E_bv2lowererror,E_bv2uppererror])
+                errornotesthisrow.append([ebv2lowernotes,ebv2uppernotes])
+                ###
+                self.errorsallrows.append(errorsthisrow)
+                self.errornotes.append(errornotesthisrow)
+        
+        elif self.triple_cluster == True:
+            self.errornotes = []
+            self.errorsallrows = []
+            for curr_row in range(self.bandfluxes.shape[0]):  
+                valid_filters_this_row = []
+                ul_filters_this_row = []
+                for valid_ind,arraytup in enumerate(zip(self.bandfluxes.loc[curr_row,:],self.ul_frame.loc[curr_row,:])):
+                    if np.isnan(arraytup[0]) == False:
+                        valid_filters_this_row.append(valid_ind)
+                    if arraytup[1] == 1:
+                        ul_filters_this_row.append(valid_ind)
+                errorsthisrow = []
+                errornotesthisrow = []
+                Z_old_1,age_old_1,M_old_1,E_bv_old,Z_old_2,age_old_2,M_old_2,E_bv_new,Z_new,age_new,M_new = self.results[curr_row].x[0],self.results[curr_row].x[1],self.results[curr_row].x[2],self.results[curr_row].x[3],self.results[curr_row].x[4],self.results[curr_row].x[5],self.results[curr_row].x[6],self.results[curr_row].x[7],self.results[curr_row].x[8],self.results[curr_row].x[9],self.results[curr_row].x[10]
+                ###
+                otherstup = (age_old_1,M_old_1,E_bv_old,Z_old_2,age_old_2,M_old_2,E_bv_new,Z_new,age_new,M_new,valid_filters_this_row,ul_filters_this_row,curr_row)
+                try:
+                    Z_old_1lowererror = Z_old_1 - opt.root_scalar(self.chisqfunc3error, args=(0,otherstup,),method="brentq",bracket=[self.Zbound1lo[curr_row],Z_old_1]).root
+                    Z_old_1lowernotes = "\n"
+                except:
+                    Z_old_1lowererror = "N/A"
+                    if self.chisqfunc3error(Z_old_1,0,otherstup,) != self.chisqfunc3error(self.Zbound1lo[curr_row],0,otherstup,):
+                        Z_old_1lowernotes = "cannot go low enough to\nchange chi^2 by 12.77"
+                    elif self.chisqfunc3error(Z_old_1,0,otherstup,) == self.chisqfunc3error(self.Zbound1lo[curr_row],0,otherstup,):
+                        Z_old_1lowernotes = "sitting at lower bound\n"
+                try:
+                    Z_old_1uppererror = opt.root_scalar(self.chisqfunc3error, args=(0,otherstup,),method="brentq",bracket=[Z_old_1,self.Zbound1hi[curr_row]]).root - Z_old_1
+                    Z_old_1uppernotes = "\n"
+                except:
+                    Z_old_1uppererror = "N/A"
+                    if self.chisqfunc3error(Z_old_1,0,otherstup,) != self.chisqfunc3error(self.Zbound1hi[curr_row],0,otherstup,):
+                        Z_old_1uppernotes = "cannot go high enough to\nchange chi^2 by 12.77"
+                    elif self.chisqfunc3error(Z_old_1,0,otherstup,) == self.chisqfunc3error(self.Zbound1hi[curr_row],0,otherstup,):
+                        Z_old_1uppernotes = "sitting at upper bound\n"
+                errorsthisrow.append([Z_old_1lowererror,Z_old_1uppererror])
+                errornotesthisrow.append([Z_old_1lowernotes,Z_old_1uppernotes])
+                ###
+                otherstup = (Z_old_1,M_old_1,E_bv_old,Z_old_2,age_old_2,M_old_2,E_bv_new,Z_new,age_new,M_new,valid_filters_this_row,ul_filters_this_row,curr_row)            
+                try:
+                    age_old_1lowererror = (age_old_1 - opt.root_scalar(self.chisqfunc3error, args=(1,otherstup,),method="brentq",bracket=[self.agebound1lo[curr_row],age_old_1]).root)
+                    age_old_1lowernotes = "\n"
+                except:
+                    age_old_1lowererror = "N/A"
+                    if self.chisqfunc3error(age_old_1,1,otherstup,) != self.chisqfunc3error(self.agebound1lo[curr_row],1,otherstup,):
+                        age_old_1lowernotes = "cannot go low enough to\nchange chi^2 by 12.77"
+                    elif self.chisqfunc3error(age_old_1,1,otherstup,) == self.chisqfunc3error(self.agebound1lo[curr_row],1,otherstup,):
+                        age_old_1lowernotes = "sitting at lower bound\n"
+                try:    
+                    age_old_1uppererror = (opt.root_scalar(self.chisqfunc3error, args=(1,otherstup,),method="brentq",bracket=[age_old_1,self.agebound1hi[curr_row]]).root - age_old_1)
+                    age_old_1uppernotes = "\n"
+                except:
+                    age_old_1uppererror = "N/A"
+                    if self.chisqfunc3error(age_old_1,1,otherstup,) != self.chisqfunc3error(self.agebound1hi[curr_row],1,otherstup,):
+                        age_old_1uppernotes = "cannot go high enough to\nchange chi^2 by 12.77"
+                    elif self.chisqfunc3error(age_old_1,1,otherstup,) == self.chisqfunc3error(self.agebound1hi[curr_row],1,otherstup,):
+                        age_old_1uppernotes = "sitting at upper bound\n"
+                errorsthisrow.append([age_old_1lowererror,age_old_1uppererror])
+                errornotesthisrow.append([age_old_1lowernotes,age_old_1uppernotes])
+                ###
+                otherstup = (Z_old_1,age_old_1,E_bv_old,Z_old_2,age_old_2,M_old_2,E_bv_new,Z_new,age_new,M_new,valid_filters_this_row,ul_filters_this_row,curr_row)              
+                try:
+                    M_old_1lowererror = M_old_1 - opt.root_scalar(self.chisqfunc3error, args=(2,otherstup,),method="brentq",bracket=[self.Mbound1lo[curr_row],M_old_1]).root
+                    M_old_1lowernotes = "\n"
+                except:
+                    M_old_1lowererror = "N/A"
+                    if self.chisqfunc3error(M_old_1,2,otherstup,) != self.chisqfunc3error(self.Mbound1lo[curr_row],2,otherstup,):
+                        M_old_1lowernotes = "cannot go low enough\nto change chi^2 by 12.77"
+                    elif self.chisqfunc3error(M_old_1,2,otherstup,) == self.chisqfunc3error(self.Mbound1lo[curr_row],2,otherstup,):
+                        M_old_1lowernotes = "sitting at lower bound\n"
+                try:
+                    M_old_1uppererror = opt.root_scalar(self.chisqfunc3error, args=(2,otherstup,),method="brentq",bracket=[M_old_1,self.Mbound1hi[curr_row]]).root - M_old_1
+                    M_old_1uppernotes = "\n"
+                except:
+                    M_old_1uppererror = "N/A"
+                    if self.chisqfunc3error(M_old_1,2,otherstup,) != self.chisqfunc3error(self.Mbound1hi[curr_row],2,otherstup,):
+                        M_old_1uppernotes = "cannot go high enough\nto change chi^2 by 12.77"
+                    elif self.chisqfunc3error(M_old_1,2,otherstup,) == self.chisqfunc3error(self.Mbound1hi[curr_row],2,otherstup,):
+                        M_old_1uppernotes = "sitting at upper bound\n"
+                errorsthisrow.append([M_old_1lowererror,M_old_1uppererror])
+                errornotesthisrow.append([M_old_1lowernotes,M_old_1uppernotes])
+                ###
+                otherstup = (Z_old_1,age_old_1,M_old_1,Z_old_2,age_old_2,M_old_2,E_bv_new,Z_new,age_new,M_new,valid_filters_this_row,ul_filters_this_row,curr_row)                           
+                try:
+                    E_bv_oldlowererror = E_bv_old - opt.root_scalar(self.chisqfunc3error, args=(3,otherstup,),method="brentq",bracket=[self.ebvbound1lo[curr_row],E_bv_old]).root
+                    ebv1lowernotes = "\n"
+                except:
+                    E_bv_oldlowererror = "N/A"
+                    if self.chisqfunc3error(E_bv_old,3,otherstup,) != self.chisqfunc3error(self.ebvbound1lo[curr_row],3,otherstup,):
+                        ebv1lowernotes = "cannot go low enough to\nchange chi^2 by 12.77"
+                    elif self.chisqfunc3error(E_bv_old,3,otherstup,) == self.chisqfunc3error(self.ebvbound1lo[curr_row],3,otherstup,):
+                        ebv1lowernotes = "sitting at lower bound\n"
+                try:
+                    E_bv_olduppererror = opt.root_scalar(self.chisqfunc3error, args=(3,otherstup,),method="brentq",bracket=[E_bv_old,self.ebvbound1hi[curr_row]]).root - E_bv_old
+                    ebv1uppernotes = "\n"
+                except:
+                    E_bv_olduppererror = "N/A"
+                    if self.chisqfunc3error(E_bv_old,3,otherstup,) != self.chisqfunc3error(self.ebvbound1hi[curr_row],3,otherstup,):
+                        ebv1uppernotes = "cannot go high enough to\nchange chi^2 by 12.77"
+                    elif self.chisqfunc3error(E_bv_old,3,otherstup,) == self.chisqfunc3error(self.ebvbound1hi[curr_row],3,otherstup,):
+                        ebv1uppernotes = "sitting at upper bound\n"
+                errorsthisrow.append([E_bv_oldlowererror,E_bv_olduppererror])
+                errornotesthisrow.append([ebv1lowernotes,ebv1uppernotes])
+                ###
+                otherstup = (Z_old_1,age_old_1,M_old_1,E_bv_old,age_old_2,M_old_2,E_bv_new,Z_new,age_new,M_new,valid_filters_this_row,ul_filters_this_row,curr_row)
+                try:
+                    Z_old_2lowererror = Z_old_2 - opt.root_scalar(self.chisqfunc3error, args=(4,otherstup,),method="brentq",bracket=[self.Zbound2lo[curr_row],Z_old_2]).root
+                    Z_old_2lowernotes = "\n"
+                except:
+                    Z_old_2lowererror = "N/A"
+                    if self.chisqfunc3error(Z_old_2,4,otherstup,) != self.chisqfunc3error(self.Zbound2lo[curr_row],4,otherstup,):
+                        Z_old_2lowernotes = "cannot go low enough to\nchange chi^2 by 12.77"
+                    elif self.chisqfunc3error(Z_old_2,4,otherstup,) == self.chisqfunc3error(self.Zbound2lo[curr_row],4,otherstup,):
+                        Z_old_2lowernotes = "sitting at lower bound\n"
+                try:
+                    Z_old_2uppererror = opt.root_scalar(self.chisqfunc3error, args=(4,otherstup,),method="brentq",bracket=[Z_old_2,self.Zbound2hi[curr_row]]).root - Z_old_2
+                    Z_old_2uppernotes = "\n"
+                except:
+                    Z_old_2uppererror = "N/A"
+                    if self.chisqfunc3error(Z_old_2,4,otherstup,) != self.chisqfunc3error(self.Zbound2hi[curr_row],4,otherstup,):
+                        Z_old_2uppernotes = "cannot go high enough to\nchange chi^2 by 12.77"
+                    elif self.chisqfunc3error(Z_old_2,4,otherstup,) == self.chisqfunc3error(self.Zbound2hi[curr_row],4,otherstup,):
+                        Z_old_2uppernotes = "sitting at upper bound\n"
+                errorsthisrow.append([Z_old_2lowererror,Z_old_2uppererror])
+                errornotesthisrow.append([Z_old_2lowernotes,Z_old_2uppernotes])
+                ###
+                otherstup = (Z_old_1,age_old_1,M_old_1,E_bv_old,Z_old_2,M_old_2,E_bv_new,Z_new,age_new,M_new,valid_filters_this_row,ul_filters_this_row,curr_row)              
+                try:
+                    age_old_2lowererror = (age_old_2 - opt.root_scalar(self.chisqfunc3error, args=(5,otherstup,),method="brentq",bracket=[self.agebound2lo[curr_row],age_old_2]).root)
+                    age_old_2lowernotes = "\n"
+                except:
+                    age_old_2lowererror = "N/A"
+                    if self.chisqfunc3error(age_old_2,5,otherstup,) != self.chisqfunc3error(self.agebound2lo[curr_row],5,otherstup,):
+                        age_old_2lowernotes = "cannot go low enough to\nchange chi^2 by 12.77"
+                    elif self.chisqfunc3error(age_old_2,5,otherstup,) == self.chisqfunc3error(self.agebound2lo[curr_row],5,otherstup,):
+                        age_old_2lowernotes = "sitting at lower bound\n"
+                try:    
+                    age_old_2uppererror = (opt.root_scalar(self.chisqfunc3error, args=(5,otherstup,),method="brentq",bracket=[age_old_2,self.agebound2hi[curr_row]]).root - age_old_2)
+                    age_old_2uppernotes = "\n"
+                except:
+                    age_old_2uppererror = "N/A"
+                    if self.chisqfunc3error(age_old_2,5,otherstup,) != self.chisqfunc3error(self.agebound2hi[curr_row],5,otherstup,):
+                        age_old_2uppernotes = "cannot go high enough to\nchange chi^2 by 12.77"
+                    elif self.chisqfunc3error(age_old_2,5,otherstup,) == self.chisqfunc3error(self.agebound2hi[curr_row],5,otherstup,):
+                        age_old_2uppernotes = "sitting at upper bound\n"
+                errorsthisrow.append([age_old_2lowererror,age_old_2uppererror])
+                errornotesthisrow.append([age_old_2lowernotes,age_old_2uppernotes])
+                ###
+                otherstup = (Z_old_1,age_old_1,M_old_1,E_bv_old,Z_old_2,age_old_2,E_bv_new,Z_new,age_new,M_new,valid_filters_this_row,ul_filters_this_row,curr_row)              
+                try:
+                    M_old_2lowererror = M_old_2 - opt.root_scalar(self.chisqfunc3error, args=(6,otherstup,),method="brentq",bracket=[self.Mbound2lo[curr_row],M_old_2]).root
+                    M_old_2lowernotes = "\n"
+                except:
+                    M_old_2lowererror = "N/A"
+                    if self.chisqfunc3error(M_old_2,6,otherstup,) != self.chisqfunc3error(self.Mbound2lo[curr_row],6,otherstup,):
+                        M_old_2lowernotes = "cannot go low enough to\nchange chi^2 by 12.77"
+                    elif self.chisqfunc3error(M_old_2,6,otherstup,) == self.chisqfunc3error(self.Mbound2lo[curr_row],6,otherstup,):
+                        M_old_2lowernotes = "sitting at lower bound\n"
+                try:
+                    M_old_2uppererror = opt.root_scalar(self.chisqfunc3error, args=(6,otherstup,),method="brentq",bracket=[M_old_2,self.Mbound2hi[curr_row]]).root - M_old_2
+                    M_old_2uppernotes = "\n"
+                except:
+                    M_old_2uppererror = "N/A"
+                    if self.chisqfunc3error(M_old_2,6,otherstup,) != self.chisqfunc3error(self.Mbound2hi[curr_row],6,otherstup,):
+                        M_old_2uppernotes = "cannot go high enough to\nchange chi^2 by 12.77"
+                    elif self.chisqfunc3error(M_old_2,6,otherstup,) == self.chisqfunc3error(self.Mbound2hi[curr_row],6,otherstup,):
+                        M_old_2uppernotes = "sitting at upper bound\n"
+                errorsthisrow.append([M_old_2lowererror,M_old_2uppererror])
+                errornotesthisrow.append([M_old_2lowernotes,M_old_2uppernotes])
+                ###
+                otherstup = (Z_old_1,age_old_1,M_old_1,E_bv_old,Z_old_2,age_old_2,M_old_2,Z_new,age_new,M_new,valid_filters_this_row,ul_filters_this_row,curr_row)                           
+                try:
+                    E_bv_newlowererror = E_bv_new - opt.root_scalar(self.chisqfunc3error, args=(7,otherstup,),method="brentq",bracket=[self.ebvbound2lo[curr_row],E_bv_new]).root
+                    ebv2lowernotes = "\n"
+                except:
+                    E_bv_newlowererror = "N/A"
+                    if self.chisqfunc3error(E_bv_new,7,otherstup,) != self.chisqfunc3error(self.ebvbound2lo[curr_row],7,otherstup,):
+                        ebv2lowernotes = "cannot go low enough to\nchange chi^2 by 12.77"
+                    elif self.chisqfunc3error(E_bv_new,7,otherstup,) == self.chisqfunc3error(self.ebvbound2lo[curr_row],7,otherstup,):
+                        ebv2lowernotes = "sitting at lower bound\n"
+                try:
+                    E_bv_newuppererror = opt.root_scalar(self.chisqfunc3error, args=(7,otherstup,),method="brentq",bracket=[E_bv_new,self.ebvbound2hi[curr_row]]).root - E_bv_new
+                    ebv2uppernotes = "\n"
+                except:
+                    E_bv_newuppererror = "N/A"
+                    if self.chisqfunc3error(E_bv_new,7,otherstup,) != self.chisqfunc3error(self.ebvbound2hi[curr_row],7,otherstup,):
+                        ebv2uppernotes = "cannot go high enough to\nchange chi^2 by 12.77"
+                    elif self.chisqfunc3error(E_bv_new,7,otherstup,) == self.chisqfunc3error(self.ebvbound2hi[curr_row],7,otherstup,):
+                        ebv2uppernotes = "sitting at upper bound\n"
+                errorsthisrow.append([E_bv_newlowererror,E_bv_newuppererror])
+                errornotesthisrow.append([ebv2lowernotes,ebv2uppernotes])
+                ###
+                otherstup = (Z_old_1,age_old_1,M_old_1,E_bv_old,Z_old_2,age_old_2,M_old_2,E_bv_new,age_new,M_new,valid_filters_this_row,ul_filters_this_row,curr_row)                           
+                try:
+                    Z_newlowererror = Z_new - opt.root_scalar(self.chisqfunc3error, args=(8,otherstup,),method="brentq",bracket=[self.Zbound3lo[curr_row],Z_new]).root
+                    Z_newlowernotes = "\n"
+                except:
+                    Z_newlowererror = "N/A"
+                    if self.chisqfunc3error(Z_new,8,otherstup,) != self.chisqfunc3error(self.Zbound3lo[curr_row],8,otherstup,):
+                        Z_newlowernotes = "cannot go low enough to\nchange chi^2 by 12.77"
+                    elif self.chisqfunc3error(Z_new,8,otherstup,) == self.chisqfunc3error(self.Zbound3lo[curr_row],8,otherstup,):
+                        Z_newlowernotes = "sitting at lower bound\n"
+                try:
+                    Z_newuppererror = opt.root_scalar(self.chisqfunc3error, args=(8,otherstup,),method="brentq",bracket=[Z_new,self.Zbound3hi[curr_row]]).root - Z_new
+                    Z_newuppernotes = "\n"
+                except:
+                    Z_newuppererror = "N/A"
+                    if self.chisqfunc3error(Z_new,8,otherstup,) != self.chisqfunc3error(self.Zbound3hi[curr_row],8,otherstup,):
+                        Z_newuppernotes = "cannot go high enough to\nchange chi^2 by 12.77"
+                    elif self.chisqfunc3error(Z_new,8,otherstup,) == self.chisqfunc3error(self.Zbound3hi[curr_row],8,otherstup,):
+                        Z_newuppernotes = "sitting at upper bound\n"
+                errorsthisrow.append([Z_newlowererror,Z_newuppererror])
+                errornotesthisrow.append([Z_newlowernotes,Z_newuppernotes])
+                ###
+                otherstup = (Z_old_1,age_old_1,M_old_1,E_bv_old,Z_old_2,age_old_2,M_old_2,E_bv_new,Z_new,M_new,valid_filters_this_row,ul_filters_this_row,curr_row)                           
+                try:
+                    age_newlowererror = age_new - opt.root_scalar(self.chisqfunc3error, args=(9,otherstup,),method="brentq",bracket=[self.agebound3lo[curr_row],age_new]).root
+                    age_newlowernotes = "\n"
+                except:
+                    age_newlowererror = "N/A"
+                    if self.chisqfunc3error(age_new,9,otherstup,) != self.chisqfunc3error(self.agebound3lo[curr_row],9,otherstup,):
+                        age_newlowernotes = "cannot go low enough to\nchange chi^2 by 12.77"
+                    elif self.chisqfunc3error(age_new,9,otherstup,) == self.chisqfunc3error(self.agebound3lo[curr_row],9,otherstup,):
+                        age_newlowernotes = "sitting at lower bound\n"
+                try:
+                    age_newuppererror = opt.root_scalar(self.chisqfunc3error, args=(9,otherstup,),method="brentq",bracket=[age_new,self.agebound3hi[curr_row]]).root - age_new
+                    age_newuppernotes = "\n"
+                except:
+                    age_newuppererror = "N/A"
+                    if self.chisqfunc3error(age_new,9,otherstup,) != self.chisqfunc3error(self.agebound3hi[curr_row],9,otherstup,):
+                        age_newuppernotes = "cannot go high enough to\nchange chi^2 by 12.77"
+                    elif self.chisqfunc3error(age_new,9,otherstup,) == self.chisqfunc3error(self.agebound3hi[curr_row],9,otherstup,):
+                        age_newuppernotes = "sitting at upper bound\n"
+                errorsthisrow.append([age_newlowererror,age_newuppererror])
+                errornotesthisrow.append([age_newlowernotes,age_newuppernotes])
+                ###
+                otherstup = (Z_old_1,age_old_1,M_old_1,E_bv_old,Z_old_2,age_old_2,M_old_2,E_bv_new,Z_new,age_new,valid_filters_this_row,ul_filters_this_row,curr_row)                           
+                try:
+                    M_newlowererror = M_new - opt.root_scalar(self.chisqfunc3error, args=(10,otherstup,),method="brentq",bracket=[self.Mbound3lo[curr_row],M_new]).root
+                    M_newlowernotes = "\n"
+                except:
+                    M_newlowererror = "N/A"
+                    if self.chisqfunc3error(M_new,10,otherstup,) != self.chisqfunc3error(self.Mbound3lo[curr_row],10,otherstup,):
+                        M_newlowernotes = "cannot go low enough to\nchange chi^2 by 12.77"
+                    elif self.chisqfunc3error(M_new,10,otherstup,) == self.chisqfunc3error(self.Mbound3lo[curr_row],10,otherstup,):
+                        M_newlowernotes = "sitting at lower bound\n"
+                try:
+                    M_newuppererror = opt.root_scalar(self.chisqfunc3error, args=(10,otherstup,),method="brentq",bracket=[M_new,self.Mbound3hi[curr_row]]).root - M_new
+                    M_newuppernotes = "\n"
+                except:
+                    M_newuppererror = "N/A"
+                    if self.chisqfunc3error(M_new,10,otherstup,) != self.chisqfunc3error(self.Mbound3hi[curr_row],10,otherstup,):
+                        M_newuppernotes = "cannot go high enough to\nchange chi^2 by 12.77"
+                    elif self.chisqfunc3error(M_new,10,otherstup,) == self.chisqfunc3error(self.Mbound3hi[curr_row],10,otherstup,):
+                        M_newuppernotes = "sitting at upper bound\n"
+                errorsthisrow.append([M_newlowererror,M_newuppererror])
+                errornotesthisrow.append([M_newlowernotes,M_newuppernotes])
+                ###
+                self.errorsallrows.append(errorsthisrow)
+                self.errornotes.append(errornotesthisrow)
 
     def display_all_results(self):
         if self.dispresults == 1:
@@ -2339,10 +3423,14 @@ class ChiSquared():
                     'weighted var age1' : self.var_age1s,
                     'weighted var M1' : self.var_M1s,
                     'weighted var ebv1' : self.var_ebv1s,
+                    'sigma Z1' : self.sigma_Z1s,
+                    'sigma age1' : self.sigma_age1s,
+                    'sigma M1' : self.sigma_M1s,
+                    'sigma ebv1' : self.sigma_ebv1s,
                     'model flux using weighted mean parameters' : self.mean_fluxes,
                     'chi2 using weighted mean parameters' : self.mean_chi2s,
-                    'new M1' : self.newM1s,
-                    'new chi2' : self.newchi2s})
+                    'fitted M1 to other mean parameters' : self.newM1s,
+                    'chi2 of fitted M1 to other mean parameters' : self.newchi2s})
 
                 df1.to_csv("{}".format(self.weightedmeanvarname),index=False)
         
@@ -2366,12 +3454,20 @@ class ChiSquared():
                     'weighted var age2' : self.var_age2s,
                     'weighted var M2' : self.var_M2s,
                     'weighted var ebv2' : self.var_ebv2s,
+                    'sigma Z1' : self.sigma_Z1s,
+                    'sigma age1' : self.sigma_age1s,
+                    'sigma M1' : self.sigma_M1s,
+                    'sigma ebv1' : self.sigma_ebv1s,
+                    'sigma Z2' : self.sigma_Z2s,
+                    'sigma age2' : self.sigma_age2s,
+                    'sigma M2' : self.sigma_M2s,
+                    'sigma ebv2' : self.sigma_ebv2s,
                     'hot model flux using weighted mean parameters' : self.mean_hotfluxes,
                     'cool model flux using weighted mean parameters' : self.mean_coolfluxes,
                     'chi2 using weighted mean parameters' : self.mean_chi2s,
-                    'new M1' : self.newM1s,
-                    'new M2' : self.newM2s,
-                    'new chi2' : self.newchi2s})
+                    'fitted M1 to other mean parameters' : self.newM1s,
+                    'fitted M2 to other mean parameters' : self.newM2s,
+                    'chi2 of fitted Ms to other mean parameters' : self.newchi2s})
 
                 df1.to_csv("{}".format(self.weightedmeanvarname),index=False)
 
@@ -2401,14 +3497,25 @@ class ChiSquared():
                     'weighted var Z3' : self.var_Z3s,
                     'weighted var age3' : self.var_age3s,
                     'weighted var M3' : self.var_M3s,
+                    'sigma Z1' : self.sigma_Z1s,
+                    'sigma age1' : self.sigma_age1s,
+                    'sigma M1' : self.sigma_M1s,
+                    'sigma ebv1' : self.sigma_ebv1s,
+                    'sigma Z2' : self.sigma_Z2s,
+                    'sigma age2' : self.sigma_age2s,
+                    'sigma M2' : self.sigma_M2s,
+                    'sigma ebv2' : self.sigma_ebv2s,
+                    'sigma Z3' : self.sigma_Z3s,
+                    'sigma age3' : self.sigma_age3s,
+                    'sigma M3' : self.sigma_M3s,
                     'old1 model flux using weighted mean parameters' : self.mean_old1fluxes,
                     'old2 model flux using weighted mean parameters' : self.mean_old2fluxes,
                     'young model flux using weighted mean parameters' : self.mean_youngfluxes,
                     'chi2 using weighted mean parameters' : self.mean_chi2s,
-                    'new M1' : self.newM1s,
-                    'new M2' : self.newM2s,
-                    'new M3' : self.newM3s,
-                    'new chi2' : self.newchi2s})
+                    'fitted M1 to other mean parameters' : self.newM1s,
+                    'fitted M2 to other mean parameters' : self.newM2s,
+                    'fitted M3 to other mean parameters' : self.newM3s,
+                    'chi2 of fitted Ms to other mean parameters' : self.newchi2s})
 
         if self.gridresults == 1:
 
