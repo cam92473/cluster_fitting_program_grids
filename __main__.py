@@ -3207,7 +3207,7 @@ class ChiSquared():
                         elif self.ulmeth == "Standard":
                             self.truefluxerrors.iat[curr_row,colno] = (arraytup[2]*-1/3)
 
-
+    ##purple
     def save_output(self):
 
         import numpy as np
@@ -3219,107 +3219,98 @@ class ChiSquared():
 
                 df1 = pd.DataFrame({
                     'row' : [i+2 for i in self.rows],
-                    'weighted mean Z1' : self.mean_Z1s,
-                    'weighted mean age1' : self.mean_age1s,
-                    'weighted mean M1s' : self.mean_M1s,
-                    'weighted mean ebv1' : self.mean_ebv1s,
-                    'weighted var Z1' : self.var_Z1s,
-                    'weighted var age1' : self.var_age1s,
-                    'weighted var M1' : self.var_M1s,
-                    'weighted var ebv1' : self.var_ebv1s,
-                    'sigma Z1' : self.sigma_Z1s,
-                    'sigma age1' : self.sigma_age1s,
-                    'sigma M1' : self.sigma_M1s,
-                    'sigma ebv1' : self.sigma_ebv1s,
-                    'model flux using weighted mean parameters' : self.mean_fluxes,
-                    'chi2 using weighted mean parameters' : self.mean_chi2s,
-                    'fitted M1 to other mean parameters' : self.newM1s,
-                    'chi2 of fitted M1 to other mean parameters' : self.newchi2s})
+                    'weighted_mean_Z1' : self.mean_Z1s,
+                    'sigma_Z1' : self.sigma_Z1s,
+                    'weighted_mean_age1' : self.mean_age1s,
+                    'sigma_age1' : self.sigma_age1s,
+                    'weighted_mean_M1s' : self.mean_M1s,
+                    'sigma_M1' : self.sigma_M1s,
+                    'weighted_mean_ebv1' : self.mean_ebv1s,
+                    'sigma_ebv1' : self.sigma_ebv1s,
+                    'chi2_using_mean_parameters' : self.mean_chi2s,
+                    'fitted_M1_to_mean_parameters' : self.newM1s,
+                    'chi2_of_fitted_M1' : self.newchi2s})
 
-                df1.to_csv("{}".format(self.weightedmeanvarname),index=False)
+                try:
+                    df1.to_csv("{}".format(self.weightedmeanvarname),index=False)
+                except:
+                    import tkinter as tk
+                    from tkinter import messagebox
+                    tk.messagebox.showerror('Error','An error occurred. This can happen if a file is open while trying to overwrite it. Please close any relevant files and try again.')  
+
         
             elif self.double_cluster == True:
 
                 df1 = pd.DataFrame({
                     'row' : [i+2 for i in self.rows],
-                    'weighted mean Z1' : self.mean_Z1s,
-                    'weighted mean age1' : self.mean_age1s,
-                    'weighted mean M1' : self.mean_M1s,
-                    'weighted mean ebv1' : self.mean_ebv1s,
-                    'weighted mean Z2' : self.mean_Z2s,
-                    'weighted mean age2' : self.mean_age2s,
-                    'weighted mean M2' : self.mean_M2s,
-                    'weighted mean ebv2' : self.mean_ebv2s,
-                    'weighted var Z1' : self.var_Z1s,
-                    'weighted var age1' : self.var_age1s,
-                    'weighted var M1' : self.var_M1s,
-                    'weighted var ebv1' : self.var_ebv1s,
-                    'weighted var Z2' : self.var_Z2s,
-                    'weighted var age2' : self.var_age2s,
-                    'weighted var M2' : self.var_M2s,
-                    'weighted var ebv2' : self.var_ebv2s,
-                    'sigma Z1' : self.sigma_Z1s,
-                    'sigma age1' : self.sigma_age1s,
-                    'sigma M1' : self.sigma_M1s,
-                    'sigma ebv1' : self.sigma_ebv1s,
-                    'sigma Z2' : self.sigma_Z2s,
-                    'sigma age2' : self.sigma_age2s,
-                    'sigma M2' : self.sigma_M2s,
-                    'sigma ebv2' : self.sigma_ebv2s,
-                    'hot model flux using weighted mean parameters' : self.mean_hotfluxes,
-                    'cool model flux using weighted mean parameters' : self.mean_coolfluxes,
-                    'chi2 using weighted mean parameters' : self.mean_chi2s,
-                    'fitted M1 to other mean parameters' : self.newM1s,
-                    'fitted M2 to other mean parameters' : self.newM2s,
-                    'chi2 of fitted Ms to other mean parameters' : self.newchi2s})
+                    'weighted_mean_Z1' : self.mean_Z1s,
+                    'sigma_Z1' : self.sigma_Z1s,
+                    'weighted_mean_age1' : self.mean_age1s,
+                    'sigma_age1' : self.sigma_age1s,
+                    'weighted_mean_M1' : self.mean_M1s,
+                    'sigma_M1' : self.sigma_M1s,
+                    'weighted_mean_ebv1' : self.mean_ebv1s,
+                    'sigma_ebv1' : self.sigma_ebv1s,
+                    'weighted_mean_Z2' : self.mean_Z2s,
+                    'sigma_Z2' : self.sigma_Z2s,
+                    'weighted_mean_age2' : self.mean_age2s,
+                    'sigma_age2' : self.sigma_age2s,
+                    'weighted_mean_M2' : self.mean_M2s,
+                    'sigma_M2' : self.sigma_M2s,
+                    'weighted_mean_ebv2' : self.mean_ebv2s,
+                    'sigma_ebv2' : self.sigma_ebv2s,
+                    'chi2_using_mean_parameters' : self.mean_chi2s,
+                    'fitted_M1_to_mean_parameters' : self.newM1s,
+                    'fitted_M2_to_mean_parameters' : self.newM2s,
+                    'chi2_of_fitted_Ms' : self.newchi2s})
 
-                df1.to_csv("{}".format(self.weightedmeanvarname),index=False)
+                try:
+                    df1.to_csv("{}".format(self.weightedmeanvarname),index=False)
+                except:
+                    import tkinter as tk
+                    from tkinter import messagebox
+                    tk.messagebox.showerror('Error','An error occurred. This can happen if a file is open while trying to overwrite it. Please close any relevant files and try again.')  
+                
 
             elif self.triple_cluster == True:
 
                 df1 = pd.DataFrame({
                     'row' : [i+2 for i in self.rows],
-                    'weighted mean Z1' : self.mean_Z1s,
-                    'weighted mean age1' : self.mean_age1s,
-                    'weighted mean M1' : self.mean_M1s,
-                    'weighted mean ebv1' : self.mean_ebv1s,
-                    'weighted mean Z2' : self.mean_Z2s,
-                    'weighted mean age2' : self.mean_age2s,
-                    'weighted mean M2' : self.mean_M2s,
-                    'weighted mean ebv2' : self.mean_ebv2s,
-                    'weighted mean Z3' : self.mean_Z3s,
-                    'weighted mean age3' : self.mean_age3s,
-                    'weighted mean M3' : self.mean_M3s,
-                    'weighted var Z1' : self.var_Z1s,
-                    'weighted var age1' : self.var_age1s,
-                    'weighted var M1' : self.var_M1s,
-                    'weighted var ebv1' : self.var_ebv1s,
-                    'weighted var Z2' : self.var_Z2s,
-                    'weighted var age2' : self.var_age2s,
-                    'weighted var M2' : self.var_M2s,
-                    'weighted var ebv2' : self.var_ebv2s,
-                    'weighted var Z3' : self.var_Z3s,
-                    'weighted var age3' : self.var_age3s,
-                    'weighted var M3' : self.var_M3s,
-                    'sigma Z1' : self.sigma_Z1s,
-                    'sigma age1' : self.sigma_age1s,
-                    'sigma M1' : self.sigma_M1s,
-                    'sigma ebv1' : self.sigma_ebv1s,
-                    'sigma Z2' : self.sigma_Z2s,
-                    'sigma age2' : self.sigma_age2s,
-                    'sigma M2' : self.sigma_M2s,
-                    'sigma ebv2' : self.sigma_ebv2s,
-                    'sigma Z3' : self.sigma_Z3s,
-                    'sigma age3' : self.sigma_age3s,
-                    'sigma M3' : self.sigma_M3s,
-                    'old1 model flux using weighted mean parameters' : self.mean_old1fluxes,
-                    'old2 model flux using weighted mean parameters' : self.mean_old2fluxes,
-                    'young model flux using weighted mean parameters' : self.mean_youngfluxes,
-                    'chi2 using weighted mean parameters' : self.mean_chi2s,
-                    'fitted M1 to other mean parameters' : self.newM1s,
-                    'fitted M2 to other mean parameters' : self.newM2s,
-                    'fitted M3 to other mean parameters' : self.newM3s,
-                    'chi2 of fitted Ms to other mean parameters' : self.newchi2s})
+                    'weighted_mean_Z1' : self.mean_Z1s,
+                    'sigma_Z1' : self.sigma_Z1s,
+                    'weighted_mean_age1' : self.mean_age1s,
+                    'sigma_age1' : self.sigma_age1s,
+                    'weighted_mean_M1' : self.mean_M1s,
+                    'sigma_M1' : self.sigma_M1s,
+                    'weighted_mean_ebv1' : self.mean_ebv1s,
+                    'sigma_ebv1' : self.sigma_ebv1s,
+                    'weighted_mean_Z2' : self.mean_Z2s,
+                    'sigma_Z2' : self.sigma_Z2s,
+                    'weighted_mean_age2' : self.mean_age2s,
+                    'sigma_age2' : self.sigma_age2s,
+                    'weighted_mean_M2' : self.mean_M2s,
+                    'sigma_M2' : self.sigma_M2s,
+                    'weighted_mean_ebv2' : self.mean_ebv2s,
+                    'sigma_ebv2' : self.sigma_ebv2s,
+                    'weighted_mean_Z3' : self.mean_Z3s,
+                    'sigma_Z3' : self.sigma_Z3s,
+                    'weighted_mean_age3' : self.mean_age3s,
+                    'sigma_age3' : self.sigma_age3s,
+                    'weighted_mean_M3' : self.mean_M3s,
+                    'sigma_M3' : self.sigma_M3s,
+                    'chi2_using_mean_parameters' : self.mean_chi2s,
+                    'fitted_M1_to_mean_parameters' : self.newM1s,
+                    'fitted_M2_to_mean_parameters' : self.newM2s,
+                    'fitted_M3_to_mean_parameters' : self.newM3s,
+                    'chi2_of_fitted_Ms' : self.newchi2s})
+
+                try:
+                    df1.to_csv("{}".format(self.weightedmeanvarname),index=False)
+                except:
+                    import tkinter as tk
+                    from tkinter import messagebox
+                    tk.messagebox.showerror('Error','An error occurred. This can happen if a file is open while trying to overwrite it. Please close any relevant files and try again.')  
+
 
         if self.gridresults == 1:
 
@@ -3332,7 +3323,7 @@ class ChiSquared():
                         'log(age)/10' : self.age1grid.flatten(),
                         'log(M)/10' : self.gridM1s[curr_row],
                         'E(B-V)' : self.ebv1grid.flatten(),
-                        'Chi squared' : self.gridChisqs[curr_row]})
+                        'Chi_squared' : self.gridChisqs[curr_row]})
                     
                     parts = self.gridname.split(".")
                     numbered_gridname = parts[0] + str(self.rows[curr_row]+2) + "." + parts[1]
@@ -3352,7 +3343,7 @@ class ChiSquared():
                         'log(age_cool)/10' : self.age2grid.flatten(),
                         'log(M_cool)/10' : self.gridM2s[curr_row],
                         'E(B-V)_cool' : self.ebv2grid.flatten(),
-                        'Chi squared' : self.gridChisqs[curr_row]})
+                        'Chi_squared' : self.gridChisqs[curr_row]})
                     
                     parts = self.gridname.split(".")
                     numbered_gridname = parts[0] + str(self.rows[curr_row]+2) + "." + parts[1]
@@ -3375,12 +3366,13 @@ class ChiSquared():
                         'log(Z_old3)' : self.Z3grid.flatten(),
                         'log(age_old3)/10' : self.age3grid.flatten(),
                         'log(M_old3)/10' : self.gridM3s[curr_row],
-                        'Chi squared' : self.gridChisqs[curr_row]})
+                        'Chi_squared' : self.gridChisqs[curr_row]})
                     
                     parts = self.gridname.split(".")
                     numbered_gridname = parts[0] + str(self.rows[curr_row]+2) + "." + parts[1]
 
                     a.to_csv("{}".format(numbered_gridname),index=False)
+    ##
 
     ##red
 
@@ -3505,12 +3497,12 @@ class ChiSquared():
             textbox4.insert(tk.END,"{}      {}\n".format(filtername,format(mod,'.8e')))
         print("total model flux using weighted mean parameters: {}".format(self.mean_fluxes[curr_row]))
         textbox4.place(x=50,y=650)
-        groove = tk.Canvas(topw,width=185,height=120,bd=4,relief=tk.RIDGE)
+        groove = tk.Canvas(topw,width=215,height=120,bd=4,relief=tk.RIDGE)
         groove.place(x=405,y=655)
         label5 = tk.Label(topw,text="chi^2 value using \nweighted mean parameters")
         label5.place(x=425,y=665)
         label5a = tk.Label(topw,text="{}".format(format(mean_chi2,'.6e')),font=("Arial",12))
-        label5a.place(x=437,y=715)
+        label5a.place(x=445,y=725)
         self.mean_chi2s.append(0)
         self.mean_chi2s[curr_row] = mean_chi2
 
@@ -3550,11 +3542,11 @@ class ChiSquared():
         parameter2 = tk.Label(colpack1,text="log(age)/10").pack(pady=10)
         parameter3 = tk.Label(colpack1,text="log(M)/10").pack(pady=10)
         parameter4 = tk.Label(colpack1,text="E(B-V)").pack(pady=10)
-        besthead = tk.Label(colpack2,text="Weighted mean value",bg="azure").pack(pady=10)
-        best1 = tk.Label(colpack2,text="{}".format(Z_sticker1)).pack(pady=10)
-        best2 = tk.Label(colpack2,text="{}".format(age_sticker1)).pack(pady=10)
-        best3 = tk.Label(colpack2,text="{}".format(M_sticker1)).pack(pady=10)
-        best4 = tk.Label(colpack2,text="{}".format(ebv_sticker1)).pack(pady=10)
+        meanhead = tk.Label(colpack2,text="Weighted mean",bg="azure").pack(pady=10)
+        mean1 = tk.Label(colpack2,text="{}".format(Z_sticker1)).pack(pady=10)
+        mean2 = tk.Label(colpack2,text="{}".format(age_sticker1)).pack(pady=10)
+        mean3 = tk.Label(colpack2,text="{}".format(M_sticker1)).pack(pady=10)
+        mean4 = tk.Label(colpack2,text="{}".format(ebv_sticker1)).pack(pady=10)
         errlohead = tk.Label(colpack3,text="Lower error",bg="azure").pack(pady=10)
         errlo3 = tk.Label(colpack3,text="{}".format(M_sticker2)).pack(pady=10)
         noteslohead = tk.Label(colpack4,text="Lower error notes",bg="azure").pack(pady=10)
@@ -3704,12 +3696,12 @@ class ChiSquared():
             textbox5.insert(tk.END,"{}      {}\n".format(filtername,format(coolmod,'.8e')))
         print("total cool model flux using weighted mean parameters: {}".format(self.mean_coolfluxes[curr_row]))
         textbox5.place(x=50,y=750)
-        groove = tk.Canvas(topw,width=185,height=120,bd=4,relief=tk.RIDGE)
+        groove = tk.Canvas(topw,width=215,height=120,bd=4,relief=tk.RIDGE)
         groove.place(x=405,y=655)
         label5 = tk.Label(topw,text="chi^2 value using\n weighted mean parameters")
         label5.place(x=425,y=665)
         label5a = tk.Label(topw,text="{}".format(format(mean_chi2,'.6e')),font=("Arial",12))
-        label5a.place(x=437,y=715)        
+        label5a.place(x=445,y=725)        
         self.mean_chi2s.append(0)
         self.mean_chi2s[curr_row] = mean_chi2
 
@@ -3771,15 +3763,15 @@ class ChiSquared():
         parameter6 = tk.Label(colpack1,text="log(age_cool)/10").pack(pady=3)
         parameter7 = tk.Label(colpack1,text="log(M_cool)/10").pack(pady=3)
         parameter8 = tk.Label(colpack1,text="E(B-V)_cool").pack(pady=3)
-        besthead = tk.Label(colpack2,text="Weighted mean value",bg="azure").pack(pady=3)
-        best1 = tk.Label(colpack2,text="{}".format(Z_hot_sticker1)).pack(pady=3)
-        best2 = tk.Label(colpack2,text="{}".format(age_hot_sticker1)).pack(pady=3)
-        best3 = tk.Label(colpack2,text="{}".format(M_hot_sticker1)).pack(pady=3)
-        best4 = tk.Label(colpack2,text="{}".format(ebv_hot_sticker1)).pack(pady=3)
-        best5 = tk.Label(colpack2,text="{}".format(Z_cool_sticker1)).pack(pady=3)
-        best6 = tk.Label(colpack2,text="{}".format(age_cool_sticker1)).pack(pady=3)
-        best7 = tk.Label(colpack2,text="{}".format(M_cool_sticker1)).pack(pady=3)
-        best8 = tk.Label(colpack2,text="{}".format(ebv_cool_sticker1)).pack(pady=3)
+        meanhead = tk.Label(colpack2,text="Weighted mean",bg="azure").pack(pady=3)
+        mean1 = tk.Label(colpack2,text="{}".format(Z_hot_sticker1)).pack(pady=3)
+        mean2 = tk.Label(colpack2,text="{}".format(age_hot_sticker1)).pack(pady=3)
+        mean3 = tk.Label(colpack2,text="{}".format(M_hot_sticker1)).pack(pady=3)
+        mean4 = tk.Label(colpack2,text="{}".format(ebv_hot_sticker1)).pack(pady=3)
+        mean5 = tk.Label(colpack2,text="{}".format(Z_cool_sticker1)).pack(pady=3)
+        mean6 = tk.Label(colpack2,text="{}".format(age_cool_sticker1)).pack(pady=3)
+        mean7 = tk.Label(colpack2,text="{}".format(M_cool_sticker1)).pack(pady=3)
+        mean8 = tk.Label(colpack2,text="{}".format(ebv_cool_sticker1)).pack(pady=3)
         errlohead = tk.Label(colpack3,text="Lower error",bg="azure").pack(pady=3)
         errlo3 = tk.Label(colpack3,text="{}".format(M_hot_sticker2)).pack(pady=3)
         errlo7 = tk.Label(colpack3,text="{}".format(M_cool_sticker2)).pack(pady=3)
@@ -3943,12 +3935,12 @@ class ChiSquared():
             textbox6.insert(tk.END,"{}      {}\n".format(filtername,format(youngmod,'.8e')))
         print("total young model flux using weighted mean parameters: {}".format(self.mean_youngfluxes[curr_row]))
         textbox6.place(x=50,y=775)
-        groove = tk.Canvas(topw,width=185,height=120,bd=4,relief=tk.RIDGE)
+        groove = tk.Canvas(topw,width=215,height=120,bd=4,relief=tk.RIDGE)
         groove.place(x=405,y=655)
-        label7 = tk.Label(topw,text="chi^2 value using weighted mean parameters")
+        label7 = tk.Label(topw,text="chi^2 value using \nweighted mean parameters")
         label7.place(x=425,y=665)
         label7a = tk.Label(topw,text="{}".format(format(mean_chi2,'.6e')),font=("Arial",12))
-        label7a.place(x=437,y=715)
+        label7a.place(x=445,y=725)
         self.mean_chi2s.append(0)
         self.mean_chi2s[curr_row] = mean_chi2
         import math
@@ -4028,18 +4020,18 @@ class ChiSquared():
         parameter9 = tk.Label(colpack1,text="log(Z_young)").pack(pady=3)
         parameter10 = tk.Label(colpack1,text="log(age_young)/10").pack(pady=3)
         parameter11 = tk.Label(colpack1,text="log(M_young)/10").pack(pady=3)
-        besthead = tk.Label(colpack2,text="Weighted mean value",bg="azure").pack(pady=3)
-        best1 = tk.Label(colpack2,text="{}".format(Z_old_1_sticker1)).pack(pady=3)
-        best2 = tk.Label(colpack2,text="{}".format(age_old_1_sticker1)).pack(pady=3)
-        best3 = tk.Label(colpack2,text="{}".format(M_old_1_sticker1)).pack(pady=3)
-        best4 = tk.Label(colpack2,text="{}".format(ebv_old_sticker1)).pack(pady=3)
-        best5 = tk.Label(colpack2,text="{}".format(Z_old_2_sticker1)).pack(pady=3)
-        best6 = tk.Label(colpack2,text="{}".format(age_old_2_sticker1)).pack(pady=3)
-        best7 = tk.Label(colpack2,text="{}".format(M_old_2_sticker1)).pack(pady=3)
-        best8 = tk.Label(colpack2,text="{}".format(ebv_new_sticker1)).pack(pady=3)
-        best9 = tk.Label(colpack2,text="{}".format(Z_new_sticker1)).pack(pady=3)
-        best10 = tk.Label(colpack2,text="{}".format(age_new_sticker1)).pack(pady=3)
-        best11 = tk.Label(colpack2,text="{}".format(M_new_sticker1)).pack(pady=3)
+        meanhead = tk.Label(colpack2,text="Weighted mean",bg="azure").pack(pady=3)
+        mean1 = tk.Label(colpack2,text="{}".format(Z_old_1_sticker1)).pack(pady=3)
+        mean2 = tk.Label(colpack2,text="{}".format(age_old_1_sticker1)).pack(pady=3)
+        mean3 = tk.Label(colpack2,text="{}".format(M_old_1_sticker1)).pack(pady=3)
+        mean4 = tk.Label(colpack2,text="{}".format(ebv_old_sticker1)).pack(pady=3)
+        mean5 = tk.Label(colpack2,text="{}".format(Z_old_2_sticker1)).pack(pady=3)
+        mean6 = tk.Label(colpack2,text="{}".format(age_old_2_sticker1)).pack(pady=3)
+        mean7 = tk.Label(colpack2,text="{}".format(M_old_2_sticker1)).pack(pady=3)
+        mean8 = tk.Label(colpack2,text="{}".format(ebv_new_sticker1)).pack(pady=3)
+        mean9 = tk.Label(colpack2,text="{}".format(Z_new_sticker1)).pack(pady=3)
+        mean10 = tk.Label(colpack2,text="{}".format(age_new_sticker1)).pack(pady=3)
+        mean11 = tk.Label(colpack2,text="{}".format(M_new_sticker1)).pack(pady=3)
         errlohead = tk.Label(colpack3,text="Lower error",bg="azure").pack(pady=3)
         errlo3 = tk.Label(colpack3,text="{}".format(M_old_1_sticker2)).pack(pady=3)
         errlo7 = tk.Label(colpack3,text="{}".format(M_old_2_sticker2)).pack(pady=3)
