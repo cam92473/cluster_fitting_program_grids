@@ -1,7 +1,6 @@
 import scipy.optimize as opt
 import pandas as pd
 
-
 class ChiSquared():
     def __init__(self):
         self.filenamevar = ""
@@ -26,17 +25,17 @@ class ChiSquared():
         self.starlist2 = ["0","1.4","0","1.4","N/A","N/A"]
         self.starlist3 = ["0","1","0","1","0","0.7"]
         #UVIT_HST
-        self.stardict1 = [["-2.5","0.3","0"],[".66",".90","0"],["0","1","0"],["N/A","N/A","N/A"],["N/A","N/A","N/A"],["N/A","N/A","N/A"],["N/A","N/A","N/A"],["N/A","N/A","N/A"]]
-        self.stardict2 = [["-2.1","-0.1","0"],[".66","1.01","0"],["0","2","0"],["-2.1","-0.1","0"],[".66","1.01","0"],["0","2","0"],["N/A","N/A","N/A"],["N/A","N/A","N/A"]]
-        self.stardict3 = [["-2.1","-0.1","0"],[".8",".9","0"],["0","1","0"],["-2.1","-0.1","0"],[".9","1.13","0"],["0","1","0"],["-2.1","0.3","0"],[".66",".8","0"]]
+        self.stardict1 = [["-2.5","0.3","1"],[".66",".90","1"],["0","1","1"],["N/A","N/A","N/A"],["N/A","N/A","N/A"],["N/A","N/A","N/A"],["N/A","N/A","N/A"],["N/A","N/A","N/A"]]
+        self.stardict2 = [["-2.1","-0.1","1"],[".66","1.01","1"],["0","2","1"],["-2.1","-0.1","1"],[".66","1.01","1"],["0","2","1"],["N/A","N/A","N/A"],["N/A","N/A","N/A"]]
+        self.stardict3 = [["-2.1","-0.1","1"],[".8",".9","1"],["0","1","1"],["-2.1","-0.1","1"],[".9","1.13","1"],["0","1","1"],["-2.1","0.3","1"],[".66",".8","1"]]
         #UVIT_SDSS_Spitzer
-        self.stardict4 = [["-2.1","-0.1","0"],[".66",".90","0"],["0","1","0"],["N/A","N/A","N/A"],["N/A","N/A","N/A"],["N/A","N/A","N/A"],["N/A","N/A","N/A"],["N/A","N/A","N/A"]]
-        self.stardict5 = [["-2.1","-0.1","0"],[".66","1.01","0"],["0","2","0"],["-2.1","-0.1","0"],[".66","1.01","0"],["0","2","0"],["N/A","N/A","N/A"],["N/A","N/A","N/A"]]
-        self.stardict6 = [["-2.1","-0.1","0"],[".8",".9","0"],["0","1","0"],["-2.1","-0.1","0"],[".9","1.0","0"],["0","1","0"],["-2.1","-0.1","0"],[".66",".8","0"]]
+        self.stardict4 = [["-2.1","-0.1","1"],[".66",".90","1"],["0","1","1"],["N/A","N/A","N/A"],["N/A","N/A","N/A"],["N/A","N/A","N/A"],["N/A","N/A","N/A"],["N/A","N/A","N/A"]]
+        self.stardict5 = [["-2.1","-0.1","1"],[".66","1.01","1"],["0","2","1"],["-2.1","-0.1","1"],[".66","1.01","1"],["0","2","1"],["N/A","N/A","N/A"],["N/A","N/A","N/A"]]
+        self.stardict6 = [["-2.1","-0.1","1"],[".8",".9","1"],["0","1","1"],["-2.1","-0.1","1"],[".9","1.0","1"],["0","1","1"],["-2.1","-0.1","1"],[".66",".8","1"]]
         #UVIT_Johnson_GALEX
-        self.stardict7 = [["-2.1","-0.1","0"],[".66",".90","0"],["0","1","0"],["N/A","N/A","N/A"],["N/A","N/A","N/A"],["N/A","N/A","N/A"],["N/A","N/A","N/A"],["N/A","N/A","N/A"]]
-        self.stardict8 = [["-2.1","-0.1","0"],[".66","1.01","0"],["0","2","0"],["-2.1","-0.1","0"],[".66","1.01","0"],["0","2","0"],["N/A","N/A","N/A"],["N/A","N/A","N/A"]]
-        self.stardict9 = [["-2.1","-0.1","0"],[".8",".9","0"],["0","1","0"],["-2.1","-0.1","0"],[".9","1.0","0"],["0","1","0"],["-2.1","-0.1","0"],[".66",".8","0"]]
+        self.stardict7 = [["-2.1","-0.1","1"],[".66",".90","1"],["0","1","1"],["N/A","N/A","N/A"],["N/A","N/A","N/A"],["N/A","N/A","N/A"],["N/A","N/A","N/A"],["N/A","N/A","N/A"]]
+        self.stardict8 = [["-2.1","-0.1","1"],[".66","1.01","1"],["0","2","1"],["-2.1","-0.1","1"],[".66","1.01","1"],["0","2","1"],["N/A","N/A","N/A"],["N/A","N/A","N/A"]]
+        self.stardict9 = [["-2.1","-0.1","1"],[".8",".9","1"],["0","1","1"],["-2.1","-0.1","1"],[".9","1.0","1"],["0","1","1"],["-2.1","-0.1","1"],[".66",".8","1"]]
 
         while True:
             self.intro_gui()
@@ -164,7 +163,6 @@ class ChiSquared():
                                     self.ulmeth = user_ulmeth.get()
                                     self.ulmethset = user_ulmeth.get()
 
-
                                     if checker2.get() == 1:
                                         self.weightedmeanvarname = weightedmeanvarname.get()
                                     if checker3.get() == 1:
@@ -189,7 +187,6 @@ class ChiSquared():
                                         return None
 
                                     if self.chosenstar == "     1-cluster fit     ":
-
                                         self.single_cluster = True
 
                                         self.Mbound1lo = float(user_Mbound1lo.get())
@@ -213,6 +210,7 @@ class ChiSquared():
                                          
                                         self.starlist1[0] = user_Mbound1lo.get()
                                         self.starlist1[1] = user_Mbound1hi.get()
+
                                         if user_model_cho.get() == "UVIT_HST":
                                             self.stardict1[0][0] = user_Z1lowest.get()
                                             self.stardict1[0][1] = user_Z1highest.get()
@@ -245,12 +243,10 @@ class ChiSquared():
                                             self.stardict7[2][2] = user_ebv1num.get()
 
                                     elif self.chosenstar == "     2-cluster fit     ":
-                                        
                                         self.double_cluster = True
 
                                         self.Mbound1lo = float(user_Mbound1lo.get())
                                         self.Mbound1hi = float(user_Mbound1hi.get())
-                                        self.Mguess2 = float(user_Mguess2.get())
                                         self.Mbound2lo = float(user_Mbound2lo.get())
                                         self.Mbound2hi = float(user_Mbound2hi.get())
                                         
@@ -289,6 +285,7 @@ class ChiSquared():
                                         self.starlist2[1] = user_Mbound1hi.get()
                                         self.starlist2[2] = user_Mbound2lo.get()
                                         self.starlist2[3] = user_Mbound2hi.get()
+
                                         if user_model_cho.get() == "UVIT_HST":
                                             self.stardict2[0][0] = user_Z1lowest.get()
                                             self.stardict2[0][1] = user_Z1highest.get()
@@ -348,7 +345,6 @@ class ChiSquared():
                                             self.stardict8[5][2] = user_ebv2num.get()
 
                                     elif self.chosenstar == "     3-cluster fit     ":
-
                                         self.triple_cluster = True
 
                                         self.Mbound1lo = float(user_Mbound1lo.get())
@@ -483,9 +479,9 @@ class ChiSquared():
                                             self.stardict9[7][2] = user_age3num.get()
 
                                 except Exception as e:
-                                        print(e)
-                                        tk.messagebox.showinfo('Error', "One or more parameters seem to have been entered incorrectly. Please reenter the values and try again.")
-                                        return None
+                                    print(e)
+                                    tk.messagebox.showinfo('Error', "One or more parameters seem to have been entered incorrectly. Please reenter the values and try again.")
+                                    return None
                                 else:
                                     mwin.destroy()
         
@@ -531,7 +527,6 @@ class ChiSquared():
 
         user_Mbound1lo = tk.DoubleVar()
         user_Mbound1hi = tk.DoubleVar()
-        user_Mguess2 = tk.DoubleVar()
         user_Mbound2lo = tk.DoubleVar()
         user_Mbound2hi = tk.DoubleVar()
         user_Mbound3lo = tk.DoubleVar()
@@ -550,11 +545,11 @@ class ChiSquared():
         upperboundlabel = tk.Label(mwin,text="Upper bound",font="Arial 10 underline",bg="mint cream")
         upperboundlabel.place(x=470,y=ystar1labels)
 
-        label1 = tk.Label(mwin,text="log(M1)/10",font="Arial 10 underline",bg="mint cream")
+        label1 = tk.Label(mwin,text="log(M1)/10",bg="mint cream")
         label1.place(x=50,y=ystar1labels+30)
-        label2 = tk.Label(mwin,text="log(M2)/10",font="Arial 10 underline",bg="mint cream")
+        label2 = tk.Label(mwin,text="log(M2)/10",bg="mint cream")
         label2.place(x=50,y=ystar2labels+30)
-        label3 = tk.Label(mwin,text="log(M3)/10",font="Arial 10 underline",bg="mint cream")
+        label3 = tk.Label(mwin,text="log(M3)/10",bg="mint cream")
         label3.place(x=50,y=ystar3labels+30)
 
         entrylowerbound1 = tk.Entry(mwin,textvariable=user_Mbound1lo,width=12)
@@ -694,7 +689,6 @@ class ChiSquared():
                 buttentry4['state'] = tk.NORMAL
                 buttentry4.insert(tk.END,"plot_so_rowX.png")
 
-                
         checkbutt1 = tk.Checkbutton(mwin,text="Display results",variable=checker1,command=grent1,bg='azure2')
         plotslider1 = tk.Scale(mwin,from_=0,to=1,orient=tk.HORIZONTAL,showvalue=0,length=65,width=25,variable=currentsliderval1, command=changesliderstring1)
         plotslider1.place(x=500,y=240)
@@ -760,9 +754,12 @@ class ChiSquared():
             tk.messagebox.showinfo("Help","Values are evenly spaced, starting from the lowest value and including the highest value.")
         infobutton = tk.Button(mwin,text=" ? ",font=("TimesNewRoman 8"),command = infopopup)
         infobutton.place(x=xstarbentriesnum+100,y=240)
-        lwbound = tk.Label(mwin,text="Lowest value",font="Arial 10 underline",bg="lavender").place(x=xstarbentrieslo-7,y=240)
-        upbound = tk.Label(mwin,text="Highest value",font = "Arial 10 underline",bg="lavender").place(x=xstarbentrieshi-7,y=240)
-        numberr = tk.Label(mwin,text="No. of values",font = "Arial 10 underline",bg="lavender").place(x=xstarbentriesnum-7,y=240)
+        lwbound = tk.Label(mwin,text="Lowest value",font="Arial 10 underline",bg="lavender")
+        lwbound.place(x=xstarbentrieslo-7,y=240)
+        upbound = tk.Label(mwin,text="Highest value",font = "Arial 10 underline",bg="lavender")
+        upbound.place(x=xstarbentrieshi-7,y=240)
+        numberr = tk.Label(mwin,text="No. of values",font = "Arial 10 underline",bg="lavender")
+        numberr.place(x=xstarbentriesnum-7,y=240)
         labelbZ1 = tk.Label(mwin,text="",bg="lavender")
         labelbZ1.place(x=xstarbentrieslo-150,y=290)
         entrybZ1lo = tk.Entry(mwin,textvariable=user_Z1lowest,width=10)
@@ -1029,7 +1026,6 @@ class ChiSquared():
         def stuffyonly2(useless):
             stuff_vals2()
 
-
         def gray():
             if starno_chosen.get() == "     1-cluster fit     ":
                 if entrylowerbound1['state'] == tk.NORMAL:
@@ -1078,11 +1074,13 @@ class ChiSquared():
         modelcholabel.place(x=38,y=410)
         modelchomenu = tk.OptionMenu(mwin,user_model_cho,*modelchooptions,command=stuffyonly2)
         modelchomenu.place(x=32,y=440)
-        starlabel = tk.Label(mwin,text="Fitting method",bg="alice blue").place(x=38,y=500)
+        starlabel = tk.Label(mwin,text="Fitting method",bg="alice blue")
+        starlabel.place(x=38,y=500)
         starno_chosen.set(self.chosenstar)
         staroptions = ["     1-cluster fit     ","     2-cluster fit     ","     3-cluster fit     "]
         starmenu = tk.OptionMenu(mwin,starno_chosen,*staroptions,command=stuffy)
         starmenu.place(x=32,y=530)
+        
         checkbutton = tk.Checkbutton(mwin,text="Edit bounds for log(M)",variable=checked,command=gray,bg="mint cream")
         checkbutton.place(x=10,y=ycheckbutton)
         checkbutton2 = tk.Checkbutton(mwin,text="Edit parameters grid",variable=checked2,command=gray2,bg="lavender")
@@ -1090,7 +1088,7 @@ class ChiSquared():
         
         user_filename = tk.StringVar()
         user_filename.set(self.filenamevar)
-        enterfileneame = tk.Entry(mwin,textvariable = user_filename,width=72)
+        enterfileneame = tk.Entry(mwin,textvariable = user_filename,width=50)
         enterfileneame.place(x=224,y=34)
         labeltop = tk.Label(mwin,text="Input measured flux file: ", bg='white',border=2,relief=tk.RIDGE,padx=6,pady=5)
         labeltop.place(x=35,y=29)
@@ -1112,33 +1110,6 @@ class ChiSquared():
 
     def extract_measured_flux(self):
         assert self.switch == True, "Program terminated"
-
-        '''print("self.Zguess1", self.Zguess1)
-        print("self.ageguess1", self.ageguess1)
-        print("self.Mguess1", self.Mguess1)
-        print("self.ebvguess1", self.ebvguess1)
-        print("self.Zguess2", self.Zguess2)
-        print("self.ageguess2", self.ageguess2)
-        print("self.Mguess2", self.Mguess2)
-        print("self.ebvguess2", self.ebvguess2)
-
-        print("self.Zbound1lo", self.Zbound1lo)
-        print("self.Zbound1hi", self.Zbound1hi)
-        print("self.agebound1lo", self.agebound1lo)
-        print("self.agebound1hi", self.agebound1hi)
-        print("self.Mbound1lo", self.Mbound1lo)
-        print("self.Mbound1hi", self.Mbound1hi)
-        print("self.ebvbound1lo", self.ebvbound1lo)
-        print("self.ebvbound1hi", self.ebvbound1hi)
-        print("self.Zbound2lo", self.Zbound2lo)
-        print("self.Zbound2hi", self.Zbound2hi)
-        print("self.agebound2lo", self.agebound2lo)
-        print("self.agebound2hi", self.agebound2hi)
-        print("self.Mbound2lo", self.Mbound2lo)
-        print("self.Mbound2hi", self.Mbound2hi)
-        print("self.ebvbound2lo", self.ebvbound2lo)
-        print("self.ebvbound2hi", self.ebvbound2hi)'''
-
 
         if self.model_chosen == "UVIT_HST":
 
@@ -1635,7 +1606,7 @@ class ChiSquared():
 
     def minichisqfunc2_single(self,M1,Z1,age1,ebv1,valid_filters_this_row,ul_filters_this_row,curr_row):
         if self.silent is False:
-            print("Fitting M1 to other mean parameters: Testing row {} with Z1, age1, M1, ebv1: ".format(self.rows[curr_row]+2), Z1,age1,M1,ebv1)
+            print("Fitting log(M1)/10 to mean parameters: Testing row {} with log(Z1), log(age1)/10, log(M1)/10, ebv1: ".format(self.rows[curr_row]+2), Z1,age1,M1,ebv1)
 
         true_M = 10**(M1*10)
 
@@ -1699,7 +1670,7 @@ class ChiSquared():
         M1, M2 = tup
 
         if self.silent is False:
-            print("Fitting Ms to other mean parameters: Testing row {} with Z1, age1, M1, ebv1, Z2, age2, M2, ebv2: ".format(self.rows[curr_row]+2), Z1,age1,M1,ebv1,Z2,age2,M2,ebv2)
+            print("Fitting log(M)/10s to mean parameters: Testing row {} with log(Z1), log(age1)/10, log(M1)/10, ebv1, log(Z2), log(age2)/10, log(M2)/10, ebv2: ".format(self.rows[curr_row]+2), Z1,age1,M1,ebv1,Z2,age2,M2,ebv2)
 
         true_M1 = 10**(M1*10)
         true_M2 = 10**(M2*10)
@@ -1778,7 +1749,7 @@ class ChiSquared():
         M_old_1,M_old_2,M_young = tup
 
         if self.silent is False:
-            print("Fitting Ms to other mean parameters: Testing row {} with Z1, age1, M1, ebv1, Z2, age2, M2, ebv2, Z3, age3, M3: ".format(self.rows[curr_row]+2), Z_old_1,age_old_1,M_old_1,ebv_old,Z_old_2,age_old_2,M_old_2,ebv_young,Z_young,age_young,M_young)
+            print("Fitting log(M)/10s to mean parameters: Testing row {} with log(Z1), log(age1)/10, log(M1)/10, ebv1, log(Z2), log(age2)/10, log(M2)/10, ebv2, log(Z3), log(age3)/10, log(M3)/10: ".format(self.rows[curr_row]+2), Z_old_1,age_old_1,M_old_1,ebv_old,Z_old_2,age_old_2,M_old_2,ebv_young,Z_young,age_young,M_young)
 
         true_M_old_1 = 10**(M_old_1*10)
         true_M_old_2 = 10**(M_old_2*10)
@@ -1821,7 +1792,7 @@ class ChiSquared():
 
     def chisqfunc(self,M,Z,age,ebv,valid_filters_this_row,ul_filters_this_row,curr_row):
         if self.silent is False:
-            print("Testing row {} with log(Z), log(age)/10, log(M)/10, E_bv: ".format(self.rows[curr_row]+2), Z,age,M,ebv)
+            print("Testing row {} with log(Z), log(age)/10, log(M)/10, E(B-V): ".format(self.rows[curr_row]+2), Z,age,M,ebv)
 
         true_M = 10**(M*10)
 
@@ -1853,7 +1824,7 @@ class ChiSquared():
     def chisqfunc2(self,tup,Z1,age1,E_bv1,Z2,age2,E_bv2,valid_filters_this_row,ul_filters_this_row,curr_row):
         M1,M2 = tup
         if self.silent is False:
-            print("Testing row {} with log(Z1), log(age1)/10, log(M1)/10, E_bv1, log(Z2), log(age2)/10, log(M2)/10, E_bv2: ".format(self.rows[curr_row]+2), Z1, age1, M1, E_bv1, Z2, age2, M2, E_bv2)
+            print("Testing row {} with log(Z1), log(age1)/10, log(M1)/10, E(B-V)1, log(Z2), log(age2)/10, log(M2)/10, E(B-V)2: ".format(self.rows[curr_row]+2), Z1, age1, M1, E_bv1, Z2, age2, M2, E_bv2)
 
         true_M1 = 10**(M1*10)
         true_M2 = 10**(M2*10)
@@ -1952,7 +1923,6 @@ class ChiSquared():
                     summands.append(((self.bandfluxes.iat[curr_row,valid_ind]/3 - models[i])/(self.bandfluxes.iat[curr_row,valid_ind]/3))**2)
             else:
                 summands.append(((self.bandfluxes.iat[curr_row,valid_ind] - models[i])/self.bandfluxerrors.iat[curr_row,valid_ind])**2)
-
 
         chisq = sum(summands) - mean_chi2 - 4.28
         return chisq
@@ -2208,7 +2178,7 @@ class ChiSquared():
                 print("Smallest chi2 for row {}: {}".format(self.rows[curr_row]+2,smallest_chi2))
                 self.smallest_chi2_params.append(0)
                 self.smallest_chi2_params[curr_row] = smallest_chi2_params
-                print("Associated parameter values: Z1 {}, age1 {}, M1 {}, ebv1 {}".format(smallest_chi2_params[0],smallest_chi2_params[1],smallest_chi2_params[2],smallest_chi2_params[3]))
+                print("Associated parameter values: log(Z1) {}, log(age1)/10 {}, log(M1)/10 {}, E(B-V)1 {}".format(smallest_chi2_params[0],smallest_chi2_params[1],smallest_chi2_params[2],smallest_chi2_params[3]))
                 gridChisq -= smallest_chi2
                 self.mean_Z1s.append(0)
                 self.mean_age1s.append(0)
@@ -2235,10 +2205,10 @@ class ChiSquared():
                 self.mean_M1s[curr_row] /= Wtot
                 self.mean_ebv1s[curr_row] /= Wtot
 
-                print("weighted mean Z1 ", self.mean_Z1s[curr_row])
-                print("weighted mean age1 ", self.mean_age1s[curr_row])
-                print("weighted mean M1 ", self.mean_M1s[curr_row])
-                print("weighted mean ebv1 ", self.mean_ebv1s[curr_row])
+                print("weighted mean log(Z1) ", self.mean_Z1s[curr_row])
+                print("weighted mean log(age1)/10 ", self.mean_age1s[curr_row])
+                print("weighted mean log(M1)/10 ", self.mean_M1s[curr_row])
+                print("weighted mean E(B-V)1 ", self.mean_ebv1s[curr_row])
 
                 self.var_Z1s.append(0)
                 self.var_age1s.append(0)
@@ -2278,14 +2248,14 @@ class ChiSquared():
                 self.sigma_M1s[curr_row] = sqrt(self.var_M1s[curr_row])
                 self.sigma_ebv1s[curr_row] = sqrt(self.var_ebv1s[curr_row])
 
-                print("weighted var Z1 ", self.var_Z1s[curr_row])
-                print("sigma Z1 (sqrt weighted var Z1) ", self.sigma_Z1s[curr_row])
-                print("weighted var age1 ", self.var_age1s[curr_row])
-                print("sigma age1 (sqrt weighted var age1) ", self.sigma_age1s[curr_row])
-                print("weighted var M1 ", self.var_M1s[curr_row])
-                print("sigma M1 (sqrt weighted var M1) ", self.sigma_M1s[curr_row])
-                print("weighted var ebv1 ", self.var_ebv1s[curr_row])
-                print("sigma ebv1 (sqrt weighted var ebv1) ", self.sigma_ebv1s[curr_row])
+                print("weighted var log(Z1) ", self.var_Z1s[curr_row])
+                print("sigma log(Z1) (sqrt weighted var log(Z1)) ", self.sigma_Z1s[curr_row])
+                print("weighted var log(age1)/10 ", self.var_age1s[curr_row])
+                print("sigma log(age1)/10 (sqrt weighted var log(age1)/10) ", self.sigma_age1s[curr_row])
+                print("weighted var log(M1)/10 ", self.var_M1s[curr_row])
+                print("sigma log(M1)/10 (sqrt weighted var log(M1)/10) ", self.sigma_M1s[curr_row])
+                print("weighted var E(B-V)1 ", self.var_ebv1s[curr_row])
+                print("sigma ebv1 (sqrt weighted var E(B-V)1) ", self.sigma_ebv1s[curr_row])
 
                 x02 = np.array([self.mean_M1s[curr_row]])
                 res2 = opt.minimize(self.minichisqfunc2_single, x02, args=(self.mean_Z1s[curr_row],self.mean_age1s[curr_row],self.mean_ebv1s[curr_row],valid_filters_this_row,ul_filters_this_row,curr_row,), bounds=bnds)
@@ -2293,8 +2263,8 @@ class ChiSquared():
                 newchi2 = res2.fun
                 newM1 = res2.x[0]
 
-                print("chi2 of fitted M to other mean parameters: ", newchi2)
-                print("fitted M1 to other mean parameters: ", newM1)
+                print("chi2 of fitted log(M1)/10 to mean parameters: ", newchi2)
+                print("fitted log(M1)/10: ", newM1)
 
                 self.newchi2s.append(newchi2)
                 self.newM1s.append(newM1)
@@ -2394,7 +2364,7 @@ class ChiSquared():
                 print("Smallest chi2 for row {}: {}".format(self.rows[curr_row]+2,smallest_chi2))
                 self.smallest_chi2_params.append(0)
                 self.smallest_chi2_params[curr_row] = smallest_chi2_params
-                print("Associated parameter values: Z1 {}, age1 {}, M1 {}, ebv1 {}, Z2 {}, age2 {}, M2 {}, ebv2 {}".format(smallest_chi2_params[0],smallest_chi2_params[1],smallest_chi2_params[2],smallest_chi2_params[3],smallest_chi2_params[4],smallest_chi2_params[5],smallest_chi2_params[6],smallest_chi2_params[7]))
+                print("Associated parameter values: log(Z1) {}, log(age1)/10 {}, log(M1)/10 {}, E(B-V)1 {}, log(Z2) {}, log(age2)/10 {}, log(M2)/10 {}, E(B-V)2 {}".format(smallest_chi2_params[0],smallest_chi2_params[1],smallest_chi2_params[2],smallest_chi2_params[3],smallest_chi2_params[4],smallest_chi2_params[5],smallest_chi2_params[6],smallest_chi2_params[7]))
                 gridChisq -= smallest_chi2
                 self.mean_Z1s.append(0)
                 self.mean_age1s.append(0)
@@ -2440,14 +2410,14 @@ class ChiSquared():
                 self.mean_M2s[curr_row] /= Wtot
                 self.mean_ebv2s[curr_row] /= Wtot
 
-                print("weighted mean Z1 ", self.mean_Z1s[curr_row])
-                print("weighted mean age1 ", self.mean_age1s[curr_row])
-                print("weighted mean M1 ", self.mean_M1s[curr_row])
-                print("weighted mean ebv1 ", self.mean_ebv1s[curr_row])
-                print("weighted mean Z2 ", self.mean_Z2s[curr_row])
-                print("weighted mean age2 ", self.mean_age2s[curr_row])
-                print("weighted mean M2 ", self.mean_M2s[curr_row])
-                print("weighted mean ebv2 ", self.mean_ebv2s[curr_row])
+                print("weighted mean log(Z1) ", self.mean_Z1s[curr_row])
+                print("weighted mean log(age1)/10 ", self.mean_age1s[curr_row])
+                print("weighted mean log(M1)/10 ", self.mean_M1s[curr_row])
+                print("weighted mean E(B-V)1 ", self.mean_ebv1s[curr_row])
+                print("weighted mean log(Z2) ", self.mean_Z2s[curr_row])
+                print("weighted mean log(age2)/10 ", self.mean_age2s[curr_row])
+                print("weighted mean log(M2)/10 ", self.mean_M2s[curr_row])
+                print("weighted mean E(B-V)2 ", self.mean_ebv2s[curr_row])
 
                 self.var_Z1s.append(0)
                 self.var_age1s.append(0)
@@ -2515,22 +2485,22 @@ class ChiSquared():
                 self.sigma_M2s[curr_row] = sqrt(self.var_M2s[curr_row])
                 self.sigma_ebv2s[curr_row] = sqrt(self.var_ebv2s[curr_row])
 
-                print("weighted var Z1 ", self.var_Z1s[curr_row])
-                print("sigma Z1 (sqrt weighted var Z1) ", self.sigma_Z1s[curr_row])
-                print("weighted var age1 ", self.var_age1s[curr_row])
-                print("sigma age1 (sqrt weighted var age1) ", self.sigma_age1s[curr_row])
-                print("weighted var M1 ", self.var_M1s[curr_row])
-                print("sigma M1 (sqrt weighted var M1) ", self.sigma_M1s[curr_row])
+                print("weighted var log(Z1) ", self.var_Z1s[curr_row])
+                print("sigma log(Z1) (sqrt weighted var log(Z1)) ", self.sigma_Z1s[curr_row])
+                print("weighted var log(age1)/10 ", self.var_age1s[curr_row])
+                print("sigma log(age1)/10 (sqrt weighted var log(age1)/10) ", self.sigma_age1s[curr_row])
+                print("weighted var log(M1)/10 ", self.var_M1s[curr_row])
+                print("sigma log(M1)/10 (sqrt weighted var log(M1)/10) ", self.sigma_M1s[curr_row])
                 print("weighted var ebv1 ", self.var_ebv1s[curr_row])
                 print("sigma ebv1 (sqrt weighted var ebv1) ", self.sigma_ebv1s[curr_row])
-                print("weighted var Z2 ", self.var_Z2s[curr_row])
-                print("sigma Z2 (sqrt weighted var Z2) ", self.sigma_Z2s[curr_row])
-                print("weighted var age2 ", self.var_age2s[curr_row])
-                print("sigma age2 (sqrt weighted var age2) ", self.sigma_age2s[curr_row])
+                print("weighted var log(Z2) ", self.var_Z2s[curr_row])
+                print("sigma log(Z2) (sqrt weighted var log(Z2)) ", self.sigma_Z2s[curr_row])
+                print("weighted var log(age2)/10 ", self.var_age2s[curr_row])
+                print("sigma log(age2)/10 (sqrt weighted var log(age2)/10) ", self.sigma_age2s[curr_row])
                 print("weighted var M2 ", self.var_M2s[curr_row])
-                print("sigma M2 (sqrt weighted var M2) ", self.sigma_M2s[curr_row])
-                print("weighted var ebv2 ", self.var_ebv2s[curr_row])
-                print("sigma ebv2 (sqrt weighted var ebv2) ", self.sigma_ebv2s[curr_row])
+                print("sigma log(M2)/10 (sqrt weighted var log(M2)/10) ", self.sigma_M2s[curr_row])
+                print("weighted var E(B-V)2 ", self.var_ebv2s[curr_row])
+                print("sigma E(B-V)2 (sqrt weighted var E(B-V)2) ", self.sigma_ebv2s[curr_row])
 
                 x02 = np.array([self.mean_M1s[curr_row],self.mean_M2s[curr_row]])
                 res2 = opt.minimize(self.minichisqfunc2_double, x02, args=(self.mean_Z1s[curr_row],self.mean_age1s[curr_row],self.mean_ebv1s[curr_row],self.mean_Z2s[curr_row],self.mean_age2s[curr_row],self.mean_ebv2s[curr_row],valid_filters_this_row,ul_filters_this_row,curr_row,), bounds=bnds)
@@ -2539,9 +2509,9 @@ class ChiSquared():
                 newM1 = res2.x[0]
                 newM2 = res2.x[1]
 
-                print("chi2 of fitted Ms to other mean parameters: ", newchi2)
-                print("fitted M1 to other mean parameters: ", newM1)
-                print("fitted M2 to other mean parameters: ", newM2)
+                print("chi2 of fitted log(M)/10s to mean parameters: ", newchi2)
+                print("fitted log(M1)/10: ", newM1)
+                print("fitted log(M2)/10: ", newM2)
 
                 self.newchi2s.append(newchi2)
                 self.newM1s.append(newM1)
@@ -2664,7 +2634,7 @@ class ChiSquared():
                 print("Smallest chi2 for row {}: {}".format(self.rows[curr_row]+2,smallest_chi2))
                 self.smallest_chi2_params.append(0)
                 self.smallest_chi2_params[curr_row] = smallest_chi2_params
-                print("Associated parameter values: Z1 {}, age1 {}, M1 {}, ebv1 {}, Z2 {}, age2 {}, M2 {}, ebv2 {}, Z3 {}, age3 {}, M3 {}".format(smallest_chi2_params[0],smallest_chi2_params[1],smallest_chi2_params[2],smallest_chi2_params[3],smallest_chi2_params[4],smallest_chi2_params[5],smallest_chi2_params[6],smallest_chi2_params[7],smallest_chi2_params[8],smallest_chi2_params[9],smallest_chi2_params[10]))
+                print("Associated parameter values: log(Z1) {},log(age1)/10 {}, log(M1)/10 {}, E(B-V)1 {}, log(Z2) {}, log(age2)/10 {}, log(M2)/10 {}, E(B-V)2 {}, log(Z3) {}, log(age3)/10 {}, log(M3)/10 {}".format(smallest_chi2_params[0],smallest_chi2_params[1],smallest_chi2_params[2],smallest_chi2_params[3],smallest_chi2_params[4],smallest_chi2_params[5],smallest_chi2_params[6],smallest_chi2_params[7],smallest_chi2_params[8],smallest_chi2_params[9],smallest_chi2_params[10]))
                 gridChisq -= smallest_chi2
                 self.mean_Z1s.append(0)
                 self.mean_age1s.append(0)
@@ -2724,17 +2694,17 @@ class ChiSquared():
                 self.mean_age3s[curr_row] /= Wtot
                 self.mean_M3s[curr_row] /= Wtot                
 
-                print("weighted mean Z1 ", self.mean_Z1s[curr_row])
-                print("weighted mean age1 ", self.mean_age1s[curr_row])
-                print("weighted mean M1 ", self.mean_M1s[curr_row])
-                print("weighted mean ebv1 ", self.mean_ebv1s[curr_row])
-                print("weighted mean Z2 ", self.mean_Z2s[curr_row])
-                print("weighted mean age2 ", self.mean_age2s[curr_row])
-                print("weighted mean M2 ", self.mean_M2s[curr_row])
-                print("weighted mean ebv2 ", self.mean_ebv2s[curr_row])
-                print("weighted mean Z3 ", self.mean_Z3s[curr_row])
-                print("weighted mean age3 ", self.mean_age3s[curr_row])
-                print("weighted mean M3 ", self.mean_M3s[curr_row])                
+                print("weighted mean log(Z1) ", self.mean_Z1s[curr_row])
+                print("weighted mean log(age1)/10 ", self.mean_age1s[curr_row])
+                print("weighted mean log(M1)/10 ", self.mean_M1s[curr_row])
+                print("weighted mean E(B-V)1 ", self.mean_ebv1s[curr_row])
+                print("weighted mean log(Z2) ", self.mean_Z2s[curr_row])
+                print("weighted mean log(age2)/10 ", self.mean_age2s[curr_row])
+                print("weighted mean log(M2)/10 ", self.mean_M2s[curr_row])
+                print("weighted mean E(B-V)2 ", self.mean_ebv2s[curr_row])
+                print("weighted mean log(Z3) ", self.mean_Z3s[curr_row])
+                print("weighted mean log(age3)/10 ", self.mean_age3s[curr_row])
+                print("weighted mean log(M3)/10 ", self.mean_M3s[curr_row])                
 
                 self.var_Z1s.append(0)
                 self.var_age1s.append(0)
@@ -2823,28 +2793,28 @@ class ChiSquared():
                 self.sigma_age3s[curr_row] = sqrt(self.var_age3s[curr_row])
                 self.sigma_M3s[curr_row] = sqrt(self.var_M3s[curr_row])          
 
-                print("weighted var Z1 ", self.var_Z1s[curr_row])
-                print("sigma Z1 (sqrt weighted var Z1) ", self.sigma_Z1s[curr_row])
-                print("weighted var age1 ", self.var_age1s[curr_row])
-                print("sigma age1 (sqrt weighted var age1) ", self.sigma_age1s[curr_row])
-                print("weighted var M1 ", self.var_M1s[curr_row])
-                print("sigma M1 (sqrt weighted var M1) ", self.sigma_M1s[curr_row])
-                print("weighted var ebv1 ", self.var_ebv1s[curr_row])
-                print("sigma ebv1 (sqrt weighted var ebv1) ", self.sigma_ebv1s[curr_row])
-                print("weighted var Z2 ", self.var_Z2s[curr_row])
-                print("sigma Z2 (sqrt weighted var Z2) ", self.sigma_Z2s[curr_row])
-                print("weighted var age2 ", self.var_age2s[curr_row])
-                print("sigma age2 (sqrt weighted var age2) ", self.sigma_age2s[curr_row])
-                print("weighted var M2 ", self.var_M2s[curr_row])
-                print("sigma M2 (sqrt weighted var M2) ", self.sigma_M2s[curr_row])
-                print("weighted var ebv2 ", self.var_ebv2s[curr_row])
-                print("sigma ebv2 (sqrt weighted var ebv2) ", self.sigma_ebv2s[curr_row])
-                print("weighted var Z3 ", self.var_Z3s[curr_row])
-                print("sigma Z3 (sqrt weighted var Z3) ", self.sigma_Z3s[curr_row])
-                print("weighted var age3 ", self.var_age3s[curr_row])
-                print("sigma age3 (sqrt weighted var age3) ", self.sigma_age3s[curr_row])
-                print("weighted var M3 ", self.var_M3s[curr_row])
-                print("sigma M3 (sqrt weighted var M3) ", self.sigma_M3s[curr_row])
+                print("weighted var log(Z1) ", self.var_Z1s[curr_row])
+                print("sigma log(Z1) (sqrt weighted var log(Z1)) ", self.sigma_Z1s[curr_row])
+                print("weighted var log(age1)/10 ", self.var_age1s[curr_row])
+                print("sigma log(age1)/10 (sqrt weighted var log(age1)/10) ", self.sigma_age1s[curr_row])
+                print("weighted var log(M1)/10 ", self.var_M1s[curr_row])
+                print("sigma log(M1)/10 (sqrt weighted var log(M1)/10) ", self.sigma_M1s[curr_row])
+                print("weighted var E(B-V)1 ", self.var_ebv1s[curr_row])
+                print("sigma E(B-V)1 (sqrt weighted var E(B-V)1) ", self.sigma_ebv1s[curr_row])
+                print("weighted var log(Z2) ", self.var_Z2s[curr_row])
+                print("sigma log(Z2) (sqrt weighted var log(Z2)) ", self.sigma_Z2s[curr_row])
+                print("weighted var log(age2)/10 ", self.var_age2s[curr_row])
+                print("sigma log(age2)/10 (sqrt weighted var log(age2)/10) ", self.sigma_age2s[curr_row])
+                print("weighted var log(M2)/10 ", self.var_M2s[curr_row])
+                print("sigma log(M2)/10 (sqrt weighted var log(M2)/10) ", self.sigma_M2s[curr_row])
+                print("weighted var E(B-V)2 ", self.var_ebv2s[curr_row])
+                print("sigma E(B-V)2 (sqrt weighted var E(B-V)2) ", self.sigma_ebv2s[curr_row])
+                print("weighted var log(Z3) ", self.var_Z3s[curr_row])
+                print("sigma log(Z3) (sqrt weighted var log(Z3)) ", self.sigma_Z3s[curr_row])
+                print("weighted var log(age3)/10 ", self.var_age3s[curr_row])
+                print("sigma log(age3)/10 (sqrt weighted var log(age3)/10) ", self.sigma_age3s[curr_row])
+                print("weighted var log(M3) ", self.var_M3s[curr_row])
+                print("sigma log(M3) (sqrt weighted var log(M3)) ", self.sigma_M3s[curr_row])
 
                 x02 = np.array([self.mean_M1s[curr_row],self.mean_M2s[curr_row],self.mean_M3s[curr_row]])
                 res2 = opt.minimize(self.minichisqfunc2_triple, x02, args=(self.mean_Z1s[curr_row],self.mean_age1s[curr_row],self.mean_ebv1s[curr_row],self.mean_Z2s[curr_row],self.mean_age2s[curr_row],self.mean_ebv2s[curr_row],self.mean_Z3s[curr_row],self.mean_age3s[curr_row],valid_filters_this_row,ul_filters_this_row,curr_row,), bounds=bnds)
@@ -2854,10 +2824,10 @@ class ChiSquared():
                 newM2 = res2.x[1]
                 newM3 = res2.x[2]
 
-                print("chi2 of fitted Ms to other mean parameters: ", newchi2)
-                print("fitted M1 to other mean parameters: ", newM1)
-                print("fitted M2 to other mean parameters: ", newM2)
-                print("fitted M3 to other mean parameters: ", newM3)
+                print("chi2 of fitted log(M)/10s to mean parameters: ", newchi2)
+                print("fitted log(M1)/10: ", newM1)
+                print("fitted log(M2)/10: ", newM2)
+                print("fitted log(M3)/10: ", newM3)
 
                 self.newchi2s.append(newchi2)
                 self.newM1s.append(newM1)
@@ -3219,12 +3189,12 @@ class ChiSquared():
 
                 df1 = pd.DataFrame({
                     'row' : [i+2 for i in self.rows],
-                    'weighted_mean_Z1' : self.mean_Z1s,
-                    'sigma_Z1' : self.sigma_Z1s,
-                    'weighted_mean_age1' : self.mean_age1s,
-                    'sigma_age1' : self.sigma_age1s,
-                    'weighted_mean_M1s' : self.mean_M1s,
-                    'sigma_M1' : self.sigma_M1s,
+                    'weighted_mean_log(Z1)' : self.mean_Z1s,
+                    'sigma_log(Z1)' : self.sigma_Z1s,
+                    'weighted_mean_log(age1)/10' : self.mean_age1s,
+                    'sigma_log(age1)/10' : self.sigma_age1s,
+                    'weighted_mean_log(M1)/10' : self.mean_M1s,
+                    'sigma_log(M1)/10' : self.sigma_M1s,
                     'weighted_mean_ebv1' : self.mean_ebv1s,
                     'sigma_ebv1' : self.sigma_ebv1s,
                     'chi2_using_mean_parameters' : self.mean_chi2s,
@@ -3237,31 +3207,30 @@ class ChiSquared():
                     import tkinter as tk
                     from tkinter import messagebox
                     tk.messagebox.showerror('Error','An error occurred. This can happen if a file is open while trying to overwrite it. Please close any relevant files and try again.')  
-
         
             elif self.double_cluster == True:
 
                 df1 = pd.DataFrame({
                     'row' : [i+2 for i in self.rows],
-                    'weighted_mean_Z1' : self.mean_Z1s,
-                    'sigma_Z1' : self.sigma_Z1s,
-                    'weighted_mean_age1' : self.mean_age1s,
-                    'sigma_age1' : self.sigma_age1s,
-                    'weighted_mean_M1' : self.mean_M1s,
-                    'sigma_M1' : self.sigma_M1s,
+                    'weighted_mean_log(Z1)' : self.mean_Z1s,
+                    'sigma_log(Z1)' : self.sigma_Z1s,
+                    'weighted_mean_log(age1)/10' : self.mean_age1s,
+                    'sigma_log(age1)/10' : self.sigma_age1s,
+                    'weighted_mean_log(M1)/10' : self.mean_M1s,
+                    'sigma_log(M1)/10' : self.sigma_M1s,
                     'weighted_mean_ebv1' : self.mean_ebv1s,
                     'sigma_ebv1' : self.sigma_ebv1s,
-                    'weighted_mean_Z2' : self.mean_Z2s,
-                    'sigma_Z2' : self.sigma_Z2s,
-                    'weighted_mean_age2' : self.mean_age2s,
-                    'sigma_age2' : self.sigma_age2s,
-                    'weighted_mean_M2' : self.mean_M2s,
-                    'sigma_M2' : self.sigma_M2s,
+                    'weighted_mean_log(Z2)' : self.mean_Z2s,
+                    'sigma_log(Z2)' : self.sigma_Z2s,
+                    'weighted_mean_log(age2)/10' : self.mean_age2s,
+                    'sigma_log(age2)/10' : self.sigma_age2s,
+                    'weighted_mean_log(M2)/10' : self.mean_M2s,
+                    'sigma_log(M2)/10' : self.sigma_M2s,
                     'weighted_mean_ebv2' : self.mean_ebv2s,
                     'sigma_ebv2' : self.sigma_ebv2s,
                     'chi2_using_mean_parameters' : self.mean_chi2s,
-                    'fitted_M1_to_mean_parameters' : self.newM1s,
-                    'fitted_M2_to_mean_parameters' : self.newM2s,
+                    'fitted_log(M1)/10_to_mean_parameters' : self.newM1s,
+                    'fitted_log(M2)/10_to_mean_parameters' : self.newM2s,
                     'chi2_of_fitted_Ms' : self.newchi2s})
 
                 try:
@@ -3270,39 +3239,38 @@ class ChiSquared():
                     import tkinter as tk
                     from tkinter import messagebox
                     tk.messagebox.showerror('Error','An error occurred. This can happen if a file is open while trying to overwrite it. Please close any relevant files and try again.')  
-                
 
             elif self.triple_cluster == True:
 
                 df1 = pd.DataFrame({
                     'row' : [i+2 for i in self.rows],
-                    'weighted_mean_Z1' : self.mean_Z1s,
-                    'sigma_Z1' : self.sigma_Z1s,
-                    'weighted_mean_age1' : self.mean_age1s,
-                    'sigma_age1' : self.sigma_age1s,
-                    'weighted_mean_M1' : self.mean_M1s,
-                    'sigma_M1' : self.sigma_M1s,
+                    'weighted_mean_log(Z1)' : self.mean_Z1s,
+                    'sigma_log(Z1)' : self.sigma_Z1s,
+                    'weighted_mean_log(age1)/10' : self.mean_age1s,
+                    'sigma_log(age1)/10' : self.sigma_age1s,
+                    'weighted_mean_log(M1)/10' : self.mean_M1s,
+                    'sigma_log(M1)/10' : self.sigma_M1s,
                     'weighted_mean_ebv1' : self.mean_ebv1s,
                     'sigma_ebv1' : self.sigma_ebv1s,
-                    'weighted_mean_Z2' : self.mean_Z2s,
-                    'sigma_Z2' : self.sigma_Z2s,
-                    'weighted_mean_age2' : self.mean_age2s,
-                    'sigma_age2' : self.sigma_age2s,
-                    'weighted_mean_M2' : self.mean_M2s,
-                    'sigma_M2' : self.sigma_M2s,
+                    'weighted_mean_log(Z2)' : self.mean_Z2s,
+                    'sigma_log(Z2)' : self.sigma_Z2s,
+                    'weighted_mean_log(age2)/10' : self.mean_age2s,
+                    'sigma_log(age2)/10' : self.sigma_age2s,
+                    'weighted_mean_log(M2)/10' : self.mean_M2s,
+                    'sigma_log(M2)/10' : self.sigma_M2s,
                     'weighted_mean_ebv2' : self.mean_ebv2s,
                     'sigma_ebv2' : self.sigma_ebv2s,
-                    'weighted_mean_Z3' : self.mean_Z3s,
-                    'sigma_Z3' : self.sigma_Z3s,
-                    'weighted_mean_age3' : self.mean_age3s,
-                    'sigma_age3' : self.sigma_age3s,
-                    'weighted_mean_M3' : self.mean_M3s,
-                    'sigma_M3' : self.sigma_M3s,
+                    'weighted_mean_log(Z3)' : self.mean_Z3s,
+                    'sigma_log(Z3)' : self.sigma_Z3s,
+                    'weighted_mean_log(age3)/10' : self.mean_age3s,
+                    'sigma_log(age3)/10' : self.sigma_age3s,
+                    'weighted_mean_log(M3)/10' : self.mean_M3s,
+                    'sigma_log(M3)/10' : self.sigma_M3s,
                     'chi2_using_mean_parameters' : self.mean_chi2s,
-                    'fitted_M1_to_mean_parameters' : self.newM1s,
-                    'fitted_M2_to_mean_parameters' : self.newM2s,
-                    'fitted_M3_to_mean_parameters' : self.newM3s,
-                    'chi2_of_fitted_Ms' : self.newchi2s})
+                    'fitted_log(M1)/10_to_mean_parameters' : self.newM1s,
+                    'fitted_log(M2)/10_to_mean_parameters' : self.newM2s,
+                    'fitted_log(M3)/10_to_mean_parameters' : self.newM3s,
+                    'chi2_of_fitted_log(M)/10s' : self.newchi2s})
 
                 try:
                     df1.to_csv("{}".format(self.weightedmeanvarname),index=False)
@@ -3310,7 +3278,6 @@ class ChiSquared():
                     import tkinter as tk
                     from tkinter import messagebox
                     tk.messagebox.showerror('Error','An error occurred. This can happen if a file is open while trying to overwrite it. Please close any relevant files and try again.')  
-
 
         if self.gridresults == 1:
 
@@ -3328,7 +3295,12 @@ class ChiSquared():
                     parts = self.gridname.split(".")
                     numbered_gridname = parts[0] + str(self.rows[curr_row]+2) + "." + parts[1]
 
-                    a.to_csv("{}".format(numbered_gridname),index=False)
+                    try:
+                        a.to_csv("{}".format(numbered_gridname),index=False)
+                    except:
+                        import tkinter as tk
+                        from tkinter import messagebox
+                        tk.messagebox.showerror('Error','An error occurred. This can happen if a file is open while trying to overwrite it. Please close any relevant files and try again.')             
             
             elif self.double_cluster == True:
 
@@ -3348,7 +3320,12 @@ class ChiSquared():
                     parts = self.gridname.split(".")
                     numbered_gridname = parts[0] + str(self.rows[curr_row]+2) + "." + parts[1]
 
-                    a.to_csv("{}".format(numbered_gridname),index=False)
+                    try:
+                        a.to_csv("{}".format(numbered_gridname),index=False)
+                    except:
+                        import tkinter as tk
+                        from tkinter import messagebox
+                        tk.messagebox.showerror('Error','An error occurred. This can happen if a file is open while trying to overwrite it. Please close any relevant files and try again.')             
 
             elif self.triple_cluster == True:
 
@@ -3371,7 +3348,12 @@ class ChiSquared():
                     parts = self.gridname.split(".")
                     numbered_gridname = parts[0] + str(self.rows[curr_row]+2) + "." + parts[1]
 
-                    a.to_csv("{}".format(numbered_gridname),index=False)
+                    try:
+                        a.to_csv("{}".format(numbered_gridname),index=False)
+                    except:
+                        import tkinter as tk
+                        from tkinter import messagebox
+                        tk.messagebox.showerror('Error','An error occurred. This can happen if a file is open while trying to overwrite it. Please close any relevant files and try again.')             
     ##
 
     ##red
@@ -3455,8 +3437,7 @@ class ChiSquared():
 
         if self.plotscale == 1:
             pass
-
-        if self.plotscale == 0:
+        elif self.plotscale == 0:
             abc.set_xscale('log')
             abc.set_yscale('log')
             abc.set_xticks([140,200,500,1000,1500])
@@ -3645,8 +3626,7 @@ class ChiSquared():
 
         if self.plotscale == 1:
             pass
-
-        if self.plotscale == 0:
+        elif self.plotscale == 0:
             abc.set_xscale('log')
             abc.set_yscale('log')
             abc.set_xticks([140,200,500,1000,1500])
@@ -3698,7 +3678,7 @@ class ChiSquared():
         textbox5.place(x=50,y=750)
         groove = tk.Canvas(topw,width=215,height=120,bd=4,relief=tk.RIDGE)
         groove.place(x=405,y=655)
-        label5 = tk.Label(topw,text="chi^2 value using\n weighted mean parameters")
+        label5 = tk.Label(topw,text="chi^2 value using \nweighted mean parameters")
         label5.place(x=425,y=665)
         label5a = tk.Label(topw,text="{}".format(format(mean_chi2,'.6e')),font=("Arial",12))
         label5a.place(x=445,y=725)        
