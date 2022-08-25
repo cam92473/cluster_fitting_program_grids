@@ -16,8 +16,10 @@ class ChiSquared():
         self.checker5set = 0
         self.dset = "785000"
         self.sliderval1set = 0
+        self.sliderval2set = 0
         self.rownumberset = ""
         self.sliderstring1set = "log-log axes"
+        self.sliderstring2set = "optimizer"
         self.model_chosen_set = "UVIT_HST"
         self.ulmethset = "Standard"
 
@@ -148,6 +150,7 @@ class ChiSquared():
                                     self.gridresults = checker3.get()
                                     self.saveplots = checker4.get()
                                     self.plotscale = currentsliderval1.get()
+                                    self.solvemethod = currentsliderval2.get()
                                     self.checker1set = checker1.get()
                                     self.checker2set = checker2.get()
                                     self.checker3set = checker3.get()
@@ -157,6 +160,8 @@ class ChiSquared():
                                     self.checked2set = checked2.get()
                                     self.sliderval1set = currentsliderval1.get()
                                     self.sliderstring1set = sliderstring1.get()
+                                    self.sliderval2set = currentsliderval2.get()
+                                    self.sliderstring2set = sliderstring2.get()
                                     
                                     self.model_chosen = user_model_cho.get()
                                     self.model_chosen_set = user_model_cho.get()
@@ -644,16 +649,27 @@ class ChiSquared():
         sliderstring1 = tk.StringVar()
         currentsliderval1 = tk.IntVar()
         currentsliderval1.set(self.sliderval1set)
+        sliderstring1.set(self.sliderstring1set)
+        sliderstring2 = tk.StringVar()
+        currentsliderval2 = tk.IntVar()
+        currentsliderval2.set(self.sliderval2set)
+        sliderstring2.set(self.sliderstring2set)
         weightedmeanvarname = tk.StringVar()
         gridname = tk.StringVar()
         imgname = tk.StringVar()
-        sliderstring1.set(self.sliderstring1set)
         def changesliderstring1(useless):
             if currentsliderval1.get() == 1:
                 sliderstring1.set(" linear axes  ")
             elif currentsliderval1.get() == 0:
                 sliderstring1.set("log-log axes")
-        
+        def changesliderstring2(useless):
+            if currentsliderval2.get() == 1:
+                sliderstring2.set("  analytic ")
+                ulmethmenu['state'] = tk.DISABLED
+            elif currentsliderval2.get() == 0:
+                sliderstring2.set("optimizer")
+                ulmethmenu['state'] = tk.NORMAL
+
         def grent1():
             if plotslider1['state'] == tk.NORMAL:
                 plotslider1['state'] = tk.DISABLED
@@ -689,10 +705,9 @@ class ChiSquared():
                 buttentry4['state'] = tk.NORMAL
                 buttentry4.insert(tk.END,"plot_so_rowX.png")
 
-        checkbutt1 = tk.Checkbutton(mwin,text="Display results",variable=checker1,command=grent1,bg='azure2')
         plotslider1 = tk.Scale(mwin,from_=0,to=1,orient=tk.HORIZONTAL,showvalue=0,length=65,width=25,variable=currentsliderval1, command=changesliderstring1)
         plotslider1.place(x=500,y=240)
-        grayframe1= tk.Frame(mwin,bg="gray95",bd=3)
+        grayframe1 = tk.Frame(mwin,bg="gray95",bd=3)
         grayframe1.place(x=350,y=240)
         sliderlabel1 = tk.Label(grayframe1,textvariable=sliderstring1,padx=5,bg='white')
         sliderlabel1.pack()
@@ -700,27 +715,42 @@ class ChiSquared():
             plotslider1.set(0)
         if currentsliderval1 == 1:
             plotslider1.set(1)
+        solvelabel = tk.Label(mwin,text="Solve method",bg='alice blue')
+        solvelabel.place(x=40,y=100)
+        plotslider2 = tk.Scale(mwin,from_=0,to=1,orient=tk.HORIZONTAL,showvalue=0,length=65,width=25,variable=currentsliderval2, command=changesliderstring2)
+        plotslider2.place(x=40,y=135)
+        grayframe2 = tk.Frame(mwin,bg="gray95",bd=3)
+        grayframe2.place(x=120,y=135)
+        sliderlabel2 = tk.Label(grayframe2,textvariable=sliderstring2,padx=5,bg='white')
+        sliderlabel2.pack()
+        if currentsliderval2.get() == 0:
+            plotslider2.set(0)
+        if currentsliderval2 == 1:
+            plotslider2.set(1)
+        checkbutt1 = tk.Checkbutton(mwin,text="Display results",variable=checker1,command=grent1,bg='azure2')
         checkbutt2 = tk.Checkbutton(mwin,text="Save weighted mean and variance data",variable=checker2,command=grent2,bg='azure2')
         checkbutt3 = tk.Checkbutton(mwin,text="Save parameter grids",variable=checker3,command=grent3,bg='azure2')
         checkbutt4 = tk.Checkbutton(mwin,text="Save plot images (1 per source X)",variable=checker4,command=grent4,bg='azure2')
         checkbutt5 = tk.Checkbutton(mwin,text="Run silently",variable=checker5,bg='alice blue')
+        checkbutt1.place(x=340,y=210)
+        checkbutt2.place(x=340,y=310)
+        checkbutt3.place(x=340,y=405)
+        checkbutt4.place(x=340,y=500)
+        checkbutt5.place(x=870,y=35)
         buttentry2 = tk.Entry(mwin, textvariable = weightedmeanvarname, width=26)
         buttentry3 = tk.Entry(mwin, textvariable = gridname,width=26)
         buttentry4 = tk.Entry(mwin,textvariable = imgname,width=26)
+        buttentry2.place(x=345,y=340)
+        buttentry3.place(x=345,y=435)
+        buttentry4.place(x=345,y=530)
         if checker2.get() == 0:
             buttentry2['state'] = tk.DISABLED
         if checker3.get() == 0:
             buttentry3['state'] = tk.DISABLED
         if checker4.get() == 0:
             buttentry4['state'] = tk.DISABLED
-        checkbutt1.place(x=340,y=210)
-        checkbutt2.place(x=340,y=310)
-        checkbutt3.place(x=340,y=405)
-        checkbutt4.place(x=340,y=500)
-        checkbutt5.place(x=870,y=35)
-        buttentry2.place(x=345,y=340)
-        buttentry3.place(x=345,y=435)
-        buttentry4.place(x=345,y=530)
+
+
 
         user_Z1lowest = tk.DoubleVar()
         user_Z1highest = tk.DoubleVar()
@@ -1821,6 +1851,40 @@ class ChiSquared():
 
         return chisq
 
+    def analyticfunc(self,Z,age,ebv,valid_filters_this_row,curr_row):
+        from math import log
+
+        if self.silent is False:
+            print("Finding log(M)/10 analytically for row {} with log(Z), log(age)/10, E(B-V): ".format(self.rows[curr_row]+2), Z,age,ebv)
+
+        modelsnoM = []
+        interpolist = self.interpolate(Z,age,valid_filters_this_row)
+        extinctolist = self.extinction(valid_filters_this_row)
+        for i in range(len(valid_filters_this_row)):
+            modelsnoM.append(interpolist[i]*(10/self.d)**2*10**(-0.4*(ebv*(extinctolist[i]+3.001))))
+
+        Tf1summands = []
+        for i,valid_ind in enumerate(valid_filters_this_row):
+            Tf1summands.append((self.bandfluxes.iat[curr_row,valid_ind]*modelsnoM[i])/(self.bandfluxerrors.iat[curr_row,valid_ind])**2)
+        Tf1 = sum(Tf1summands)
+
+        Tm11summands = []
+        for i,valid_ind in enumerate(valid_filters_this_row):
+            Tm11summands.append((modelsnoM[i]/(self.bandfluxerrors.iat[curr_row,valid_ind]))**2)
+        Tm11 = sum(Tm11summands)
+
+        M = log(Tf1/Tm11)/10
+
+        summands = []
+        for i,valid_ind in enumerate(valid_filters_this_row):
+            summands.append(((self.bandfluxes.iat[curr_row,valid_ind] - M*modelsnoM[i])/self.bandfluxerrors.iat[curr_row,valid_ind])**2)
+
+        chisq = sum(summands)
+        if self.silent is False:
+            print("log(M)/10, chisq: ",M,chisq,"\n")
+
+        return M,chisq
+
     def chisqfunc2(self,tup,Z1,age1,E_bv1,Z2,age2,E_bv2,valid_filters_this_row,ul_filters_this_row,curr_row):
         M1,M2 = tup
         if self.silent is False:
@@ -1857,6 +1921,74 @@ class ChiSquared():
         if self.silent is False:
             print("chisq: ",chisq,"\n")
         return chisq
+
+    def analyticfunc2(self,Z1,age1,E_bv1,Z2,age2,E_bv2,valid_filters_this_row,curr_row):
+        from scipy.linalg import solve
+        import numpy as np
+        from math import log
+
+        if self.silent is False:
+            print("Finding log(M1)/10 and log(M2)/10 analytically for row {} with log(Z1), log(age1)/10, E(B-V)1, log(Z2), log(age2)/10, E(B-V)2: ".format(self.rows[curr_row]+2), Z1, age1, E_bv1, Z2, age2, E_bv2)
+
+        models1noM = []
+        interpolist1 = self.interpolate(Z1,age1,valid_filters_this_row)
+        extinctolist1 =self.extinction(valid_filters_this_row)
+        for i in range(len(valid_filters_this_row)):
+            models1noM.append(interpolist1[i]*(10/self.d)**2*10**(-0.4*(E_bv1*(extinctolist1[i]+3.001))))
+        models2noM = []
+        interpolist2 = self.interpolate(Z2,age2,valid_filters_this_row)
+        extinctolist2 = self.extinction(valid_filters_this_row)
+        for i in range(len(valid_filters_this_row)):
+            models2noM.append(interpolist2[i]*(10/self.d)**2*10**(-0.4*(E_bv2*(extinctolist2[i]+3.001))))
+
+        Tf1summands = []
+        for i,valid_ind in enumerate(valid_filters_this_row):
+            Tf1summands.append((self.bandfluxes.iat[curr_row,valid_ind]*models1noM[i])/(self.bandfluxerrors.iat[curr_row,valid_ind])**2)
+        Tf1 = sum(Tf1summands)
+
+        Tf2summands = []
+        for i,valid_ind in enumerate(valid_filters_this_row):
+            Tf2summands.append((self.bandfluxes.iat[curr_row,valid_ind]*models2noM[i])/(self.bandfluxerrors.iat[curr_row,valid_ind])**2)
+        Tf2 = sum(Tf2summands)
+
+        Tm11summands = []
+        for i,valid_ind in enumerate(valid_filters_this_row):
+            Tm11summands.append((models1noM[i]/(self.bandfluxerrors.iat[curr_row,valid_ind]))**2)
+        Tm11 = sum(Tm11summands)
+
+        Tm12summands = []
+        for i,valid_ind in enumerate(valid_filters_this_row):
+            Tm12summands.append((models1noM[i]*models2noM[i])/(self.bandfluxerrors.iat[curr_row,valid_ind])**2)
+        Tm12 = sum(Tm12summands)
+
+        Tm22summands = []
+        for i,valid_ind in enumerate(valid_filters_this_row):
+            Tm22summands.append((models2noM[i]/(self.bandfluxerrors.iat[curr_row,valid_ind]))**2)
+        Tm22 = sum(Tm22summands)
+
+        Tm = np.array([[Tm11,Tm12],[Tm12,Tm22]])
+        Tf = np.array([Tf1,Tf2])
+
+        M = solve(Tm,Tf)
+
+        if M[0] <= 0:
+            M1 = 0
+            M2 = log(Tf1/Tm11)/10
+        elif M[1] <= 0:
+            M1 = log(Tf1/Tm11)/10
+            M2 = 0
+        else:
+            M1 = log(M[0],10)/10
+            M2 = log(M[1],10)/10
+
+        summands = []
+        for i,valid_ind in enumerate(valid_filters_this_row):
+            summands.append(((self.bandfluxes.iat[curr_row,valid_ind] - M1*models1noM[i] - M2*models2noM[i])/self.bandfluxerrors.iat[curr_row,valid_ind])**2)
+
+        chisq = sum(summands)
+        if self.silent is False:
+            print("log(M1)/10, log(M2)/10, chisq: ", M1, M2, chisq,"\n")
+        return M1,M2,chisq
 
     def chisqfunc3(self,tup,Z_old_1,age_old_1,E_bv_old,Z_old_2,age_old_2,E_bv_new,Z_new,age_new,valid_filters_this_row,ul_filters_this_row,curr_row):
         M_old_1,M_old_2,M_new = tup
@@ -1901,6 +2033,141 @@ class ChiSquared():
             print("chisq: ",chisq,"\n")
         return chisq
     
+    def analyticfunc3(self,Z_old_1,age_old_1,E_bv_old,Z_old_2,age_old_2,E_bv_new,Z_new,age_new,valid_filters_this_row,curr_row):
+        from scipy.linalg import solve
+        import numpy as np
+        from math import log
+
+        if self.silent is False:
+            print("Finding log(M1)/10, log(M2)/10 and log(M3)/10 analytically for row {} with log(Z_old_1), log(age_old_1)/10, E(B-V)_old, log(Z_old_2), log(age_old_2)/10, E(B-V)_new, log(Z_new), log(age_new)/10: ".format(self.rows[curr_row]+2),Z_old_1,age_old_1,E_bv_old,Z_old_2,age_old_2,E_bv_new,Z_new,age_new)
+
+        models1noM = []
+        interpolist1 = self.interpolate(Z_old_1,age_old_1,valid_filters_this_row)
+        extinctolist1 =self.extinction(valid_filters_this_row)
+        for i in range(len(valid_filters_this_row)):
+            models1noM.append(interpolist1[i]*(10/self.d)**2*10**(-0.4*(E_bv_old*(extinctolist1[i]+3.001))))
+        models2noM = []
+        interpolist2 = self.interpolate(Z_old_2,age_old_2,valid_filters_this_row)
+        extinctolist2 = self.extinction(valid_filters_this_row)
+        for i in range(len(valid_filters_this_row)):
+            models2noM.append(interpolist2[i]*(10/self.d)**2*10**(-0.4*(E_bv_old*(extinctolist2[i]+3.001))))
+        models3noM = []
+        interpolist3 = self.interpolate(Z_new,age_new,valid_filters_this_row)
+        extinctolist3 = self.extinction(valid_filters_this_row)
+        for i in range(len(valid_filters_this_row)):
+            models3noM.append(interpolist3[i]*(10/self.d)**2*10**(-0.4*(E_bv_new*(extinctolist3[i]+3.001))))
+
+        Tf1summands = []
+        for i,valid_ind in enumerate(valid_filters_this_row):
+            Tf1summands.append((self.bandfluxes.iat[curr_row,valid_ind]*models1noM[i])/(self.bandfluxerrors.iat[curr_row,valid_ind])**2)
+        Tf1 = sum(Tf1summands)
+
+        Tf2summands = []
+        for i,valid_ind in enumerate(valid_filters_this_row):
+            Tf2summands.append((self.bandfluxes.iat[curr_row,valid_ind]*models2noM[i])/(self.bandfluxerrors.iat[curr_row,valid_ind])**2)
+        Tf2 = sum(Tf2summands)
+
+        Tf3summands = []
+        for i,valid_ind in enumerate(valid_filters_this_row):
+            Tf3summands.append((self.bandfluxes.iat[curr_row,valid_ind]*models3noM[i])/(self.bandfluxerrors.iat[curr_row,valid_ind])**2)
+        Tf3 = sum(Tf3summands)
+
+        Tm11summands = []
+        for i,valid_ind in enumerate(valid_filters_this_row):
+            Tm11summands.append((models1noM[i]/(self.bandfluxerrors.iat[curr_row,valid_ind]))**2)
+        Tm11 = sum(Tm11summands)
+
+        Tm12summands = []
+        for i,valid_ind in enumerate(valid_filters_this_row):
+            Tm12summands.append((models1noM[i]*models2noM[i])/(self.bandfluxerrors.iat[curr_row,valid_ind])**2)
+        Tm12 = sum(Tm12summands)
+
+        Tm13summands = []
+        for i,valid_ind in enumerate(valid_filters_this_row):
+            Tm13summands.append((models1noM[i]*models3noM[i])/(self.bandfluxerrors.iat[curr_row,valid_ind])**2)
+        Tm13 = sum(Tm13summands)
+
+        Tm22summands = []
+        for i,valid_ind in enumerate(valid_filters_this_row):
+            Tm22summands.append((models2noM[i]/(self.bandfluxerrors.iat[curr_row,valid_ind]))**2)
+        Tm22 = sum(Tm22summands)
+
+        Tm23summands = []
+        for i,valid_ind in enumerate(valid_filters_this_row):
+            Tm23summands.append((models2noM[i]*models3noM[i])/(self.bandfluxerrors.iat[curr_row,valid_ind])**2)
+        Tm23 = sum(Tm23summands)
+
+        Tm33summands = []
+        for i,valid_ind in enumerate(valid_filters_this_row):
+            Tm33summands.append((models3noM[i]/(self.bandfluxerrors.iat[curr_row,valid_ind]))**2)
+        Tm33 = sum(Tm33summands)
+
+        Tm = np.array([[Tm11,Tm12,Tm13],[Tm12,Tm22,Tm23],[Tm13,Tm23,Tm33]])
+        Tf = np.array([Tf1,Tf2,Tf3])
+
+        M = solve(Tm,Tf)
+        if M[0] <= 0:
+            Tm = np.array([[Tm22,Tm23],[Tm23,Tm33]])
+            Tf = np.array([Tf2,Tf3])
+            M = solve(Tm,Tf)
+            if M[0] <= 0:
+                M1 = 0
+                M2 = 0
+                M3 = log(Tf3/Tm33)/10
+            elif M[1] <= 0:
+                M1 = 0
+                M2 = log(Tf2/Tm22)/10
+                M3 = 0
+            else:
+                M1 = log(M[0],10)/10
+                M2 = log(M[1],10)/10
+                M3 = 0
+        elif M[1] <= 0:
+            Tm = np.array([[Tm11,Tm13],[Tm13,Tm33]])
+            Tf = np.array([Tf1,Tf3])
+            M = solve(Tm,Tf)
+            if M[0] <= 0:
+                M1 = 0
+                M2 = 0
+                M3 = log(Tf3/Tm33)/10
+            elif M[1] <= 0:
+                M1 = log(Tf1/Tm11)/10
+                M2 = 0
+                M3 = 0
+            else:
+                M1 = log(M[0],10)/10
+                M2 = 0
+                M3 = log(M[1],10)/10
+        elif M[2] <= 0:
+            Tm = np.array([[Tm11,Tm12],[Tm12,Tm22]])
+            Tf = np.array([Tf1,Tf2])
+            M = solve(Tm,Tf)
+            if M[0] <= 0:
+                M1 = 0
+                M2 = log(Tf1/Tm11)/10
+                M3 = 0
+            elif M[1] <= 0:
+                M1 = log(Tf1/Tm11)/10
+                M2 = 0
+                M3 = 0
+            else:
+                M1 = log(M[0],10)/10
+                M2 = log(M[1],10)/10
+                M3 = 0
+        else:
+            M1 = log(M[0],10)/10
+            M2 = log(M[1],10)/10
+            M3 = log(M[2],10)/10
+            
+        summands = []
+        for i,valid_ind in enumerate(valid_filters_this_row):
+            summands.append(((self.bandfluxes.iat[curr_row,valid_ind] - M1*models1noM[i]-M2*models2noM[i]-M3*models3noM[i])/self.bandfluxerrors.iat[curr_row,valid_ind])**2)
+                
+        chisq = sum(summands)
+        if self.silent is False:
+            print("log(M1)/10, log(M2)/10, log(M3)/10, chisq: ",M1,M2,M3,chisq,"\n")
+        return M1,M2,M3,chisq
+
     def chisqfuncerror(self,M,mean_chi2,Z,age,E_bv,valid_filters_this_row,ul_filters_this_row,curr_row):
 
         true_M = 10**(M*10)
@@ -2158,14 +2425,14 @@ class ChiSquared():
                             Z1 = self.Z1grid[i,j,k]
                             age1 = self.age1grid[i,j,k]
                             ebv1 = self.ebv1grid[i,j,k]
-                            res = opt.minimize(self.chisqfunc, x0, args=(Z1,age1,ebv1,valid_filters_this_row,ul_filters_this_row,curr_row,), bounds=bnds)
-                            chi2 = res.fun
-                            M1 = res.x[0]
+                            if self.solvemethod == 0:
+                                res = opt.minimize(self.chisqfunc, x0, args=(Z1,age1,ebv1,valid_filters_this_row,ul_filters_this_row,curr_row,), bounds=bnds)
+                                chi2 = res.fun
+                                M1 = res.x[0]
+                            elif self.solvemethod == 1:
+                                M1, chi2 = self.analyticfunc(Z1,age1,ebv1,valid_filters_this_row,curr_row)
                             gridChisq[i,j,k] = chi2
-                            print("optimized chi2: ",chi2)
                             gridM[i,j,k] = M1
-                            print("optimized log(M1)/10: ",M1)
-                            print("\n")
                             if chi2 < smallest_chi2:
                                 smallest_chi2 = chi2
                                 smallest_chi2_params[0] = Z1
@@ -2337,17 +2604,16 @@ class ChiSquared():
                                         Z2 = self.Z2grid[i,j,k,l,m,n]
                                         age2 = self.age2grid[i,j,k,l,m,n]
                                         ebv2 = self.ebv2grid[i,j,k,l,m,n]
-                                        res = opt.minimize(self.chisqfunc2, x0, args=(Z1,age1,ebv1,Z2,age2,ebv2,valid_filters_this_row,ul_filters_this_row,curr_row,), bounds=bnds)
-                                        chi2 = res.fun
-                                        M1 = res.x[0]
-                                        M2 = res.x[1]
+                                        if self.solvemethod == 0:
+                                            res = opt.minimize(self.chisqfunc2, x0, args=(Z1,age1,ebv1,Z2,age2,ebv2,valid_filters_this_row,ul_filters_this_row,curr_row,), bounds=bnds)
+                                            chi2 = res.fun
+                                            M1 = res.x[0]
+                                            M2 = res.x[1]
+                                        elif self.solvemethod == 1:
+                                            M1, M2, chi2 = self.analyticfunc2(Z1,age1,ebv1,Z2,age2,ebv2,valid_filters_this_row,curr_row)
                                         gridChisq[i,j,k,l,m,n] = chi2
-                                        print("optimized chi2: ",chi2)
                                         gridM1[i,j,k,l,m,n] = M1
                                         gridM2[i,j,k,l,m,n] = M2
-                                        print("optimized log(M1)/10: ",M1)
-                                        print("optimized log(M2)/10: ",M2)
-                                        print("\n")
                                         if chi2 < smallest_chi2:
                                             smallest_chi2 = chi2
                                             smallest_chi2_params[0] = Z1
@@ -2601,20 +2867,18 @@ class ChiSquared():
                                                 ebv2 = self.ebv2grid[i,j,k,l,m,n,o,p]
                                                 Z3 = self.Z3grid[i,j,k,l,m,n,o,p]
                                                 age3 = self.age3grid[i,j,k,l,m,n,o,p]
-                                                res = opt.minimize(self.chisqfunc3, x0, args=(Z1,age1,ebv1,Z2,age2,ebv2,Z3,age3,valid_filters_this_row,ul_filters_this_row,curr_row,), bounds=bnds)
-                                                chi2 = res.fun
-                                                M1 = res.x[0]
-                                                M2 = res.x[1]
-                                                M3 = res.x[2]
+                                                if self.solvemethod == 0:
+                                                    res = opt.minimize(self.chisqfunc3, x0, args=(Z1,age1,ebv1,Z2,age2,ebv2,Z3,age3,valid_filters_this_row,ul_filters_this_row,curr_row,), bounds=bnds)
+                                                    chi2 = res.fun
+                                                    M1 = res.x[0]
+                                                    M2 = res.x[1]
+                                                    M3 = res.x[2]
+                                                elif self.solvemethod == 1:
+                                                    M1, M2, M3, chi2 = self.analyticfunc3(Z1,age1,ebv1,Z2,age2,ebv2,Z3,age3,valid_filters_this_row,curr_row)
                                                 gridChisq[i,j,k,l,m,n,o,p] = chi2
-                                                print("optimized chi2: ",chi2)
                                                 gridM1[i,j,k,l,m,n,o,p] = M1
                                                 gridM2[i,j,k,l,m,n,o,p] = M2
                                                 gridM2[i,j,k,l,m,n,o,p] = M3
-                                                print("optimized log(M1)/10: ",M1)
-                                                print("optimized log(M2)/10: ",M2)
-                                                print("optimized log(M3)/10: ",M3)
-                                                print("\n")
                                                 if chi2 < smallest_chi2:
                                                     smallest_chi2 = chi2
                                                     smallest_chi2_params[0] = Z1
