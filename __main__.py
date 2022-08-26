@@ -1973,7 +1973,7 @@ class ChiSquared():
 
         if M[0] <= 0:
             M1 = 0
-            M2 = log(Tf1/Tm11)/10
+            M2 = log(Tf2/Tm22)/10
         elif M[1] <= 0:
             M1 = log(Tf1/Tm11)/10
             M2 = 0
