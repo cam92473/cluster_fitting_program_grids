@@ -1700,7 +1700,7 @@ class ChiSquared():
         M1, M2 = tup
 
         if self.silent is False:
-            print("Fitting log(M)/10s to mean parameters: Testing row {} with log(Z1), log(age1)/10, log(M1)/10, ebv1, log(Z2), log(age2)/10, log(M2)/10, ebv2: ".format(self.rows[curr_row]+2), Z1,age1,M1,ebv1,Z2,age2,M2,ebv2)
+            print("Fitting log(M1)/10 and log(M2)/10 to mean parameters: Testing row {} with log(Z1), log(age1)/10, log(M1)/10, ebv1, log(Z2), log(age2)/10, log(M2)/10, ebv2: ".format(self.rows[curr_row]+2), Z1,age1,M1,ebv1,Z2,age2,M2,ebv2)
 
         true_M1 = 10**(M1*10)
         true_M2 = 10**(M2*10)
@@ -1779,7 +1779,7 @@ class ChiSquared():
         M_old_1,M_old_2,M_young = tup
 
         if self.silent is False:
-            print("Fitting log(M)/10s to mean parameters: Testing row {} with log(Z1), log(age1)/10, log(M1)/10, ebv1, log(Z2), log(age2)/10, log(M2)/10, ebv2, log(Z3), log(age3)/10, log(M3)/10: ".format(self.rows[curr_row]+2), Z_old_1,age_old_1,M_old_1,ebv_old,Z_old_2,age_old_2,M_old_2,ebv_young,Z_young,age_young,M_young)
+            print("Fitting log(M1)/10, log(M2)/10 and log(M3)/10 to mean parameters: Testing row {} with log(Z1), log(age1)/10, log(M1)/10, ebv1, log(Z2), log(age2)/10, log(M2)/10, ebv2, log(Z3), log(age3)/10, log(M3)/10: ".format(self.rows[curr_row]+2), Z_old_1,age_old_1,M_old_1,ebv_old,Z_old_2,age_old_2,M_old_2,ebv_young,Z_young,age_young,M_young)
 
         true_M_old_1 = 10**(M_old_1*10)
         true_M_old_2 = 10**(M_old_2*10)
@@ -1855,7 +1855,7 @@ class ChiSquared():
         from math import log
 
         if self.silent is False:
-            print("Finding log(M)/10 analytically for row {} with log(Z), log(age)/10, E(B-V): ".format(self.rows[curr_row]+2), Z,age,ebv)
+            print("Finding M analytically for row {} with log(Z), log(age)/10, E(B-V): ".format(self.rows[curr_row]+2), Z,age,ebv)
 
         modelsnoM = []
         interpolist = self.interpolate(Z,age,valid_filters_this_row)
@@ -1873,17 +1873,17 @@ class ChiSquared():
             Tm11summands.append((modelsnoM[i]/(self.bandfluxerrors.iat[curr_row,valid_ind]))**2)
         Tm11 = sum(Tm11summands)
 
-        M = log(Tf1/Tm11)/10
+        true_M = Tf1/Tm11
 
         summands = []
         for i,valid_ind in enumerate(valid_filters_this_row):
-            summands.append(((self.bandfluxes.iat[curr_row,valid_ind] - M*modelsnoM[i])/self.bandfluxerrors.iat[curr_row,valid_ind])**2)
+            summands.append(((self.bandfluxes.iat[curr_row,valid_ind] - true_M*modelsnoM[i])/self.bandfluxerrors.iat[curr_row,valid_ind])**2)
 
         chisq = sum(summands)
         if self.silent is False:
-            print("log(M)/10, chisq: ",M,chisq,"\n")
+            print("M, chisq: ",true_M,chisq,"\n")
 
-        return M,chisq
+        return true_M,chisq
 
     def chisqfunc2(self,tup,Z1,age1,E_bv1,Z2,age2,E_bv2,valid_filters_this_row,ul_filters_this_row,curr_row):
         M1,M2 = tup
@@ -1928,7 +1928,7 @@ class ChiSquared():
         from math import log
 
         if self.silent is False:
-            print("Finding log(M1)/10 and log(M2)/10 analytically for row {} with log(Z1), log(age1)/10, E(B-V)1, log(Z2), log(age2)/10, E(B-V)2: ".format(self.rows[curr_row]+2), Z1, age1, E_bv1, Z2, age2, E_bv2)
+            print("Finding M1 and M2 analytically for row {} with log(Z1), log(age1)/10, E(B-V)1, log(Z2), log(age2)/10, E(B-V)2: ".format(self.rows[curr_row]+2), Z1, age1, E_bv1, Z2, age2, E_bv2)
 
         models1noM = []
         interpolist1 = self.interpolate(Z1,age1,valid_filters_this_row)
@@ -1969,26 +1969,25 @@ class ChiSquared():
         Tm = np.array([[Tm11,Tm12],[Tm12,Tm22]])
         Tf = np.array([Tf1,Tf2])
 
-        M = solve(Tm,Tf)
+        M_vector = solve(Tm,Tf)
+        true_M1 = M_vector[0]
+        true_M2 = M_vector[1]
 
-        if M[0] <= 0:
-            M1 = 0
-            M2 = log(Tf2/Tm22)/10
-        elif M[1] <= 0:
-            M1 = log(Tf1/Tm11)/10
-            M2 = 0
-        else:
-            M1 = log(M[0],10)/10
-            M2 = log(M[1],10)/10
+        if true_M1 <= 0:
+            true_M1 = 0
+            true_M2 = Tf2/Tm22
+        elif true_M2 <= 0:
+            true_M1 = Tf1/Tm11
+            true_M2 = 0
 
         summands = []
         for i,valid_ind in enumerate(valid_filters_this_row):
-            summands.append(((self.bandfluxes.iat[curr_row,valid_ind] - M1*models1noM[i] - M2*models2noM[i])/self.bandfluxerrors.iat[curr_row,valid_ind])**2)
+            summands.append(((self.bandfluxes.iat[curr_row,valid_ind] - true_M1*models1noM[i] - true_M2*models2noM[i])/self.bandfluxerrors.iat[curr_row,valid_ind])**2)
 
         chisq = sum(summands)
         if self.silent is False:
-            print("log(M1)/10, log(M2)/10, chisq: ", M1, M2, chisq,"\n")
-        return M1,M2,chisq
+            print("M1, M2, chisq: ", true_M1, true_M2, chisq,"\n")
+        return true_M1,true_M2,chisq
 
     def chisqfunc3(self,tup,Z_old_1,age_old_1,E_bv_old,Z_old_2,age_old_2,E_bv_new,Z_new,age_new,valid_filters_this_row,ul_filters_this_row,curr_row):
         M_old_1,M_old_2,M_new = tup
@@ -2039,7 +2038,7 @@ class ChiSquared():
         from math import log
 
         if self.silent is False:
-            print("Finding log(M1)/10, log(M2)/10 and log(M3)/10 analytically for row {} with log(Z_old_1), log(age_old_1)/10, E(B-V)_old, log(Z_old_2), log(age_old_2)/10, E(B-V)_new, log(Z_new), log(age_new)/10: ".format(self.rows[curr_row]+2),Z_old_1,age_old_1,E_bv_old,Z_old_2,age_old_2,E_bv_new,Z_new,age_new)
+            print("Finding M1, M2 and M3 analytically for row {} with log(Z_old_1), log(age_old_1)/10, E(B-V)_old, log(Z_old_2), log(age_old_2)/10, E(B-V)_new, log(Z_new), log(age_new)/10: ".format(self.rows[curr_row]+2),Z_old_1,age_old_1,E_bv_old,Z_old_2,age_old_2,E_bv_new,Z_new,age_new)
 
         models1noM = []
         interpolist1 = self.interpolate(Z_old_1,age_old_1,valid_filters_this_row)
@@ -2105,68 +2104,59 @@ class ChiSquared():
         Tm = np.array([[Tm11,Tm12,Tm13],[Tm12,Tm22,Tm23],[Tm13,Tm23,Tm33]])
         Tf = np.array([Tf1,Tf2,Tf3])
 
-        M = solve(Tm,Tf)
-        if M[0] <= 0:
+        M_vector = solve(Tm,Tf)
+        true_M1 = M_vector[0]
+        true_M2 = M_vector[1]
+        true_M3 = M_vector[2]
+
+        if true_M1 <= 0:
+            true_M1 = 0
             Tm = np.array([[Tm22,Tm23],[Tm23,Tm33]])
             Tf = np.array([Tf2,Tf3])
-            M = solve(Tm,Tf)
-            if M[0] <= 0:
-                M1 = 0
-                M2 = 0
-                M3 = log(Tf3/Tm33)/10
-            elif M[1] <= 0:
-                M1 = 0
-                M2 = log(Tf2/Tm22)/10
-                M3 = 0
-            else:
-                M1 = log(M[0],10)/10
-                M2 = log(M[1],10)/10
-                M3 = 0
-        elif M[1] <= 0:
+            M_vector2 = solve(Tm,Tf)
+            true_M2 = M_vector2[0]
+            true_M3 = M_vector2[1]
+            if true_M2 <= 0:
+                true_M2 = 0
+                true_M3 = Tf3/Tm33
+            elif true_M3 <= 0:
+                true_M2 = Tf2/Tm22
+                true_M3 = 0
+        elif true_M2 <= 0:
+            true_M2 = 0
             Tm = np.array([[Tm11,Tm13],[Tm13,Tm33]])
             Tf = np.array([Tf1,Tf3])
-            M = solve(Tm,Tf)
-            if M[0] <= 0:
-                M1 = 0
-                M2 = 0
-                M3 = log(Tf3/Tm33)/10
-            elif M[1] <= 0:
-                M1 = log(Tf1/Tm11)/10
-                M2 = 0
-                M3 = 0
-            else:
-                M1 = log(M[0],10)/10
-                M2 = 0
-                M3 = log(M[1],10)/10
-        elif M[2] <= 0:
+            M_vector2 = solve(Tm,Tf)
+            true_M1 = M_vector2[0]
+            true_M3 = M_vector2[1]
+            if true_M1 <= 0:
+                true_M1 = 0
+                true_M3 = Tf3/Tm33
+            elif true_M3 <= 0:
+                true_M1 = Tf1/Tm11
+                true_M3 = 0
+        elif true_M3 <= 0:
+            true_M3 = 0
             Tm = np.array([[Tm11,Tm12],[Tm12,Tm22]])
             Tf = np.array([Tf1,Tf2])
-            M = solve(Tm,Tf)
-            if M[0] <= 0:
-                M1 = 0
-                M2 = log(Tf1/Tm11)/10
-                M3 = 0
-            elif M[1] <= 0:
-                M1 = log(Tf1/Tm11)/10
-                M2 = 0
-                M3 = 0
-            else:
-                M1 = log(M[0],10)/10
-                M2 = log(M[1],10)/10
-                M3 = 0
-        else:
-            M1 = log(M[0],10)/10
-            M2 = log(M[1],10)/10
-            M3 = log(M[2],10)/10
+            M_vector2 = solve(Tm,Tf)
+            true_M1 = M_vector2[0]
+            true_M2 = M_vector2[1]
+            if true_M1 <= 0:
+                true_M1 = 0
+                true_M2 = Tf2/Tm22
+            elif true_M2 <= 0:
+                true_M1 = Tf1/Tm11
+                true_M2 = 0
             
         summands = []
         for i,valid_ind in enumerate(valid_filters_this_row):
-            summands.append(((self.bandfluxes.iat[curr_row,valid_ind] - M1*models1noM[i]-M2*models2noM[i]-M3*models3noM[i])/self.bandfluxerrors.iat[curr_row,valid_ind])**2)
+            summands.append(((self.bandfluxes.iat[curr_row,valid_ind] - true_M1*models1noM[i]-true_M2*models2noM[i]-true_M3*models3noM[i])/self.bandfluxerrors.iat[curr_row,valid_ind])**2)
                 
         chisq = sum(summands)
         if self.silent is False:
-            print("log(M1)/10, log(M2)/10, log(M3)/10, chisq: ",M1,M2,M3,chisq,"\n")
-        return M1,M2,M3,chisq
+            print("M1, M2, M3, chisq: ",true_M1,true_M2,true_M3,chisq,"\n")
+        return true_M1,true_M2,true_M3,chisq
 
     def chisqfuncerror(self,M,mean_chi2,Z,age,E_bv,valid_filters_this_row,ul_filters_this_row,curr_row):
 
@@ -2374,7 +2364,7 @@ class ChiSquared():
 
     def minimize_chisq(self):
         import numpy as np
-        from math import exp, sqrt
+        from math import exp, sqrt, log
         from scipy.optimize import Bounds
         
         if self.single_cluster == True:
@@ -2384,6 +2374,7 @@ class ChiSquared():
             self.mean_Z1s = []
             self.mean_age1s = []
             self.mean_M1s = []
+            self.log_mean_M1s = []
             self.mean_ebv1s = []
             
             self.var_Z1s = []
@@ -2394,6 +2385,7 @@ class ChiSquared():
             self.sigma_Z1s = []
             self.sigma_age1s = []
             self.sigma_M1s = []
+            self.log_sigma_M1s = []
             self.sigma_ebv1s = []
 
             self.gridM1s = []
@@ -2428,7 +2420,7 @@ class ChiSquared():
                             if self.solvemethod == 0:
                                 res = opt.minimize(self.chisqfunc, x0, args=(Z1,age1,ebv1,valid_filters_this_row,ul_filters_this_row,curr_row,), bounds=bnds)
                                 chi2 = res.fun
-                                M1 = res.x[0]
+                                M1 = 10**(10*res.x[0])
                             elif self.solvemethod == 1:
                                 M1, chi2 = self.analyticfunc(Z1,age1,ebv1,valid_filters_this_row,curr_row)
                             gridChisq[i,j,k] = chi2
@@ -2445,11 +2437,12 @@ class ChiSquared():
                 print("Smallest chi2 for row {}: {}".format(self.rows[curr_row]+2,smallest_chi2))
                 self.smallest_chi2_params.append(0)
                 self.smallest_chi2_params[curr_row] = smallest_chi2_params
-                print("Associated parameter values: log(Z1) {}, log(age1)/10 {}, log(M1)/10 {}, E(B-V)1 {}".format(smallest_chi2_params[0],smallest_chi2_params[1],smallest_chi2_params[2],smallest_chi2_params[3]))
+                print("Associated parameter values: log(Z1) {}, log(age1)/10 {}, M1 {}, E(B-V)1 {}".format(smallest_chi2_params[0],smallest_chi2_params[1],smallest_chi2_params[2],smallest_chi2_params[3]))
                 gridChisq -= smallest_chi2
                 self.mean_Z1s.append(0)
                 self.mean_age1s.append(0)
                 self.mean_M1s.append(0)
+                self.log_mean_M1s.append(0)
                 self.mean_ebv1s.append(0)
                 
                 for i in range(self.Z1num):
@@ -2470,11 +2463,14 @@ class ChiSquared():
                 self.mean_Z1s[curr_row] /= Wtot
                 self.mean_age1s[curr_row] /= Wtot
                 self.mean_M1s[curr_row] /= Wtot
+                self.log_mean_M1s[curr_row] = log(self.mean_M1s[curr_row])/10
                 self.mean_ebv1s[curr_row] /= Wtot
-
+                
+                print("Wtot ", Wtot)
                 print("weighted mean log(Z1) ", self.mean_Z1s[curr_row])
                 print("weighted mean log(age1)/10 ", self.mean_age1s[curr_row])
-                print("weighted mean log(M1)/10 ", self.mean_M1s[curr_row])
+                print("weighted mean M1 ", self.mean_M1s[curr_row])
+                print("log(weighted mean M1)/10 ", self.log_mean_M1s[curr_row])
                 print("weighted mean E(B-V)1 ", self.mean_ebv1s[curr_row])
 
                 self.var_Z1s.append(0)
@@ -2485,6 +2481,7 @@ class ChiSquared():
                 self.sigma_Z1s.append(0)
                 self.sigma_age1s.append(0)
                 self.sigma_M1s.append(0)
+                self.log_sigma_M1s.append(0)
                 self.sigma_ebv1s.append(0)
 
                 for i in range(self.Z1num):
@@ -2513,18 +2510,23 @@ class ChiSquared():
                 self.sigma_Z1s[curr_row] = sqrt(self.var_Z1s[curr_row])
                 self.sigma_age1s[curr_row] = sqrt(self.var_age1s[curr_row])
                 self.sigma_M1s[curr_row] = sqrt(self.var_M1s[curr_row])
+                if self.sigma_M1s[curr_row] == 0:
+                    self.log_sigma_M1s[curr_row] = "bad fit; weighted sigma is 0"
+                else:
+                    self.log_sigma_M1s[curr_row] = log(self.sigma_M1s[curr_row],10)/10
                 self.sigma_ebv1s[curr_row] = sqrt(self.var_ebv1s[curr_row])
 
                 print("weighted var log(Z1) ", self.var_Z1s[curr_row])
-                print("sigma log(Z1) (sqrt weighted var log(Z1)) ", self.sigma_Z1s[curr_row])
+                print("weighted sigma log(Z1) (sqrt weighted var log(Z1)) ", self.sigma_Z1s[curr_row])
                 print("weighted var log(age1)/10 ", self.var_age1s[curr_row])
-                print("sigma log(age1)/10 (sqrt weighted var log(age1)/10) ", self.sigma_age1s[curr_row])
-                print("weighted var log(M1)/10 ", self.var_M1s[curr_row])
-                print("sigma log(M1)/10 (sqrt weighted var log(M1)/10) ", self.sigma_M1s[curr_row])
+                print("weighted sigma log(age1)/10 (sqrt weighted var log(age1)/10) ", self.sigma_age1s[curr_row])
+                print("weighted var M1 ", self.var_M1s[curr_row])
+                print("weighted sigma M1 (sqrt weighted var M1) ", self.sigma_M1s[curr_row])
+                print("log(weighted sigma M1)/10 ", self.log_sigma_M1s[curr_row])
                 print("weighted var E(B-V)1 ", self.var_ebv1s[curr_row])
-                print("sigma ebv1 (sqrt weighted var E(B-V)1) ", self.sigma_ebv1s[curr_row])
+                print("weighted sigma ebv1 (sqrt weighted var E(B-V)1) ", self.sigma_ebv1s[curr_row])
 
-                x02 = np.array([self.mean_M1s[curr_row]])
+                x02 = np.array([self.log_mean_M1s[curr_row]])
                 res2 = opt.minimize(self.minichisqfunc2_single, x02, args=(self.mean_Z1s[curr_row],self.mean_age1s[curr_row],self.mean_ebv1s[curr_row],valid_filters_this_row,ul_filters_this_row,curr_row,), bounds=bnds)
 
                 newchi2 = res2.fun
@@ -2542,10 +2544,12 @@ class ChiSquared():
             self.mean_Z1s = []
             self.mean_age1s = []
             self.mean_M1s = []
+            self.log_mean_M1s = []
             self.mean_ebv1s = []
             self.mean_Z2s = []
             self.mean_age2s = []
             self.mean_M2s = []
+            self.log_mean_M2s = []
             self.mean_ebv2s = []
             
             self.var_Z1s = []
@@ -2560,10 +2564,12 @@ class ChiSquared():
             self.sigma_Z1s = []
             self.sigma_age1s = []
             self.sigma_M1s = []
+            self.log_sigma_M1s = []
             self.sigma_ebv1s = []
             self.sigma_Z2s = []
             self.sigma_age2s = []
             self.sigma_M2s = []
+            self.log_sigma_M2s = []
             self.sigma_ebv2s = []
 
             self.gridM1s = []
@@ -2607,8 +2613,8 @@ class ChiSquared():
                                         if self.solvemethod == 0:
                                             res = opt.minimize(self.chisqfunc2, x0, args=(Z1,age1,ebv1,Z2,age2,ebv2,valid_filters_this_row,ul_filters_this_row,curr_row,), bounds=bnds)
                                             chi2 = res.fun
-                                            M1 = res.x[0]
-                                            M2 = res.x[1]
+                                            M1 = 10**(10*res.x[0])
+                                            M2 = 10**(10*res.x[1])
                                         elif self.solvemethod == 1:
                                             M1, M2, chi2 = self.analyticfunc2(Z1,age1,ebv1,Z2,age2,ebv2,valid_filters_this_row,curr_row)
                                         gridChisq[i,j,k,l,m,n] = chi2
@@ -2630,15 +2636,17 @@ class ChiSquared():
                 print("Smallest chi2 for row {}: {}".format(self.rows[curr_row]+2,smallest_chi2))
                 self.smallest_chi2_params.append(0)
                 self.smallest_chi2_params[curr_row] = smallest_chi2_params
-                print("Associated parameter values: log(Z1) {}, log(age1)/10 {}, log(M1)/10 {}, E(B-V)1 {}, log(Z2) {}, log(age2)/10 {}, log(M2)/10 {}, E(B-V)2 {}".format(smallest_chi2_params[0],smallest_chi2_params[1],smallest_chi2_params[2],smallest_chi2_params[3],smallest_chi2_params[4],smallest_chi2_params[5],smallest_chi2_params[6],smallest_chi2_params[7]))
+                print("Associated parameter values: log(Z1) {}, log(age1)/10 {}, M1 {}, E(B-V)1 {}, log(Z2) {}, log(age2)/10 {}, M2 {}, E(B-V)2 {}".format(smallest_chi2_params[0],smallest_chi2_params[1],smallest_chi2_params[2],smallest_chi2_params[3],smallest_chi2_params[4],smallest_chi2_params[5],smallest_chi2_params[6],smallest_chi2_params[7]))
                 gridChisq -= smallest_chi2
                 self.mean_Z1s.append(0)
                 self.mean_age1s.append(0)
                 self.mean_M1s.append(0)
+                self.log_mean_M1s.append(0)
                 self.mean_ebv1s.append(0)
                 self.mean_Z2s.append(0)
                 self.mean_age2s.append(0)
                 self.mean_M2s.append(0)
+                self.log_mean_M2s.append(0)
                 self.mean_ebv2s.append(0)
                 
                 for i in range(self.Z1num):
@@ -2670,19 +2678,24 @@ class ChiSquared():
                 self.mean_Z1s[curr_row] /= Wtot
                 self.mean_age1s[curr_row] /= Wtot
                 self.mean_M1s[curr_row] /= Wtot
+                self.log_mean_M1s[curr_row] = log(self.mean_M1s[curr_row],10)/10
                 self.mean_ebv1s[curr_row] /= Wtot
                 self.mean_Z2s[curr_row] /= Wtot
                 self.mean_age2s[curr_row] /= Wtot
                 self.mean_M2s[curr_row] /= Wtot
+                self.log_mean_M2s[curr_row] = log(self.mean_M2s[curr_row],10)/10
                 self.mean_ebv2s[curr_row] /= Wtot
 
+                print("Wtot ", Wtot)
                 print("weighted mean log(Z1) ", self.mean_Z1s[curr_row])
                 print("weighted mean log(age1)/10 ", self.mean_age1s[curr_row])
-                print("weighted mean log(M1)/10 ", self.mean_M1s[curr_row])
+                print("weighted mean M1 ", self.mean_M1s[curr_row])
+                print("log(weighted mean M1)/10 ", self.log_mean_M1s[curr_row])
                 print("weighted mean E(B-V)1 ", self.mean_ebv1s[curr_row])
                 print("weighted mean log(Z2) ", self.mean_Z2s[curr_row])
                 print("weighted mean log(age2)/10 ", self.mean_age2s[curr_row])
-                print("weighted mean log(M2)/10 ", self.mean_M2s[curr_row])
+                print("weighted mean M2 ", self.mean_M2s[curr_row])
+                print("log(weighted mean M2)/10 ", self.log_mean_M2s[curr_row])
                 print("weighted mean E(B-V)2 ", self.mean_ebv2s[curr_row])
 
                 self.var_Z1s.append(0)
@@ -2697,10 +2710,12 @@ class ChiSquared():
                 self.sigma_Z1s.append(0)
                 self.sigma_age1s.append(0)
                 self.sigma_M1s.append(0)
+                self.log_sigma_M1s.append(0)
                 self.sigma_ebv1s.append(0)
                 self.sigma_Z2s.append(0)
                 self.sigma_age2s.append(0)
                 self.sigma_M2s.append(0)
+                self.log_sigma_M2s.append(0)
                 self.sigma_ebv2s.append(0)
 
                 for i in range(self.Z1num):
@@ -2745,37 +2760,47 @@ class ChiSquared():
                 self.sigma_Z1s[curr_row] = sqrt(self.var_Z1s[curr_row])
                 self.sigma_age1s[curr_row] = sqrt(self.var_age1s[curr_row])
                 self.sigma_M1s[curr_row] = sqrt(self.var_M1s[curr_row])
+                if self.sigma_M1s[curr_row] == 0:
+                    self.log_sigma_M1s[curr_row] = "bad fit; weighted sigma is 0"
+                else:
+                    self.log_sigma_M1s[curr_row] = log(self.sigma_M1s[curr_row],10)/10
                 self.sigma_ebv1s[curr_row] = sqrt(self.var_ebv1s[curr_row])
                 self.sigma_Z2s[curr_row] = sqrt(self.var_Z2s[curr_row])
                 self.sigma_age2s[curr_row] = sqrt(self.var_age2s[curr_row])
                 self.sigma_M2s[curr_row] = sqrt(self.var_M2s[curr_row])
+                if self.sigma_M2s[curr_row] == 0:
+                    self.log_sigma_M2s[curr_row] = "bad fit; weighted sigma is 0"
+                else:
+                    self.log_sigma_M2s[curr_row] = log(self.sigma_M2s[curr_row],10)/10
                 self.sigma_ebv2s[curr_row] = sqrt(self.var_ebv2s[curr_row])
 
                 print("weighted var log(Z1) ", self.var_Z1s[curr_row])
-                print("sigma log(Z1) (sqrt weighted var log(Z1)) ", self.sigma_Z1s[curr_row])
+                print("weighed sigma log(Z1) (sqrt weighted var log(Z1)) ", self.sigma_Z1s[curr_row])
                 print("weighted var log(age1)/10 ", self.var_age1s[curr_row])
-                print("sigma log(age1)/10 (sqrt weighted var log(age1)/10) ", self.sigma_age1s[curr_row])
-                print("weighted var log(M1)/10 ", self.var_M1s[curr_row])
-                print("sigma log(M1)/10 (sqrt weighted var log(M1)/10) ", self.sigma_M1s[curr_row])
+                print("weighted sigma log(age1)/10 (sqrt weighted var log(age1)/10) ", self.sigma_age1s[curr_row])
+                print("weighted var M1 ", self.var_M1s[curr_row])
+                print("weighted sigma M1 (sqrt weighted var M1) ", self.sigma_M1s[curr_row])
+                print("log(weighted sigma M1)/10 ", self.log_sigma_M1s[curr_row])
                 print("weighted var ebv1 ", self.var_ebv1s[curr_row])
-                print("sigma ebv1 (sqrt weighted var ebv1) ", self.sigma_ebv1s[curr_row])
+                print("weighted sigma ebv1 (sqrt weighted var ebv1) ", self.sigma_ebv1s[curr_row])
                 print("weighted var log(Z2) ", self.var_Z2s[curr_row])
-                print("sigma log(Z2) (sqrt weighted var log(Z2)) ", self.sigma_Z2s[curr_row])
+                print("weighted sigma log(Z2) (sqrt weighted var log(Z2)) ", self.sigma_Z2s[curr_row])
                 print("weighted var log(age2)/10 ", self.var_age2s[curr_row])
-                print("sigma log(age2)/10 (sqrt weighted var log(age2)/10) ", self.sigma_age2s[curr_row])
+                print("weighted sigma log(age2)/10 (sqrt weighted var log(age2)/10) ", self.sigma_age2s[curr_row])
                 print("weighted var M2 ", self.var_M2s[curr_row])
-                print("sigma log(M2)/10 (sqrt weighted var log(M2)/10) ", self.sigma_M2s[curr_row])
+                print("weighted sigma M2 (sqrt weighted var M2) ", self.sigma_M2s[curr_row])
+                print("log(weighted sigma M2)/10 ", self.log_sigma_M2s[curr_row])
                 print("weighted var E(B-V)2 ", self.var_ebv2s[curr_row])
-                print("sigma E(B-V)2 (sqrt weighted var E(B-V)2) ", self.sigma_ebv2s[curr_row])
+                print("weighted sigma E(B-V)2 (sqrt weighted var E(B-V)2) ", self.sigma_ebv2s[curr_row])
 
-                x02 = np.array([self.mean_M1s[curr_row],self.mean_M2s[curr_row]])
+                x02 = np.array([self.log_mean_M1s[curr_row],self.log_mean_M2s[curr_row]])
                 res2 = opt.minimize(self.minichisqfunc2_double, x02, args=(self.mean_Z1s[curr_row],self.mean_age1s[curr_row],self.mean_ebv1s[curr_row],self.mean_Z2s[curr_row],self.mean_age2s[curr_row],self.mean_ebv2s[curr_row],valid_filters_this_row,ul_filters_this_row,curr_row,), bounds=bnds)
 
                 newchi2 = res2.fun
                 newM1 = res2.x[0]
                 newM2 = res2.x[1]
 
-                print("chi2 of fitted log(M)/10s to mean parameters: ", newchi2)
+                print("chi2 of fitted log(M1)/10 and log(M2)/10 to mean parameters: ", newchi2)
                 print("fitted log(M1)/10: ", newM1)
                 print("fitted log(M2)/10: ", newM2)
 
@@ -2789,13 +2814,16 @@ class ChiSquared():
             self.mean_Z1s = []
             self.mean_age1s = []
             self.mean_M1s = []
+            self.log_mean_M1s = []
             self.mean_ebv1s = []
             self.mean_Z2s = []
             self.mean_age2s = []
             self.mean_M2s = []
+            self.log_mean_M2s = []
             self.mean_ebv2s = []
             self.mean_Z3s = []
             self.mean_age3s = []
+            self.log_mean_M3s = []
             self.mean_M3s = []
             
             self.var_Z1s = []
@@ -2813,14 +2841,17 @@ class ChiSquared():
             self.sigma_Z1s = []
             self.sigma_age1s = []
             self.sigma_M1s = []
+            self.log_sigma_M1s = []
             self.sigma_ebv1s = []
             self.sigma_Z2s = []
             self.sigma_age2s = []
             self.sigma_M2s = []
+            self.log_sigma_M3s = []
             self.sigma_ebv2s = []
             self.sigma_Z3s = []
             self.sigma_age3s = []
             self.sigma_M3s = []
+            self.log_sigma_M3s = []
 
             self.gridM1s = []
             self.gridM2s = []
@@ -2870,9 +2901,9 @@ class ChiSquared():
                                                 if self.solvemethod == 0:
                                                     res = opt.minimize(self.chisqfunc3, x0, args=(Z1,age1,ebv1,Z2,age2,ebv2,Z3,age3,valid_filters_this_row,ul_filters_this_row,curr_row,), bounds=bnds)
                                                     chi2 = res.fun
-                                                    M1 = res.x[0]
-                                                    M2 = res.x[1]
-                                                    M3 = res.x[2]
+                                                    M1 = 10**(10*res.x[0])
+                                                    M2 = 10**(10*res.x[1])
+                                                    M3 = 10**(10*res.x[2])
                                                 elif self.solvemethod == 1:
                                                     M1, M2, M3, chi2 = self.analyticfunc3(Z1,age1,ebv1,Z2,age2,ebv2,Z3,age3,valid_filters_this_row,curr_row)
                                                 gridChisq[i,j,k,l,m,n,o,p] = chi2
@@ -2898,19 +2929,22 @@ class ChiSquared():
                 print("Smallest chi2 for row {}: {}".format(self.rows[curr_row]+2,smallest_chi2))
                 self.smallest_chi2_params.append(0)
                 self.smallest_chi2_params[curr_row] = smallest_chi2_params
-                print("Associated parameter values: log(Z1) {},log(age1)/10 {}, log(M1)/10 {}, E(B-V)1 {}, log(Z2) {}, log(age2)/10 {}, log(M2)/10 {}, E(B-V)2 {}, log(Z3) {}, log(age3)/10 {}, log(M3)/10 {}".format(smallest_chi2_params[0],smallest_chi2_params[1],smallest_chi2_params[2],smallest_chi2_params[3],smallest_chi2_params[4],smallest_chi2_params[5],smallest_chi2_params[6],smallest_chi2_params[7],smallest_chi2_params[8],smallest_chi2_params[9],smallest_chi2_params[10]))
+                print("Associated parameter values: log(Z1) {}, log(age1)/10 {}, M1 {}, E(B-V)1 {}, log(Z2) {}, log(age2)/10 {}, M2 {}, E(B-V)2 {}, log(Z3) {}, log(age3)/10 {}, M3 {}".format(smallest_chi2_params[0],smallest_chi2_params[1],smallest_chi2_params[2],smallest_chi2_params[3],smallest_chi2_params[4],smallest_chi2_params[5],smallest_chi2_params[6],smallest_chi2_params[7],smallest_chi2_params[8],smallest_chi2_params[9],smallest_chi2_params[10]))
                 gridChisq -= smallest_chi2
                 self.mean_Z1s.append(0)
                 self.mean_age1s.append(0)
                 self.mean_M1s.append(0)
+                self.log_mean_M1s.append(0)
                 self.mean_ebv1s.append(0)
                 self.mean_Z2s.append(0)
                 self.mean_age2s.append(0)
                 self.mean_M2s.append(0)
+                self.log_mean_M2s.append(0)
                 self.mean_ebv2s.append(0)
                 self.mean_Z3s.append(0)
                 self.mean_age3s.append(0)
                 self.mean_M3s.append(0)
+                self.log_mean_M3s.append(0)
                 
                 for i in range(self.Z1num):
                     for j in range(self.age1num):
@@ -2949,26 +2983,33 @@ class ChiSquared():
                 self.mean_Z1s[curr_row] /= Wtot
                 self.mean_age1s[curr_row] /= Wtot
                 self.mean_M1s[curr_row] /= Wtot
+                self.log_mean_M1s[curr_row] = log(self.mean_M1s[curr_row],10)/10
                 self.mean_ebv1s[curr_row] /= Wtot
                 self.mean_Z2s[curr_row] /= Wtot
                 self.mean_age2s[curr_row] /= Wtot
                 self.mean_M2s[curr_row] /= Wtot
+                self.log_mean_M2s[curr_row] = log(self.mean_M2s[curr_row],10)/10
                 self.mean_ebv2s[curr_row] /= Wtot
                 self.mean_Z3s[curr_row] /= Wtot
                 self.mean_age3s[curr_row] /= Wtot
-                self.mean_M3s[curr_row] /= Wtot                
+                self.mean_M3s[curr_row] /= Wtot
+                self.log_mean_M3s[curr_row] = log(self.mean_M3s[curr_row],10)/10
 
+                print("Wtot ", Wtot)
                 print("weighted mean log(Z1) ", self.mean_Z1s[curr_row])
                 print("weighted mean log(age1)/10 ", self.mean_age1s[curr_row])
-                print("weighted mean log(M1)/10 ", self.mean_M1s[curr_row])
+                print("weighted mean M1 ", self.mean_M1s[curr_row])
+                print("log(weighted mean M1)/10 ", self.log_mean_M1s[curr_row])
                 print("weighted mean E(B-V)1 ", self.mean_ebv1s[curr_row])
                 print("weighted mean log(Z2) ", self.mean_Z2s[curr_row])
                 print("weighted mean log(age2)/10 ", self.mean_age2s[curr_row])
-                print("weighted mean log(M2)/10 ", self.mean_M2s[curr_row])
+                print("weighted mean M2 ", self.mean_M2s[curr_row])
+                print("log(weighted mean M2)/10 ", self.log_mean_M2s[curr_row])
                 print("weighted mean E(B-V)2 ", self.mean_ebv2s[curr_row])
                 print("weighted mean log(Z3) ", self.mean_Z3s[curr_row])
                 print("weighted mean log(age3)/10 ", self.mean_age3s[curr_row])
-                print("weighted mean log(M3)/10 ", self.mean_M3s[curr_row])                
+                print("weighted mean M3 ", self.mean_M3s[curr_row])
+                print("log(weighted mean M3)/10 ", self.log_mean_M3s[curr_row])
 
                 self.var_Z1s.append(0)
                 self.var_age1s.append(0)
@@ -2985,14 +3026,17 @@ class ChiSquared():
                 self.sigma_Z1s.append(0)
                 self.sigma_age1s.append(0)
                 self.sigma_M1s.append(0)
+                self.log_sigma_M1s.append(0)
                 self.sigma_ebv1s.append(0)
                 self.sigma_Z2s.append(0)
                 self.sigma_age2s.append(0)
                 self.sigma_M2s.append(0)
+                self.log_sigma_M2s.append(0)
                 self.sigma_ebv2s.append(0)
                 self.sigma_Z3s.append(0)
                 self.sigma_age3s.append(0)
-                self.sigma_M3s.append(0)        
+                self.sigma_M3s.append(0)
+                self.log_sigma_M3s.append(0)     
 
                 for i in range(self.Z1num):
                     for j in range(self.age1num):
@@ -3048,39 +3092,54 @@ class ChiSquared():
                 self.sigma_Z1s[curr_row] = sqrt(self.var_Z1s[curr_row])
                 self.sigma_age1s[curr_row] = sqrt(self.var_age1s[curr_row])
                 self.sigma_M1s[curr_row] = sqrt(self.var_M1s[curr_row])
+                if self.sigma_M1s[curr_row] == 0:
+                    self.log_sigma_M1s[curr_row] = "bad fit; weighted sigma is 0"
+                else:
+                    self.log_sigma_M1s[curr_row] = log(self.sigma_M1s[curr_row],10)/10
                 self.sigma_ebv1s[curr_row] = sqrt(self.var_ebv1s[curr_row])
                 self.sigma_Z2s[curr_row] = sqrt(self.var_Z2s[curr_row])
                 self.sigma_age2s[curr_row] = sqrt(self.var_age2s[curr_row])
                 self.sigma_M2s[curr_row] = sqrt(self.var_M2s[curr_row])
+                if self.sigma_M2s[curr_row] == 0:
+                    self.log_sigma_M2s[curr_row] = "bad fit; weighted sigma is 0"
+                else:
+                    self.log_sigma_M2s[curr_row] = log(self.sigma_M2s[curr_row],10)/10
                 self.sigma_ebv2s[curr_row] = sqrt(self.var_ebv2s[curr_row])
                 self.sigma_Z3s[curr_row] = sqrt(self.var_Z3s[curr_row])
                 self.sigma_age3s[curr_row] = sqrt(self.var_age3s[curr_row])
-                self.sigma_M3s[curr_row] = sqrt(self.var_M3s[curr_row])          
+                self.sigma_M3s[curr_row] = sqrt(self.var_M3s[curr_row])
+                if self.sigma_M3s[curr_row] == 0:
+                    self.log_sigma_M3s[curr_row] = "bad fit; weighted sigma is 0"
+                else:
+                    self.log_sigma_M3s[curr_row] = log(self.sigma_M3s[curr_row],10)/10 
 
                 print("weighted var log(Z1) ", self.var_Z1s[curr_row])
-                print("sigma log(Z1) (sqrt weighted var log(Z1)) ", self.sigma_Z1s[curr_row])
+                print("weighted sigma log(Z1) (sqrt weighted var log(Z1)) ", self.sigma_Z1s[curr_row])
                 print("weighted var log(age1)/10 ", self.var_age1s[curr_row])
-                print("sigma log(age1)/10 (sqrt weighted var log(age1)/10) ", self.sigma_age1s[curr_row])
-                print("weighted var log(M1)/10 ", self.var_M1s[curr_row])
-                print("sigma log(M1)/10 (sqrt weighted var log(M1)/10) ", self.sigma_M1s[curr_row])
+                print("weighted sigma log(age1)/10 (sqrt weighted var log(age1)/10) ", self.sigma_age1s[curr_row])
+                print("weighted var M1 ", self.var_M1s[curr_row])
+                print("weighted sigma M1 (sqrt weighted var M1) ", self.sigma_M1s[curr_row])
+                print("log(weighted sigma M1)/10 ", self.log_sigma_M1s[curr_row])
                 print("weighted var E(B-V)1 ", self.var_ebv1s[curr_row])
-                print("sigma E(B-V)1 (sqrt weighted var E(B-V)1) ", self.sigma_ebv1s[curr_row])
+                print("weighted sigma E(B-V)1 (sqrt weighted var E(B-V)1) ", self.sigma_ebv1s[curr_row])
                 print("weighted var log(Z2) ", self.var_Z2s[curr_row])
-                print("sigma log(Z2) (sqrt weighted var log(Z2)) ", self.sigma_Z2s[curr_row])
+                print("weighted sigma log(Z2) (sqrt weighted var log(Z2)) ", self.sigma_Z2s[curr_row])
                 print("weighted var log(age2)/10 ", self.var_age2s[curr_row])
-                print("sigma log(age2)/10 (sqrt weighted var log(age2)/10) ", self.sigma_age2s[curr_row])
-                print("weighted var log(M2)/10 ", self.var_M2s[curr_row])
-                print("sigma log(M2)/10 (sqrt weighted var log(M2)/10) ", self.sigma_M2s[curr_row])
+                print("weighted sigma log(age2)/10 (sqrt weighted var log(age2)/10) ", self.sigma_age2s[curr_row])
+                print("weighted var M2 ", self.var_M2s[curr_row])
+                print("weighted sigma M2 (sqrt weighted var M2) ", self.sigma_M2s[curr_row])
+                print("log(weighted sigma M2)/10 ", self.log_sigma_M2s[curr_row])
                 print("weighted var E(B-V)2 ", self.var_ebv2s[curr_row])
-                print("sigma E(B-V)2 (sqrt weighted var E(B-V)2) ", self.sigma_ebv2s[curr_row])
+                print("weighted sigma E(B-V)2 (sqrt weighted var E(B-V)2) ", self.sigma_ebv2s[curr_row])
                 print("weighted var log(Z3) ", self.var_Z3s[curr_row])
-                print("sigma log(Z3) (sqrt weighted var log(Z3)) ", self.sigma_Z3s[curr_row])
+                print("weighted sigma log(Z3) (sqrt weighted var log(Z3)) ", self.sigma_Z3s[curr_row])
                 print("weighted var log(age3)/10 ", self.var_age3s[curr_row])
-                print("sigma log(age3)/10 (sqrt weighted var log(age3)/10) ", self.sigma_age3s[curr_row])
-                print("weighted var log(M3) ", self.var_M3s[curr_row])
-                print("sigma log(M3) (sqrt weighted var log(M3)) ", self.sigma_M3s[curr_row])
+                print("weighted sigma log(age3)/10 (sqrt weighted var log(age3)/10) ", self.sigma_age3s[curr_row])
+                print("weighted var M3 ", self.var_M3s[curr_row])
+                print("weighted sigma M3 (srt weighted var M3) ", self.sigma_M3s[curr_row])
+                print("log(weighted sigma M3)/10 ", self.log_sigma_M3s[curr_row])
 
-                x02 = np.array([self.mean_M1s[curr_row],self.mean_M2s[curr_row],self.mean_M3s[curr_row]])
+                x02 = np.array([self.log_mean_M1s[curr_row],self.log_mean_M2s[curr_row],self.log_mean_M3s[curr_row]])
                 res2 = opt.minimize(self.minichisqfunc2_triple, x02, args=(self.mean_Z1s[curr_row],self.mean_age1s[curr_row],self.mean_ebv1s[curr_row],self.mean_Z2s[curr_row],self.mean_age2s[curr_row],self.mean_ebv2s[curr_row],self.mean_Z3s[curr_row],self.mean_age3s[curr_row],valid_filters_this_row,ul_filters_this_row,curr_row,), bounds=bnds)
 
                 newchi2 = res2.fun
@@ -3088,7 +3147,7 @@ class ChiSquared():
                 newM2 = res2.x[1]
                 newM3 = res2.x[2]
 
-                print("chi2 of fitted log(M)/10s to mean parameters: ", newchi2)
+                print("chi2 of fitted log(M1)/10, log(M2)/10 and log(M3)/10 to mean parameters: ", newchi2)
                 print("fitted log(M1)/10: ", newM1)
                 print("fitted log(M2)/10: ", newM2)
                 print("fitted log(M3)/10: ", newM3)
@@ -3102,6 +3161,7 @@ class ChiSquared():
 
     def find_param_errors(self):
         import numpy as np
+        from math import log
 
         if self.single_cluster == True:
 
@@ -3119,7 +3179,7 @@ class ChiSquared():
                 errornotesthisrow = []
                 Z = self.mean_Z1s[curr_row]
                 age = self.mean_age1s[curr_row]
-                M = self.mean_M1s[curr_row]
+                M = self.log_mean_M1s[curr_row]
                 ebv = self.mean_ebv1s[curr_row]
                 mean_models, mean_chi2 = self.minichisqfunc_single(M,Z,age,ebv,valid_filters_this_row,ul_filters_this_row,curr_row)
                 #
@@ -3161,8 +3221,8 @@ class ChiSquared():
                         ul_filters_this_row.append(valid_ind)
                 errorsthisrow = []
                 errornotesthisrow = []
-                M1 = self.mean_M1s[curr_row]
-                M2 = self.mean_M2s[curr_row]
+                M1 = self.log_mean_M1s[curr_row]
+                M2 = self.log_mean_M2s[curr_row]
                 Z1 = self.mean_Z1s[curr_row]
                 age1 = self.mean_age1s[curr_row]
                 ebv1 = self.mean_ebv1s[curr_row]
@@ -3230,9 +3290,9 @@ class ChiSquared():
                 errorsthisrow = []
                 errornotesthisrow = []
                 
-                M1 = self.mean_M1s[curr_row]
-                M2 = self.mean_M2s[curr_row]
-                M3 = self.mean_M3s[curr_row]
+                M1 = self.log_mean_M1s[curr_row]
+                M2 = self.log_mean_M2s[curr_row]
+                M3 = self.log_mean_M3s[curr_row]
                 Z1 = self.mean_Z1s[curr_row]
                 age1 = self.mean_age1s[curr_row]
                 ebv1 = self.mean_ebv1s[curr_row]
@@ -3334,6 +3394,7 @@ class ChiSquared():
 
         import numpy as np
         import pandas as pd 
+        from math import log
 
         if self.single_cluster == True:
             
@@ -3349,7 +3410,7 @@ class ChiSquared():
                     if arraytup[1] == 1:
                         ul_filters_this_row.append(valid_ind)
 
-                model,mean_chi2 = self.minichisqfunc_single(self.mean_M1s[curr_row],self.mean_Z1s[curr_row],self.mean_age1s[curr_row],self.mean_ebv1s[curr_row],valid_filters_this_row,ul_filters_this_row,curr_row)
+                model,mean_chi2 = self.minichisqfunc_single(self.log_mean_M1s[curr_row],self.mean_Z1s[curr_row],self.mean_age1s[curr_row],self.mean_ebv1s[curr_row],valid_filters_this_row,ul_filters_this_row,curr_row)
                 used = 0 
                 for colno,col in enumerate(models.loc[curr_row,:]):
                     if np.isnan(col) == False:
@@ -3379,7 +3440,7 @@ class ChiSquared():
                     if arraytup[1] == 1:
                         ul_filters_this_row.append(valid_ind)
     
-                hot,cool,mean_chi2 = self.minichisqfunc_double(self.mean_M1s[curr_row], self.mean_M2s[curr_row], self.mean_Z1s[curr_row],self.mean_age1s[curr_row],self.mean_ebv1s[curr_row],self.mean_Z2s[curr_row],self.mean_age2s[curr_row],self.mean_ebv2s[curr_row],valid_filters_this_row,ul_filters_this_row,curr_row)
+                hot,cool,mean_chi2 = self.minichisqfunc_double(self.log_mean_M1s[curr_row], self.log_mean_M2s[curr_row], self.mean_Z1s[curr_row],self.mean_age1s[curr_row],self.mean_ebv1s[curr_row],self.mean_Z2s[curr_row],self.mean_age2s[curr_row],self.mean_ebv2s[curr_row],valid_filters_this_row,ul_filters_this_row,curr_row)
                 usedhot = 0
                 usedcool = 0
                 for colno,col in enumerate(hotmodels.loc[curr_row,:]):
@@ -3415,7 +3476,7 @@ class ChiSquared():
                     if arraytup[1] == 1:
                         ul_filters_this_row.append(valid_ind)
     
-                old1,old2,new,mean_chi2 = self.minichisqfunc_triple(self.mean_M1s[curr_row], self.mean_M2s[curr_row], self.mean_M3s[curr_row], self.mean_Z1s[curr_row],self.mean_age1s[curr_row],self.mean_ebv1s[curr_row],self.mean_Z2s[curr_row],self.mean_age2s[curr_row],self.mean_ebv2s[curr_row],self.mean_Z3s[curr_row],self.mean_age3s[curr_row],valid_filters_this_row,ul_filters_this_row,curr_row)
+                old1,old2,new,mean_chi2 = self.minichisqfunc_triple(self.log_mean_M1s[curr_row], self.log_mean_M2s[curr_row], self.log_mean_M3s[curr_row], self.mean_Z1s[curr_row], self.mean_age1s[curr_row], self.mean_ebv1s[curr_row], self.mean_Z2s[curr_row], self.mean_age2s[curr_row], self.mean_ebv2s[curr_row], self.mean_Z3s[curr_row], self.mean_age3s[curr_row], valid_filters_this_row, ul_filters_this_row, curr_row)
                 usedold1 = 0
                 usedold2 = 0
                 usednew = 0
@@ -3454,16 +3515,16 @@ class ChiSquared():
                 df1 = pd.DataFrame({
                     'row' : [i+2 for i in self.rows],
                     'weighted_mean_log(Z1)' : self.mean_Z1s,
-                    'sigma_log(Z1)' : self.sigma_Z1s,
+                    'weighted_sigma_log(Z1)' : self.sigma_Z1s,
                     'weighted_mean_log(age1)/10' : self.mean_age1s,
-                    'sigma_log(age1)/10' : self.sigma_age1s,
-                    'weighted_mean_log(M1)/10' : self.mean_M1s,
-                    'sigma_log(M1)/10' : self.sigma_M1s,
+                    'weighted_sigma_log(age1)/10' : self.sigma_age1s,
+                    'log(weighted_mean_M1)/10' : self.log_mean_M1s,
+                    'log(weighted_sigma_M1)/10' : self.log_sigma_M1s,
                     'weighted_mean_ebv1' : self.mean_ebv1s,
-                    'sigma_ebv1' : self.sigma_ebv1s,
+                    'weighted_sigma_ebv1' : self.sigma_ebv1s,
                     'chi2_using_mean_parameters' : self.mean_chi2s,
-                    'fitted_M1_to_mean_parameters' : self.newM1s,
-                    'chi2_of_fitted_M1' : self.newchi2s})
+                    'fitted_log(M1)/10_to_mean_parameters' : self.newM1s,
+                    'chi2_of_fitted_log(M1)/10' : self.newchi2s})
 
                 try:
                     df1.to_csv("{}".format(self.weightedmeanvarname),index=False)
@@ -3477,25 +3538,25 @@ class ChiSquared():
                 df1 = pd.DataFrame({
                     'row' : [i+2 for i in self.rows],
                     'weighted_mean_log(Z1)' : self.mean_Z1s,
-                    'sigma_log(Z1)' : self.sigma_Z1s,
+                    'weighted_sigma_log(Z1)' : self.sigma_Z1s,
                     'weighted_mean_log(age1)/10' : self.mean_age1s,
-                    'sigma_log(age1)/10' : self.sigma_age1s,
-                    'weighted_mean_log(M1)/10' : self.mean_M1s,
-                    'sigma_log(M1)/10' : self.sigma_M1s,
+                    'weighted_sigma_log(age1)/10' : self.sigma_age1s,
+                    'log(weighted_mean_M1)/10' : self.log_mean_M1s,
+                    'log(weighted_sigma_M1)/10 ' : self.log_sigma_M1s,
                     'weighted_mean_ebv1' : self.mean_ebv1s,
-                    'sigma_ebv1' : self.sigma_ebv1s,
+                    'weighted_sigma_ebv1' : self.sigma_ebv1s,
                     'weighted_mean_log(Z2)' : self.mean_Z2s,
-                    'sigma_log(Z2)' : self.sigma_Z2s,
+                    'weighted_sigma_log(Z2)' : self.sigma_Z2s,
                     'weighted_mean_log(age2)/10' : self.mean_age2s,
-                    'sigma_log(age2)/10' : self.sigma_age2s,
-                    'weighted_mean_log(M2)/10' : self.mean_M2s,
-                    'sigma_log(M2)/10' : self.sigma_M2s,
+                    'weighted_sigma_log(age2)/10' : self.sigma_age2s,
+                    'log(weighted_mean_M2)/10' : self.log_mean_M2s,
+                    'log(weighted_sigma_M2)/10' : self.log_sigma_M2s,
                     'weighted_mean_ebv2' : self.mean_ebv2s,
-                    'sigma_ebv2' : self.sigma_ebv2s,
+                    'weighted_sigma_ebv2' : self.sigma_ebv2s,
                     'chi2_using_mean_parameters' : self.mean_chi2s,
                     'fitted_log(M1)/10_to_mean_parameters' : self.newM1s,
                     'fitted_log(M2)/10_to_mean_parameters' : self.newM2s,
-                    'chi2_of_fitted_Ms' : self.newchi2s})
+                    'chi2_of_fitted_log(M)/10s' : self.newchi2s})
 
                 try:
                     df1.to_csv("{}".format(self.weightedmeanvarname),index=False)
@@ -3509,27 +3570,27 @@ class ChiSquared():
                 df1 = pd.DataFrame({
                     'row' : [i+2 for i in self.rows],
                     'weighted_mean_log(Z1)' : self.mean_Z1s,
-                    'sigma_log(Z1)' : self.sigma_Z1s,
+                    'weighted_sigma_log(Z1)' : self.sigma_Z1s,
                     'weighted_mean_log(age1)/10' : self.mean_age1s,
-                    'sigma_log(age1)/10' : self.sigma_age1s,
-                    'weighted_mean_log(M1)/10' : self.mean_M1s,
-                    'sigma_log(M1)/10' : self.sigma_M1s,
+                    'weighted_sigma_log(age1)/10' : self.sigma_age1s,
+                    'log(weighted_mean_M1)/10' : self.log_mean_M1s,
+                    'log(weighted_sigma_M1)/10' : self.log_sigma_M1s,
                     'weighted_mean_ebv1' : self.mean_ebv1s,
-                    'sigma_ebv1' : self.sigma_ebv1s,
+                    'weighted_sigma_ebv1' : self.sigma_ebv1s,
                     'weighted_mean_log(Z2)' : self.mean_Z2s,
-                    'sigma_log(Z2)' : self.sigma_Z2s,
+                    'weighted_sigma_log(Z2)' : self.sigma_Z2s,
                     'weighted_mean_log(age2)/10' : self.mean_age2s,
-                    'sigma_log(age2)/10' : self.sigma_age2s,
-                    'weighted_mean_log(M2)/10' : self.mean_M2s,
-                    'sigma_log(M2)/10' : self.sigma_M2s,
+                    'weighted_sigma_log(age2)/10' : self.sigma_age2s,
+                    'log(weighted_mean_M2)/10' : self.log_mean_M2s,
+                    'log(weighted_sigma_M2)/10' : self.log_sigma_M2s,
                     'weighted_mean_ebv2' : self.mean_ebv2s,
-                    'sigma_ebv2' : self.sigma_ebv2s,
+                    'weighted_sigma_ebv2' : self.sigma_ebv2s,
                     'weighted_mean_log(Z3)' : self.mean_Z3s,
-                    'sigma_log(Z3)' : self.sigma_Z3s,
+                    'weighted_sigma_log(Z3)' : self.sigma_Z3s,
                     'weighted_mean_log(age3)/10' : self.mean_age3s,
-                    'sigma_log(age3)/10' : self.sigma_age3s,
-                    'weighted_mean_log(M3)/10' : self.mean_M3s,
-                    'sigma_log(M3)/10' : self.sigma_M3s,
+                    'weighted_sigma_log(age3)/10' : self.sigma_age3s,
+                    'log(weighted_mean_M3)/10' : self.log_mean_M3s,
+                    'log(weighted_sigma_M3)/10' : self.log_sigma_M3s,
                     'chi2_using_mean_parameters' : self.mean_chi2s,
                     'fitted_log(M1)/10_to_mean_parameters' : self.newM1s,
                     'fitted_log(M2)/10_to_mean_parameters' : self.newM2s,
@@ -3552,7 +3613,7 @@ class ChiSquared():
                     a = pd.DataFrame({
                         'log(Z)' : self.Z1grid.flatten(),
                         'log(age)/10' : self.age1grid.flatten(),
-                        'log(M)/10' : self.gridM1s[curr_row],
+                        'M' : self.gridM1s[curr_row],
                         'E(B-V)' : self.ebv1grid.flatten(),
                         'Chi_squared' : self.gridChisqs[curr_row]})
                     
@@ -3573,11 +3634,11 @@ class ChiSquared():
                     a = pd.DataFrame({
                         'log(Z_hot)' : self.Z1grid.flatten(),
                         'log(age_hot)/10' : self.age1grid.flatten(),
-                        'log(M_hot)/10' : self.gridM1s[curr_row],
+                        'M_hot' : self.gridM1s[curr_row],
                         'E(B-V)_hot' : self.ebv1grid.flatten(),
                         'log(Z_cool)' : self.Z2grid.flatten(),
                         'log(age_cool)/10' : self.age2grid.flatten(),
-                        'log(M_cool)/10' : self.gridM2s[curr_row],
+                        'M_cool' : self.gridM2s[curr_row],
                         'E(B-V)_cool' : self.ebv2grid.flatten(),
                         'Chi_squared' : self.gridChisqs[curr_row]})
                     
@@ -3596,18 +3657,18 @@ class ChiSquared():
                 for curr_row in range(self.bandfluxes.shape[0]):
 
                     a = pd.DataFrame({
-                        'log(Z_old1)' : self.Z1grid.flatten(),
-                        'log(age_old2)/10' : self.age1grid.flatten(),
-                        'log(M_old1)/10' : self.gridM1s[curr_row],
-                        'E(B-V)_old1' : self.ebv1grid.flatten(),
-                        'log(Z_old2)' : self.Z2grid.flatten(),
-                        'log(age_old2)/10' : self.age2grid.flatten(),
-                        'log(M_old2)/10' : self.gridM2s[curr_row],
-                        'E(B-V)_young' : self.ebv2grid.flatten(),
-                        'log(Z_old3)' : self.Z3grid.flatten(),
-                        'log(age_old3)/10' : self.age3grid.flatten(),
-                        'log(M_old3)/10' : self.gridM3s[curr_row],
-                        'Chi_squared' : self.gridChisqs[curr_row]})
+                        'log(Z_old1) ' : self.Z1grid.flatten(),
+                        'log(age_old2)/10 ' : self.age1grid.flatten(),
+                        'M_old1 ' : self.gridM1s[curr_row],
+                        'E(B-V)_old1 ' : self.ebv1grid.flatten(),
+                        'log(Z_old2) ' : self.Z2grid.flatten(),
+                        'log(age_old2)/10 ' : self.age2grid.flatten(),
+                        'M_old2 ' : self.gridM2s[curr_row],
+                        'E(B-V)_young ' : self.ebv2grid.flatten(),
+                        'log(Z_old3) ' : self.Z3grid.flatten(),
+                        'log(age_old3)/10 ' : self.age3grid.flatten(),
+                        'M_old3 ' : self.gridM3s[curr_row],
+                        'Chi_squared ' : self.gridChisqs[curr_row]})
                     
                     parts = self.gridname.split(".")
                     numbered_gridname = parts[0] + str(self.rows[curr_row]+2) + "." + parts[1]
@@ -3695,7 +3756,7 @@ class ChiSquared():
         abc.errorbar(valid_notul_avgwv_this_row,valid_notul_fluxes_this_row,yerr=valid_notul_errors_this_row,fmt="o",color="orange")
         if self.model_chosen == "UVIT_HST":
             abc.errorbar(valid_ul_avgwv_this_row,valid_ul_fluxes_this_row,yerr=valid_ul_errors_this_row,uplims=True,fmt="o",color="green")
-        mean_models, mean_chi2 = self.minichisqfunc_single(self.mean_M1s[curr_row],self.mean_Z1s[curr_row],self.mean_age1s[curr_row],self.mean_ebv1s[curr_row],valid_filters_this_row,ul_filters_this_row,curr_row)
+        mean_models, mean_chi2 = self.minichisqfunc_single(self.log_mean_M1s[curr_row],self.mean_Z1s[curr_row],self.mean_age1s[curr_row],self.mean_ebv1s[curr_row],valid_filters_this_row,ul_filters_this_row,curr_row)
         print("\nchi2 of mean parameters: ", mean_chi2,"\n")
         abc.plot(valid_avgwv_this_row,mean_models,color="blue")
 
@@ -3756,7 +3817,7 @@ class ChiSquared():
 
         age_sticker1 = format(self.mean_age1s[curr_row],'.6e')
 
-        M_sticker1 = format(self.mean_M1s[curr_row],'.6e')
+        M_sticker1 = format(self.log_mean_M1s[curr_row],'.6e')
         try:
             M_sticker2 = format(self.errorsallrows[curr_row][0][0],'.6')
         except:
@@ -3881,7 +3942,7 @@ class ChiSquared():
         abc.errorbar(valid_notul_avgwv_this_row,valid_notul_fluxes_this_row,yerr=valid_notul_errors_this_row,fmt="o",color="orange")
         if self.model_chosen == "UVIT_HST":
             abc.errorbar(valid_ul_avgwv_this_row,valid_ul_fluxes_this_row,yerr=valid_ul_errors_this_row,uplims=True,fmt="o",color="green")
-        hotmodels, coolmodels, mean_chi2 = self.minichisqfunc_double(self.mean_M1s[curr_row], self.mean_M2s[curr_row], self.mean_Z1s[curr_row],self.mean_age1s[curr_row],self.mean_ebv1s[curr_row],self.mean_Z2s[curr_row],self.mean_age2s[curr_row],self.mean_ebv2s[curr_row],valid_filters_this_row,ul_filters_this_row,curr_row)
+        hotmodels, coolmodels, mean_chi2 = self.minichisqfunc_double(self.log_mean_M1s[curr_row], self.log_mean_M2s[curr_row], self.mean_Z1s[curr_row],self.mean_age1s[curr_row],self.mean_ebv1s[curr_row],self.mean_Z2s[curr_row],self.mean_age2s[curr_row],self.mean_ebv2s[curr_row],valid_filters_this_row,ul_filters_this_row,curr_row)
         print("\nchi2 of mean parameters: ", mean_chi2,"\n")
         abc.plot(valid_avgwv_this_row,hotmodels,color="red")
         abc.plot(valid_avgwv_this_row,coolmodels,color="blue")
@@ -3954,7 +4015,7 @@ class ChiSquared():
 
         age_hot_sticker1 = format(self.mean_age1s[curr_row],'.6e')
 
-        M_hot_sticker1 = format(self.mean_M1s[curr_row],'.6e')
+        M_hot_sticker1 = format(self.log_mean_M1s[curr_row],'.6e')
         try:
             M_hot_sticker2 = format(self.errorsallrows[curr_row][0][0],'.6')
         except:
@@ -3972,7 +4033,7 @@ class ChiSquared():
 
         age_cool_sticker1 = format(self.mean_age2s[curr_row],'.6e')
 
-        M_cool_sticker1 = format(self.mean_M2s[curr_row],'.6e')
+        M_cool_sticker1 = format(self.log_mean_M2s[curr_row],'.6e')
         try:
             M_cool_sticker2 = format(self.errorsallrows[curr_row][1][0],'.6e')
         except:
@@ -4109,7 +4170,7 @@ class ChiSquared():
         abc.errorbar(valid_notul_avgwv_this_row,valid_notul_fluxes_this_row,yerr=valid_notul_errors_this_row,fmt="o",color="orange")
         if self.model_chosen == "UVIT_HST":
             abc.errorbar(valid_ul_avgwv_this_row,valid_ul_fluxes_this_row,yerr=valid_ul_errors_this_row,uplims=True,fmt="o",color="green")
-        old1models, old2models, youngmodels, mean_chi2 = self.minichisqfunc_triple(self.mean_M1s[curr_row], self.mean_M2s[curr_row], self.mean_M3s[curr_row], self.mean_Z1s[curr_row],self.mean_age1s[curr_row],self.mean_ebv1s[curr_row],self.mean_Z2s[curr_row],self.mean_age2s[curr_row],self.mean_ebv2s[curr_row],self.mean_Z3s[curr_row],self.mean_age3s[curr_row],valid_filters_this_row,ul_filters_this_row,curr_row)
+        old1models, old2models, youngmodels, mean_chi2 = self.minichisqfunc_triple(self.log_mean_M1s[curr_row], self.log_mean_M2s[curr_row], self.log_mean_M3s[curr_row], self.mean_Z1s[curr_row],self.mean_age1s[curr_row],self.mean_ebv1s[curr_row],self.mean_Z2s[curr_row],self.mean_age2s[curr_row],self.mean_ebv2s[curr_row],self.mean_Z3s[curr_row],self.mean_age3s[curr_row],valid_filters_this_row,ul_filters_this_row,curr_row)
         print("\nchi2 of mean parameters: ", mean_chi2,"\n")
         abc.plot(valid_avgwv_this_row,old1models,color="red")
         abc.plot(valid_avgwv_this_row,old2models,color="blue")
@@ -4192,7 +4253,7 @@ class ChiSquared():
 
         age_old_1_sticker1 = format(self.mean_age1s[curr_row],'.6e')
 
-        M_old_1_sticker1 = format(self.mean_M1s[curr_row],'.6e')
+        M_old_1_sticker1 = format(self.log_mean_M1s[curr_row],'.6e')
         try:
             M_old_1_sticker2 = format(self.errorsallrows[curr_row][0][0],'.6')
         except:
@@ -4206,7 +4267,7 @@ class ChiSquared():
 
         ebv_old_sticker1 = format(self.mean_ebv1s[curr_row],'.6e')
 
-        Z_old_2_sticker1 = format(self.mean_Z2s[curr_row],'.6e')
+        Z_old_2_sticker1 = format(self.log_mean_Z2s[curr_row],'.6e')
 
         age_old_2_sticker1 = format(self.mean_age2s[curr_row],'.6e')
 
@@ -4228,7 +4289,7 @@ class ChiSquared():
 
         age_new_sticker1 = format(self.mean_age3s[curr_row],'.6e')
 
-        M_new_sticker1 = format(self.mean_M3s[curr_row],'.6e')
+        M_new_sticker1 = format(self.log_mean_M3s[curr_row],'.6e')
         try:
             M_new_sticker2 = format(self.errorsallrows[curr_row][2][0],'.6e')
         except:
