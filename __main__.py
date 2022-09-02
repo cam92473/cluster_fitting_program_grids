@@ -2463,7 +2463,7 @@ class ChiSquared():
                 self.mean_Z1s[curr_row] /= Wtot
                 self.mean_age1s[curr_row] /= Wtot
                 self.mean_M1s[curr_row] /= Wtot
-                self.log_mean_M1s[curr_row] = log(self.mean_M1s[curr_row])/10
+                self.log_mean_M1s[curr_row] = log(self.mean_M1s[curr_row],10)/10
                 self.mean_ebv1s[curr_row] /= Wtot
                 
                 print("Wtot ", Wtot)

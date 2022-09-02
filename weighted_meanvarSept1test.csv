@@ -1,0 +1,7 @@
+row,weighted_mean_log(Z1),weighted_sigma_log(Z1),weighted_mean_log(age1)/10,weighted_sigma_log(age1)/10,log(weighted_mean_M1)/10,log(weighted_sigma_M1)/10,weighted_mean_ebv1,weighted_sigma_ebv1,chi2_using_mean_parameters,fitted_log(M1)/10_to_mean_parameters,chi2_of_fitted_log(M1)/10
+new analytic grid program result,,,,,,,,,,,
+2,-0.080596414,0.050208542,0.663251265,0.000932425,0.565873461,0.133427454,0.296813272,0.013809117,20404056940,0.245633969,22.9024497
+previous optimizer grid program result ,,,,,,,,,,,
+2,-0.096307341,0.031999213,0.66285456,0.000616715,0.245273407,0.002157411,0.297318698,0.009418492,22.86134243,0.245283155,22.86093689
+newoptimizer grid program result ,,,,,,,,,,,
+2,-0.080596414,0.050208542,0.663251265,0.000932425,0.565873461,0.133427454,0.296813272,0.013809117,20404056940,0.245633969,22.9024497
