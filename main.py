@@ -5,6 +5,7 @@ class ChiSquared():
     def __init__(self):
         self.filenamevar = ""
         self.chosenstar = "     1-cluster fit     "
+        self.chosenmodeltype = "     CMD     "
         self.checkedset = 0
         self.checked2set = 0
         self.checked3set = 0
@@ -164,6 +165,7 @@ class ChiSquared():
                                     self.sliderstring2set = sliderstring2.get()
                                     
                                     self.model_chosen = user_model_cho.get()
+                                    self.chosenmodeltype = modeltype_chosen.get()
                                     self.model_chosen_set = user_model_cho.get()
                                     self.ulmeth = user_ulmeth.get()
                                     self.ulmethset = user_ulmeth.get()
@@ -495,6 +497,7 @@ class ChiSquared():
             tk.messagebox.showinfo("Help", "One of the components of the model flux is an interpolation term that performs a 2-D interpolation inside a grid whose axes are Z and log(age)/10. The term accepts a coordinate (Z, log(age)/10) and returns a flux for every filter, subsequently to be used in calcuating the model flux. One property of the data grid of fluxes is left as a choice to the user: its resolution. The program actually contains two grids which the user can choose between. The finer grid is a 13 X 19 grid, and the coarser grid is a 10 X 16 grid, whose ranges in Z and log(age)/10 are roughly the same. The coarser grid was introduced to prevent the optimizer from getting stuck (as it tends to when performing 2-cluster fits). The lower resolution of the grid seems to help remove any local dips in the fluxes, and makes the 2-D landscape more monotonic.")
 
         starno_chosen = tk.StringVar()
+        modeltype_chosen = tk.StringVar()
         checked=tk.IntVar()
         checked.set(self.checkedset)
         user_rownumber = tk.StringVar()
@@ -526,7 +529,7 @@ class ChiSquared():
         canvas2 = tk.Canvas(mwin,relief=tk.RIDGE,bd=2,width=330,height=380,bg='azure2')
         canvas2.place(x=310,y=190)
         canvasline = tk.Canvas(mwin,bd=3,relief=tk.GROOVE,width=680,height=1000,bg='mint cream')
-        canvasline.place(x=-20,y=590)
+        canvasline.place(x=-20,y=670)
         canvasline2 = canvasline = tk.Canvas(mwin,bd=3,relief=tk.GROOVE,width=680,height=1060,bg='lavender')
         canvasline2.place(x=660,y=190)
 
@@ -537,13 +540,13 @@ class ChiSquared():
         user_Mbound3lo = tk.DoubleVar()
         user_Mbound3hi = tk.DoubleVar()
 
-        ystar1labels = 670
-        ystar1entries = 700
-        ystar2labels = 750
-        ystar2entries = 780
-        ystar3labels = 830
-        ystar3entries = 860
-        ycheckbutton = 620
+        ystar1labels = 715
+        ystar1entries = 745
+        ystar2labels = 785
+        ystar2entries = 815
+        ystar3labels = 855
+        ystar3entries = 885
+        ycheckbutton = 690
 
         lowerboundlabel = tk.Label(mwin,text="Lower bound",font="Arial 10 underline",bg="mint cream")
         lowerboundlabel.place(x=330,y=ystar1labels)
@@ -749,7 +752,6 @@ class ChiSquared():
             buttentry3['state'] = tk.DISABLED
         if checker4.get() == 0:
             buttentry4['state'] = tk.DISABLED
-
 
 
         user_Z1lowest = tk.DoubleVar()
@@ -1094,25 +1096,31 @@ class ChiSquared():
         user_ulmeth.set(self.ulmethset)
         ulmethoptions = ["Standard","Limit"]
         labelulmeth = tk.Label(mwin,text="Upper limit calculation method",bg="alice blue")
-        labelulmeth.place(x=37,y=320)
+        labelulmeth.place(x=37,y=300)
         ulmethmenu = tk.OptionMenu(mwin,user_ulmeth,*ulmethoptions)
-        ulmethmenu.place(x=37,y=350)
+        ulmethmenu.place(x=37,y=330)
         user_model_cho = tk.StringVar()
         user_model_cho.set(self.model_chosen_set)
         modelchooptions = ["UVIT_HST", "UVIT_SDSS_Spitzer", "UVIT_Johnson_GALEX"]
         modelcholabel = tk.Label(mwin,text="Model data filters",bg="alice blue")
-        modelcholabel.place(x=38,y=410)
+        modelcholabel.place(x=38,y=390)
         modelchomenu = tk.OptionMenu(mwin,user_model_cho,*modelchooptions,command=stuffyonly2)
-        modelchomenu.place(x=32,y=440)
+        modelchomenu.place(x=32,y=420)
         starlabel = tk.Label(mwin,text="Fitting method",bg="alice blue")
-        starlabel.place(x=38,y=500)
+        starlabel.place(x=38,y=480)
         starno_chosen.set(self.chosenstar)
         staroptions = ["     1-cluster fit     ","     2-cluster fit     ","     3-cluster fit     "]
         starmenu = tk.OptionMenu(mwin,starno_chosen,*staroptions,command=stuffy)
-        starmenu.place(x=32,y=530)
+        starmenu.place(x=32,y=510)
+        modeltypelabel = tk.Label(mwin,text="Model type",bg="alice blue")
+        modeltypelabel.place(x=38,y=570)
+        modeltype_chosen.set(self.chosenmodeltype)
+        modeltypeoptions = ["     CMD     ","    BPASS    "]
+        modeltypemenu = tk.OptionMenu(mwin,modeltype_chosen,*modeltypeoptions)
+        modeltypemenu.place(x=32,y=600)
         
         checkbutton = tk.Checkbutton(mwin,text="Edit bounds for log(M)",variable=checked,command=gray,bg="mint cream")
-        checkbutton.place(x=10,y=ycheckbutton)
+        checkbutton.place(x=20,y=ycheckbutton)
         checkbutton2 = tk.Checkbutton(mwin,text="Edit parameters grid",variable=checked2,command=gray2,bg="lavender")
         checkbutton2.place(x=680,y=200)
         
@@ -1273,7 +1281,6 @@ class ChiSquared():
                     if colelement == -999:
                         self.raw_magnitudes_frame.iat[rowind,colind] = np.nan
 
-        
     def convert_to_AB(self):
         if self.model_chosen == "UVIT_HST":
             self.ab_magnitudes_frame = self.raw_magnitudes_frame
@@ -1533,66 +1540,135 @@ class ChiSquared():
 
         if self.model_chosen == "UVIT_HST":
 
-            fluxdata = pd.read_csv("fluxpersolarmassUVIT_HST.csv")
+            if self.chosenmodeltype == "     CMD     ":
+
+                fluxdata = pd.read_csv("CMD_fluxpersolarmassUVIT_HST.csv")
+                
+                blankdata = np.zeros((13,19,11))
+
+                row=0
+                for Z in range(13):
+                    for age in range(19):
+                        for filt in range(11):
+                            blankdata[Z,age,filt] = fluxdata.iat[row,filt]
+                        row += 1
+
+                filleddata = blankdata
+
+                zcoordlist = [-2.617,-2.36173,-2.11185,-1.86881,-1.62577,-1.37645,-1.12564,-0.87822,-0.63202,-0.38809,-0.14836,0.08353,0.303332]
+                agecoordlist = [.66,.68,.70,.72,.74,.76,.78,.80,.82,.84,.86,.88,.90,.92,.94,.96,.98,1.0,1.2]
+                filtercoordlist = [0,1,2,3,4,5,6,7,8,9,10]
+
+                self.da = xr.DataArray(filleddata,coords=[("Z",zcoordlist),("Age",agecoordlist),("Filter",filtercoordlist)])
             
-            blankdata = np.zeros((13,19,11))
+            elif self.chosenmodeltype == "    BPASS    ":
 
-            row=0
-            for Z in range(13):
-                for age in range(19):
-                    for filt in range(11):
-                        blankdata[Z,age,filt] = fluxdata.iat[row,filt]
-                    row += 1
+                fluxdata = pd.read_csv("BPASS_fluxpersolarmassUVIT_HST.csv")
+                
+                blankdata = np.zeros((13,51,11))
 
-            filleddata = blankdata
+                row=0
+                for Z in range(13):
+                    for age in range(51):
+                        for filt in range(11):
+                            blankdata[Z,age,filt] = fluxdata.iat[row,filt]
+                        row += 1
 
-            zcoordlist = [-2.617,-2.36173,-2.11185,-1.86881,-1.62577,-1.37645,-1.12564,-0.87822,-0.63202,-0.38809,-0.14836,0.08353,0.303332]
-            agecoordlist = [.66,.68,.70,.72,.74,.76,.78,.80,.82,.84,.86,.88,.90,.92,.94,.96,.98,1.0,1.2]
-            filtercoordlist = [0,1,2,3,4,5,6,7,8,9,10]
+                filleddata = blankdata
 
-            self.da = xr.DataArray(filleddata,coords=[("Z",zcoordlist),("Age",agecoordlist),("Filter",filtercoordlist)])
+                zcoordlist = [-3.31597,-2.31597,-1.31597,-1.01494,-0.83885,-0.71391,-0.53782,-0.41288,-0.31597,-0.16984,-0.01494,0.161151,0.286089]
+                agecoordlist = [.60,.61,.62,.63,.64,.65,.66,.67,.68,.69,.70,.71,.72,.73,.74,.75,.76,.77,.78,.79,.80,.81,.82,.83,.84,.85,.86,.87,.88,.89,.90,.91,.92,.93,.94,.95,.96,.97,.98,.99,1.00,1.01,1.02,1.03,1.04,1.05,1.06,1.07,1.08,1.09,1.10]
+                filtercoordlist = [0,1,2,3,4,5,6,7,8,9,10]
+
+                self.da = xr.DataArray(filleddata,coords=[("Z",zcoordlist),("Age",agecoordlist),("Filter",filtercoordlist)])
 
         elif self.model_chosen == "UVIT_SDSS_Spitzer":
-            fluxdata = pd.read_csv("fluxpersolarmassSDSS_Spitzer.csv")
-            
-            blankdata = np.zeros((13,19,12))
 
-            row=0
-            for Z in range(13):
-                for age in range(19):
-                    for filt in range(12):
-                        blankdata[Z,age,filt] = fluxdata.iat[row,filt]
-                    row += 1
+            if self.chosenmodeltype == "     CMD     ":
 
-            filleddata = blankdata
+                fluxdata = pd.read_csv("CMD_fluxpersolarmassSDSS_Spitzer.csv")
+                
+                blankdata = np.zeros((13,19,12))
 
-            zcoordlist = [-2.617,-2.36173,-2.11185,-1.86881,-1.62577,-1.37645,-1.12564,-0.87822,-0.63202,-0.38809,-0.14836,0.08353,0.303332]
-            agecoordlist = [.66,.68,.70,.72,.74,.76,.78,.80,.82,.84,.86,.88,.90,.92,.94,.96,.98,1.0,1.2]
-            filtercoordlist = [0,1,2,3,4,5,6,7,8,9,10,11]
+                row=0
+                for Z in range(13):
+                    for age in range(19):
+                        for filt in range(12):
+                            blankdata[Z,age,filt] = fluxdata.iat[row,filt]
+                        row += 1
 
-            self.da = xr.DataArray(filleddata,coords=[("Z",zcoordlist),("Age",agecoordlist),("Filter",filtercoordlist)])
+                filleddata = blankdata
+
+                zcoordlist = [-2.617,-2.36173,-2.11185,-1.86881,-1.62577,-1.37645,-1.12564,-0.87822,-0.63202,-0.38809,-0.14836,0.08353,0.303332]
+                agecoordlist = [.66,.68,.70,.72,.74,.76,.78,.80,.82,.84,.86,.88,.90,.92,.94,.96,.98,1.0,1.2]
+                filtercoordlist = [0,1,2,3,4,5,6,7,8,9,10,11]
+
+                self.da = xr.DataArray(filleddata,coords=[("Z",zcoordlist),("Age",agecoordlist),("Filter",filtercoordlist)])
+        
+            elif self.chosenmodeltype == "    BPASS    ":
+
+                fluxdata = pd.read_csv("BPASS_fluxpersolarmassSDSS_Spitzer.csv")
+                
+                blankdata = np.zeros((13,51,12))
+
+                row=0
+                for Z in range(13):
+                    for age in range(51):
+                        for filt in range(12):
+                            blankdata[Z,age,filt] = fluxdata.iat[row,filt]
+                        row += 1
+
+                filleddata = blankdata
+
+                zcoordlist = [-3.31597,-2.31597,-1.31597,-1.01494,-0.83885,-0.71391,-0.53782,-0.41288,-0.31597,-0.16984,-0.01494,0.161151,0.286089]
+                agecoordlist = [.60,.61,.62,.63,.64,.65,.66,.67,.68,.69,.70,.71,.72,.73,.74,.75,.76,.77,.78,.79,.80,.81,.82,.83,.84,.85,.86,.87,.88,.89,.90,.91,.92,.93,.94,.95,.96,.97,.98,.99,1.00,1.01,1.02,1.03,1.04,1.05,1.06,1.07,1.08,1.09,1.10]
+                filtercoordlist = [0,1,2,3,4,5,6,7,8,9,10,11]
+
+                self.da = xr.DataArray(filleddata,coords=[("Z",zcoordlist),("Age",agecoordlist),("Filter",filtercoordlist)])
 
         elif self.model_chosen == "UVIT_Johnson_GALEX":
 
-            fluxdata = pd.read_csv("fluxpersolarmassUVIT_Johnson_GALEX.csv")
-            
-            blankdata = np.zeros((13,19,15))
+            if self.chosenmodeltype == "     CMD     ":
 
-            row=0
-            for Z in range(13):
-                for age in range(19):
-                    for filt in range(15):
-                        blankdata[Z,age,filt] = fluxdata.iat[row,filt]
-                    row += 1
+                fluxdata = pd.read_csv("CMD_fluxpersolarmassUVIT_Johnson_GALEX.csv")
+                
+                blankdata = np.zeros((13,19,15))
 
-            filleddata = blankdata
+                row=0
+                for Z in range(13):
+                    for age in range(19):
+                        for filt in range(15):
+                            blankdata[Z,age,filt] = fluxdata.iat[row,filt]
+                        row += 1
 
-            zcoordlist = [-2.617,-2.36173,-2.11185,-1.86881,-1.62577,-1.37645,-1.12564,-0.87822,-0.63202,-0.38809,-0.14836,0.08353,0.303332]
-            agecoordlist = [.66,.68,.70,.72,.74,.76,.78,.80,.82,.84,.86,.88,.90,.92,.94,.96,.98,1.0,1.2]
-            filtercoordlist = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14]
+                filleddata = blankdata
 
-            self.da = xr.DataArray(filleddata,coords=[("Z",zcoordlist),("Age",agecoordlist),("Filter",filtercoordlist)])
+                zcoordlist = [-2.617,-2.36173,-2.11185,-1.86881,-1.62577,-1.37645,-1.12564,-0.87822,-0.63202,-0.38809,-0.14836,0.08353,0.303332]
+                agecoordlist = [.66,.68,.70,.72,.74,.76,.78,.80,.82,.84,.86,.88,.90,.92,.94,.96,.98,1.0,1.2]
+                filtercoordlist = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14]
 
+                self.da = xr.DataArray(filleddata,coords=[("Z",zcoordlist),("Age",agecoordlist),("Filter",filtercoordlist)])
+
+            elif self.chosenmodeltype == "    BPASS    ":
+
+                fluxdata = pd.read_csv("BPASS_fluxpersolarmassUVIT_Johnson_GALEX.csv")
+                
+                blankdata = np.zeros((13,51,15))
+
+                row=0
+                for Z in range(13):
+                    for age in range(51):
+                        for filt in range(15):
+                            blankdata[Z,age,filt] = fluxdata.iat[row,filt]
+                        row += 1
+
+                filleddata = blankdata
+
+                zcoordlist = [-3.31597,-2.31597,-1.31597,-1.01494,-0.83885,-0.71391,-0.53782,-0.41288,-0.31597,-0.16984,-0.01494,0.161151,0.286089]
+                agecoordlist = [.60,.61,.62,.63,.64,.65,.66,.67,.68,.69,.70,.71,.72,.73,.74,.75,.76,.77,.78,.79,.80,.81,.82,.83,.84,.85,.86,.87,.88,.89,.90,.91,.92,.93,.94,.95,.96,.97,.98,.99,1.00,1.01,1.02,1.03,1.04,1.05,1.06,1.07,1.08,1.09,1.10]
+                filtercoordlist = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14]
+
+                self.da = xr.DataArray(filleddata,coords=[("Z",zcoordlist),("Age",agecoordlist),("Filter",filtercoordlist)])
     ##blue
 
     def interpolate(self,Z,age,valid_filters_this_row):
